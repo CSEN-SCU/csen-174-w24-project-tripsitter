@@ -3,6 +3,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:tripsitter/pages/another_page.dart';
 import 'package:tripsitter/pages/home.dart';
 import 'package:tripsitter/pages/login.dart';
+import 'package:url_strategy/url_strategy.dart';
 import 'firebase_options.dart';
 import 'package:fluro/fluro.dart';
 import 'package:provider/provider.dart';
@@ -10,6 +11,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 
 void main() async {
+  setPathUrlStrategy();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
