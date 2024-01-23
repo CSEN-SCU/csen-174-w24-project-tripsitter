@@ -4,4 +4,4 @@ print("Grant Goldman");
 camstring = "eneerG noremaC"
 print(camstring[::-1])
 
-print("* * * * * *" * 5)
+print("* * * * * * " * 5)
