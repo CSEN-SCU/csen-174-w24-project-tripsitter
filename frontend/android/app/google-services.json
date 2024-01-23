@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "375915765659",
+    "project_id": "tripsitter-coen-174",
+    "storage_bucket": "tripsitter-coen-174.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:375915765659:android:431633d12f56afec808b3e",
+        "android_client_info": {
+          "package_name": "com.example.tripsitter"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBfmu5f14Am3rj6LDZHqo8Gwp1DBHaQJNs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
