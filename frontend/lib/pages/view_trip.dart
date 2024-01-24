@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 
-class AnotherPage extends StatelessWidget {
-  const AnotherPage({super.key});
+class ViewTrip extends StatelessWidget {
+  final String tripId;
+  const ViewTrip(this.tripId, {super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -10,7 +11,7 @@ class AnotherPage extends StatelessWidget {
         title: Text('Another page'),
       ),
       body: Center(
-        child: Text('Add stuff here!'),
+        child: Text('You are viewing the trip with ID $tripId'),
       ),
     );
   }
