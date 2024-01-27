@@ -5,6 +5,47 @@ import amadeus from "./amadeusClient";
 
 import { parse } from 'tinyduration'
 
+var flightData = require('./flightData.json');
+
+function checkExistingFlight(i: any, existing: any) {
+  if(i.id == existing.id) {
+    return true;
+  }
+  if(i.segments.length != existing.segments.length) {
+    return false;
+  }
+  for(let j = 0; j < i.segments.length; j++) {
+     if(i.segments[j].departureAirport != existing.segments[j].departureAirport) {
+      return false;
+    }
+    // if(i.segments[j].departureTerminal != existing.segments[j].departureTerminal) {
+    //   return false;
+    // }
+    if(i.segments[j].departureTime != existing.segments[j].departureTime) {
+      return false;
+    }
+    if(i.segments[j].arrivalAirport != existing.segments[j].arrivalAirport) {
+      return false;
+    }
+    // if(i.segments[j].arrivalTerminal != existing.segments[j].arrivalTerminal) {
+    //   return false;
+    // }
+    if(i.segments[j].arrivalTime != existing.segments[j].arrivalTime) {
+      return false;
+    }
+    if(i.segments[j].airlineOperating != existing.segments[j].airlineOperating) {
+      return false;
+    }
+    // if(i.segments[j].aircraft != existing.segments[j].aircraft) {
+    //   return false;
+    // }
+    if(i.segments[j].numberOfStops != existing.segments[j].numberOfStops) {
+      return false;
+    }
+  }
+  return true;
+}
+
 /* 
   Input: query parameters for the following fields
     origin (IATA code, ie SFO)
@@ -87,30 +128,31 @@ import { parse } from 'tinyduration'
 */ 
 
 export async function searchFlights(req: Request, res: Response){
-    const origin = req.query.origin;
-    const destination = req.query.destination;
-    const departureDate = req.query.departureDate;
-    const returnDate = req.query.returnDate;
-    const adults = req.query.adults;
-    const children = req.query.children;
-    const currency = req.query.currency ?? "USD";
-    const travelClass = req.query.travelClass ?? "ECONOMY";
-    if(!origin || !destination || !departureDate || !adults) {
-      res.status(400).send('Missing required query parameters');
-      return;
-    }
+    // const origin = req.query.origin;
+    // const destination = req.query.destination;
+    // const departureDate = req.query.departureDate;
+    // const returnDate = req.query.returnDate;
+    // const adults = req.query.adults;
+    // const children = req.query.children;
+    // const currency = req.query.currency ?? "USD";
+    // const travelClass = req.query.travelClass ?? "ECONOMY";
+    // if(!origin || !destination || !departureDate || !adults) {
+    //   res.status(400).send('Missing required query parameters');
+    //   return;
+    // }
     // Docs: https://developers.amadeus.com/self-service/category/flights/api-doc/flight-offers-search
-    let flightSearch = await amadeus.shopping.flightOffersSearch.get({
-      originLocationCode: origin,
-      destinationLocationCode: destination,
-      departureDate: departureDate,
-      returnDate: returnDate,
-      adults: adults,
-      children: children,
-      currencyCode: currency,
-      travelClass: travelClass,
-    });
-    const offers = flightSearch.data.map((offer: any) => {
+    // let flightSearch = await amadeus.shopping.flightOffersSearch.get({
+    //   originLocationCode: origin,
+    //   destinationLocationCode: destination,
+    //   departureDate: departureDate,
+    //   returnDate: returnDate,
+    //   adults: adults,
+    //   children: children,
+    //   currencyCode: currency,
+    //   travelClass: travelClass,
+    // });
+    // const offers = flightSearch.data.map((offer: any) => {
+  const offers = flightData.map((offer: any) => {
       return {
         type: "flight",
         id: offer.id,
@@ -124,33 +166,65 @@ export async function searchFlights(req: Request, res: Response){
             duration: parse(itinerary.duration),
             segments: itinerary.segments.map((segment: any) => {
               return {
-                departure: {
-                  iataCode: segment.departure.iataCode,
-                  terminal: segment.departure.terminal,
-                  time: segment.departure.at,
-                },
-                arrival: {
-                  iataCode: segment.arrival.iataCode,
-                  terminal: segment.arrival.terminal,
-                  time: segment.arrival.at,
-                },
-                airlineOffering: segment.carrierCode,
+                departureAirport: segment.departure.iataCode,
+                departureTerminal: segment.departure.terminal,
+                departureTime: segment.departure.at,
+                arrivalAirport: segment.arrival.iataCode,
+                arrivalTerminal: segment.arrival.terminal,
+                arrivalTime: segment.arrival.at,
+                // airlineOffering: segment.carrierCode,
                 airlineOperating: segment.operating?.carrierCode ?? segment.carrierCode,
-                flightNumber: segment.number,
+                flightNumbers: [segment.carrierCode+""+segment.number.toString()],
                 aircraft: segment.aircraft.code,
                 duration: parse(segment.duration),
                 id: segment.id,
                 numberOfStops: segment.numberOfStops,
-                blacklistedInEU: segment.blacklistedInEU,
               }
             })
           }
         }),
-        airlinesOferring: offer.validatingAirlineCodes,
+        airlines: offer.validatingAirlineCodes,
       }
     });
-    res.send(offers);
-    // res.send('endpoint2!');
+    for(let o of offers){
+      for(let i of o.itineraries){
+        i.id = i.segments.map((s: any) => s.id).join('-');
+      }
+    }
+
+    const offersMap: any[] = [];
+
+    for(let o of offers) {
+      let currentObj: any = offersMap;
+      for(let i of o.itineraries) {
+        if(!currentObj.find((s: any) => checkExistingFlight(i, s))) {
+          currentObj.push({
+            ...i,
+            next: [],
+            minPrice: -1,
+            offerIds: [],
+            isOneWay: o.oneWay,
+            seats: o.seats,
+            offeredBy: [],
+          });
+        }
+        currentObj = currentObj.find((s: any) => checkExistingFlight(i, s));
+        currentObj.offerIds = [...new Set([...currentObj.offerIds, o.id])];
+        currentObj.offeredBy = [...new Set([...currentObj.offeredBy, ...o.airlines])];
+        for(let j = 0; j<currentObj.segments.length; j++) {
+          currentObj.segments[j].flightNumbers = [...new Set([...currentObj.segments[j].flightNumbers, ...i.segments[j].flightNumbers])];
+        }
+        if(o.price < currentObj.minPrice || currentObj.minPrice < 0 ) {
+          currentObj.minPrice = o.price;
+          currentObj.priceInfo = o.priceInfo;
+          currentObj.priceCurrency = o.priceCurrency;
+        }
+        currentObj = currentObj.next;
+      }
+    }
+    res.send(offersMap);
+
+    // res.send(offers);
   }
 
 
