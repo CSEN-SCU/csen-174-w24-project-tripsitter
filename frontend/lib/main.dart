@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:tripsitter/pages/another_page.dart';
+import 'package:tripsitter/pages/view_trip.dart';
 import 'package:tripsitter/pages/home.dart';
 import 'package:tripsitter/pages/login.dart';
 import 'package:url_strategy/url_strategy.dart';
@@ -21,12 +21,12 @@ void main() async {
   Handler loginHandler = Handler(handlerFunc: (BuildContext? context, Map<String, dynamic> params) {
     return const LoginPage();
   });
-  Handler anotherHandler = Handler(handlerFunc: (BuildContext? context, Map<String, dynamic> params) {
-    return const AnotherPage();
+  Handler viewTrip = Handler(handlerFunc: (BuildContext? context, Map<String, dynamic> params) {
+    return ViewTrip(params["id"][0]);
   });
 
   router.define("/", handler: homeHandler);
-  router.define("/another", handler: anotherHandler);
+  router.define("/trip/:id", handler: viewTrip);
   router.define("/login", handler: loginHandler);
   router.notFoundHandler = Handler(
       handlerFunc: (BuildContext? context, Map<String, dynamic> params) {
