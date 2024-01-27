@@ -18,6 +18,24 @@ app.get('/', (req, res) => {
   res.send('Hello World!');
 });
 
+/* 
+  Input: query parameter with the city or airport name
+  Format: /search/airports?query=New York
+  Output: JSON array with the airport information
+  Format: [
+    {
+      type: 'airport',
+      iataCode: 'JFK',
+      airportName: 'JOHN F KENNEDY INTL',
+      cityName: 'NEW YORK',
+      country: 'US',
+      lat: 40.639751,
+      lon: -73.778925
+    },
+    ...
+  ]
+*/
+
 app.get("/search/airports", async (req, res) => {
   const parameter = req.query.query;
   // Which cities or airports start with the parameter variable
@@ -26,12 +44,41 @@ app.get("/search/airports", async (req, res) => {
       keyword: parameter,
       subType: Amadeus.location.any,
   });
-  res.send(locations.result);
+  const data = locations.result.data;
+  const airports = data.filter((location: any) => location.subType === 'AIRPORT').map((airport: any) => {
+    return {
+      type: "airport",
+      iataCode: airport.iataCode,
+      airportName: airport.name,
+      cityName: airport.address.cityName,
+      country: airport.address.countryCode,
+      lat: airport.geoCode.latitude,
+      lon: airport.geoCode.longitude,
+    }
+  });
+  // console.log(airports);
+  res.send(airports);
 });
+
+/*
+  Input: query parameter with the a list airline IATA codes
+  Format: /search/airlines?query=DL,WN,AA
+  Output: JSON array with the airline information
+  Format: [
+    {
+      type: 'airline',
+      iataCode: 'AA',
+      icaoCode: 'AAL',
+      businessName: 'AMERICAN AIRLINES',
+      commonName: 'AMERICAN AIRLINES',
+    },
+    ...
+  ]
+*/
 
 app.get("/search/airlines", async (req, res) => {
   const parameter = req.query.query;
-  // Which cities or airports start with the parameter variable
+  // Returns information about an airline given their two digit IATA code. (Example: AA, WN, DL)
   // Docs: https://developers.amadeus.com/self-service/category/flights/api-doc/airline-code-lookup
   const airlines = await amadeus.referenceData.airlines.get({
     airlineCodes: parameter,
@@ -47,6 +94,7 @@ app.get('/search/flights', async (req, res) => {
   const adults = req.query.adults;
   const children = req.query.children;
   const currency = req.query.currency ?? "USD";
+  const travelClass = req.query.travelClass ?? "ECONOMY";
   if(!origin || !destination || !departureDate || !adults) {
     res.status(400).send('Missing required query parameters');
     return;
@@ -60,6 +108,7 @@ app.get('/search/flights', async (req, res) => {
     adults: adults,
     children: children,
     currencyCode: currency,
+    travelClass: travelClass,
   });
   res.send(flightSearch.data);
   // res.send('endpoint2!');
