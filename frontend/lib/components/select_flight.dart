@@ -49,12 +49,12 @@ class _SelectFlightState extends State<SelectFlight> {
     destinationController = TextEditingController(text: query.destination);
     adultsController = TextEditingController(text: query.adults.toString());
     childrenController = TextEditingController(text: query.children?.toString() ?? "");
-    // TripsitterApi.getFlights(query).then((flights) {
-    //   setState(() {
-    //     // flights.sort((a,b) => a.duration.compareTo(b.duration));
-    //     this.flights = flights;
-    //   });
-    // });
+    TripsitterApi.getFlights(query).then((flights) {
+      setState(() {
+        // flights.sort((a,b) => a.duration.compareTo(b.duration));
+        this.flights = flights;
+      });
+    });
   }
 
   @override
@@ -214,6 +214,7 @@ class _SelectFlightState extends State<SelectFlight> {
             DataColumn(label: Text("Price/Airline")),
             DataColumn(label: Text("Time")),
             DataColumn(label: Text("Stops")),
+            DataColumn(label: Text("")),
           ],
           rows: flights.map((flight) => DataRow(
             onSelectChanged: (bool? selected) {
@@ -260,6 +261,50 @@ class _SelectFlightState extends State<SelectFlight> {
                   ],
                 ),
               ),
+              DataCell(
+                IconButton(
+                  icon: Icon(Icons.info_outline),
+                  onPressed: () {
+                    showDialog(
+                      context: context,
+                      builder: (context) => AlertDialog(
+                        title: Text("Flight Details"),
+                        content: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            for(int j = 0; j < flight.segments.length; j++) 
+                              ...[
+                                Text("Flight ${j+1}"),
+                                // LHR - SFO
+                                Text("${flight.segments[j].departureAirport} - ${flight.segments[j].arrivalAirport}"),
+                                Text("Operated by ${Airline.fromCode(flight.segments[j].airlineOperating)?.name ?? flight.segments[j].airlineOperating}"),
+                                Text("${DateFormat.yMMMMd().add_jm().format(flight.segments[j].departureTime)} - ${DateFormat.yMMMMd().add_jm().format(flight.segments[j].arrivalTime)}"),
+                                Text("Duration: ${flight.segments[j].duration.format()}"),
+                                Text("Aircraft: ${flight.segments[j].aircraft.toPlaneName()}"),
+                                Container(height: 10),
+                                if(j < flight.segments.length-1)
+                                  ...[
+                                    Text("Layover in ${flight.segments[j+1].departureAirport}"),
+                                    Text("Duration: ${flight.segments[j+1].departureTime.difference(flight.segments[j].arrivalTime).format()}"),
+                                    Container(height: 10),
+                                  ]
+                              ]
+                          ],
+                        ),
+                        actions: [
+                          TextButton(
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                            },
+                            child: Text("Close"),
+                          )
+                        ],
+                      
+                      ),
+                    );
+                  },
+                )
+              )
             ]
           )).toList(),
         ),
