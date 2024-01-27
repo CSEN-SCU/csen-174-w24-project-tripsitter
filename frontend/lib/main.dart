@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:tripsitter/classes/flights.dart';
+import 'package:tripsitter/helpers/api.dart';
 import 'package:tripsitter/pages/view_trip.dart';
 import 'package:tripsitter/pages/home.dart';
 import 'package:tripsitter/pages/login.dart';
@@ -42,6 +44,7 @@ class MyApp extends StatelessWidget {
   const MyApp({super.key});
   @override
   Widget build(BuildContext context) {
+    Airline.cacheAirlines(context);
     return MultiProvider(
       providers: [
           StreamProvider<User?>.value(

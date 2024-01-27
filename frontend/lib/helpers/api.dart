@@ -2,6 +2,7 @@
 
 import 'dart:convert';
 
+import 'package:flutter/material.dart';
 import 'package:tripsitter/classes/flights.dart';
 
 import 'package:http/http.dart' as http;
@@ -12,6 +13,11 @@ class TripsitterApi {
   static const String searchFlightsUrl = '$baseApiUrl/search/flights';
   static const String searchAirlinesUrl = '$baseApiUrl/search/airlines';
   static const String searchAirportsUrl = '$baseApiUrl/search/airports';
+  static const String airlineLogoUrl = "$baseApiUrl/airline-logo";
+
+  static Image getAirlineImage(String iata) {
+    return Image.network('http://$baseUrl$airlineLogoUrl?iata=$iata', width: 50, height: 50);
+  }
 
   static Future<List<AirportInfo>> getAirports(String query) async {
     Uri uri = Uri.http(baseUrl, searchAirportsUrl, {'query': query});

@@ -1,18 +1,22 @@
+import 'dart:convert';
+
+import 'package:flutter/widgets.dart';
+
 class FlightsQuery {
-  final String origin;
-  final String destination;
-  final DateTime departureDate;
-  final DateTime returnDate;
-  final int adults;
-  final int? children;
-  final String? currency;
-  final TravelClass? travelClass;
+  String origin;
+  String destination;
+  DateTime departureDate;
+  DateTime? returnDate;
+  int adults;
+  int? children;
+  String? currency;
+  TravelClass? travelClass;
 
   FlightsQuery({
     required this.origin,
     required this.destination,
     required this.departureDate,
-    required this.returnDate,
+    this.returnDate,
     required this.adults,
     this.children,
     this.currency,
@@ -24,9 +28,11 @@ class FlightsQuery {
       'origin': origin,
       'destination': destination,
       'departureDate': departureDate.toIso8601String().split('T')[0],
-      'returnDate': returnDate.toIso8601String().split('T')[0],
       'adults': adults.toString(),
     };
+    if(returnDate != null) {
+      json['returnDate'] = returnDate!.toIso8601String().split('T')[0];
+    }
     if (children != null) {
       json['children'] = children.toString();
     }
@@ -60,41 +66,6 @@ enum TravelClass {
   premiumEconomy,
   business,
   first,
-}
-
-class FlightInfo {
-  final String id;
-  final bool oneWay;
-  final int seats;
-  final double price;
-  final String priceCurrency;
-  final FlightPrice priceInfo;
-  final List<FlightItinerary> itineraries;
-  final List<String> airlines;
-
-  FlightInfo({
-    required this.id,
-    required this.oneWay,
-    required this.seats,
-    required this.price,
-    required this.priceCurrency,
-    required this.priceInfo,
-    required this.itineraries,
-    required this.airlines,
-  });
-
-  factory FlightInfo.fromJson(Map<String, dynamic> json) {
-    return FlightInfo(
-      id: json['id'],
-      oneWay: json['oneWay'],
-      seats: json['seats'],
-      price: json['price'],
-      priceCurrency: json['priceCurrency'],
-      priceInfo: FlightPrice.fromJson(json['priceInfo']),
-      itineraries: json['itineraries'].map<FlightItinerary>((i) => FlightItinerary.fromJson(i)).toList(),
-      airlines: json['airlines'].cast<String>(),
-    );
-  }
 }
 
 class FlightItinerary {
@@ -313,6 +284,42 @@ class AirlineInfo {
       icaoCode: json['icaoCode'],
       businessName: json['businessName'],
       commonName: json['commonName'],
+    );
+  }
+}
+
+class Airline {
+
+  static Map<String,Airline> _airlineCache = {};
+
+  static Future<void> cacheAirlines(BuildContext context) async {
+    if(_airlineCache.isNotEmpty) return;
+    String data = await DefaultAssetBundle.of(context).loadString("airlines.json");
+    List<Airline> airlines = jsonDecode(data).map<Airline>((a) => Airline.fromJson(a)).toList(); //latest Dart
+    for (Airline airline in airlines) {
+      _airlineCache[airline.code] = airline;
+    }
+  }
+
+  static Airline? fromCode(String iata) {
+    return _airlineCache[iata];
+  }
+
+  final String name;
+  final String code;
+  final String logo;
+
+  Airline({
+    required this.name,
+    required this.code,
+    required this.logo,
+  });
+
+  factory Airline.fromJson(Map<String, dynamic> json) {
+    return Airline(
+      name: json['name'],
+      code: json['code'],
+      logo: json['logo'],
     );
   }
 }

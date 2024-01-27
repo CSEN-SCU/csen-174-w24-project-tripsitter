@@ -17,6 +17,15 @@ class _SelectFlightState extends State<SelectFlight> {
 
   List<FlightItinerary> selected = [];
 
+  FlightsQuery query = FlightsQuery(
+    origin: 'LAX',
+    destination: 'SFO',
+    departureDate: DateTime(2024, 6, 1),
+    returnDate: DateTime(2024, 6, 5),
+    adults: 1,
+    travelClass: TravelClass.economy
+  );
+
   int currentDepth = 0;
 
   void selectFlight(FlightItinerary flight) {
@@ -27,23 +36,25 @@ class _SelectFlightState extends State<SelectFlight> {
     });
   }
 
+  late TextEditingController originController;
+  late TextEditingController destinationController;
+  late TextEditingController adultsController;
+  late TextEditingController childrenController;
+
+
   @override
   void initState() {
     super.initState();
-
-    FlightsQuery query = FlightsQuery(
-      origin: 'LAX',
-      destination: 'SFO',
-      departureDate: DateTime(2024, 6, 1),
-      returnDate: DateTime(2024, 6, 5),
-      adults: 1,
-    );
-    TripsitterApi.getFlights(query).then((flights) {
-      setState(() {
-        flights.sort((a,b) => a.duration.compareTo(b.duration));
-        this.flights = flights;
-      });
-    });
+    originController = TextEditingController(text: query.origin);
+    destinationController = TextEditingController(text: query.destination);
+    adultsController = TextEditingController(text: query.adults.toString());
+    childrenController = TextEditingController(text: query.children?.toString() ?? "");
+    // TripsitterApi.getFlights(query).then((flights) {
+    //   setState(() {
+    //     // flights.sort((a,b) => a.duration.compareTo(b.duration));
+    //     this.flights = flights;
+    //   });
+    // });
   }
 
   @override
@@ -51,8 +62,155 @@ class _SelectFlightState extends State<SelectFlight> {
     return Column(
       children: [
         Text("Select ${currentDepth == 0 ? "Outbound" : "Return"} Flight"),
+        Row(
+          children: [
+            SizedBox(
+              width: 100,
+              child: TextField(
+                controller: originController,
+                onChanged: (String value) {
+                  setState(() {
+                    query.origin = value;
+                  });
+                },
+                decoration: InputDecoration(
+                  labelText: "Origin",
+                  hintText: "LAX",
+                ),
+              ),
+            ),
+            SizedBox(
+              width: 100,
+              child: TextField(
+                controller: destinationController,
+                onChanged: (String value) {
+                  setState(() {
+                    query.destination = value;
+                  });
+                },
+                decoration: InputDecoration(
+                  labelText: "Destination",
+                  hintText: "SFO",
+                ),
+              ),
+            ),
+            // checkbox for one-way
+            Checkbox(value: query.returnDate == null, onChanged: (bool? checked) => {
+              setState(() {
+                if (checked == true) {
+                  query.returnDate = null;
+                } else {
+                  query.returnDate = DateTime(2024, 6, 5);
+                }
+              })
+            }),
+            Text("One-way"),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: InkWell(
+                child: Text(DateFormat.yMMMMd().format(query.departureDate)),
+                onTap: () async {
+                  DateTime? date = await showDatePicker(
+                    context: context,
+                    initialDate: query.departureDate,
+                    firstDate: DateTime.now(),
+                    lastDate: DateTime.now().add(Duration(days: 365)),
+                  );
+                  if (date != null) {
+                    setState(() {
+                      query.departureDate = date;
+                    });
+                  }
+                },
+              ),
+            ),
+            if(query.returnDate != null) 
+              Text(" - "),
+            if(query.returnDate != null) 
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: InkWell(
+                  child: Text(DateFormat.yMMMMd().format(query.returnDate!)),
+                  onTap: () async {
+                    DateTime? date = await showDatePicker(
+                      context: context,
+                      initialDate: query.returnDate!,
+                      firstDate: DateTime.now(),
+                      lastDate: DateTime.now().add(Duration(days: 365)),
+                    );
+                    if (date != null) {
+                      setState(() {
+                        query.returnDate = date;
+                      });
+                    }
+                  },
+                ),
+              ),
+            SizedBox(
+              width: 100,
+              child: TextField(
+                keyboardType: TextInputType.number,
+                controller: adultsController,
+                onChanged: (String value) {
+                  setState(() {
+                    query.adults = int.parse(value);
+                  });
+                },
+                decoration: InputDecoration(
+                  labelText: "Adults",
+                  hintText: "1",
+                ),
+              ),
+            ),
+            SizedBox(
+              width: 100,
+              child: TextField(
+                keyboardType: TextInputType.number,
+                controller: childrenController,
+                onChanged: (String value) {
+                  setState(() {
+                    query.children = int.parse(value);
+                  });
+                },
+                decoration: InputDecoration(
+                  labelText: "Children",
+                  hintText: "0",
+                ),
+              ),
+            ),
+            // dropdown for travelClass
+            DropdownButton<TravelClass>(
+              value: query.travelClass,
+              onChanged: (TravelClass? value) {
+                setState(() {
+                  query.travelClass = value;
+                });
+              },
+              items: TravelClass.values.map((TravelClass travelClass) {
+                return DropdownMenuItem<TravelClass>(
+                  value: travelClass,
+                  child: Text(travelClass.name.toUpperCase()),
+                );
+              }).toList(),
+            ),
+            // submit
+            ElevatedButton(
+              onPressed: () {
+                TripsitterApi.getFlights(query).then((flights) {
+                  setState(() {
+                    // flights.sort((a,b) => a.duration.compareTo(b.duration));
+                    this.flights = flights;
+                  });
+                });
+              },
+              child: Text("Search"),
+            ),
+          ],
+        ),
+        
         DataTable(
           columns: [
+            DataColumn(label: Text("")),
             DataColumn(label: Text("Price/Airline")),
             DataColumn(label: Text("Time")),
             DataColumn(label: Text("Stops")),
@@ -65,12 +223,17 @@ class _SelectFlightState extends State<SelectFlight> {
             },
             cells: [
               DataCell(
+                Stack(
+                  children: flight.segments.map((s) => s.airlineOperating).toSet().map((iata) => TripsitterApi.getAirlineImage(iata)).toList()
+                )
+              ),
+              DataCell(
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text("${flight.next.isNotEmpty ? "From " : ""}\$${flight.minPrice}"),
                     // Text("Offered by ${flight.offeredBy.toSet().join(", ")}"),
-                    Text("Operated by ${flight.segments.map((s) => s.airlineOperating).toSet().join(", ")}"),
+                    Text("Operated by ${flight.segments.map((s) => Airline.fromCode(s.airlineOperating)?.name ?? s.airlineOperating).toSet().join(", ")}"),
                   ],
                 ),
               ),
@@ -93,7 +256,7 @@ class _SelectFlightState extends State<SelectFlight> {
                   children: [
                     Text(flight.segments.length == 1 ? "Nonstop" : "${(flight.segments.length-1).toString()} stop${flight.segments.length > 2 ? "s" : ""}"),
                     // list all segment arrivalIataCodes in all but the first segment
-                    flight.segments.length == 1 ? Text("") : Text("Stops in "+flight.segments.sublist(1).map((s) => s.arrivalAirport).join(", ")), 
+                    flight.segments.length == 1 ? Text("") : Text("Stops in "+flight.segments.sublist(1).map((s) => s.departureAirport).join(", ")), 
                   ],
                 ),
               ),
