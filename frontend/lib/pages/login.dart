@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-bool loggedIn = false;
+bool loggedIn = true;
 
 class LoginPage extends StatelessWidget {
   const LoginPage({super.key});

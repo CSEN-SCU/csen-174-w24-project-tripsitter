@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:tripsitter/pages/view_trip.dart';
 import 'package:tripsitter/pages/home.dart';
 import 'package:tripsitter/pages/login.dart';
@@ -13,6 +14,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   setPathUrlStrategy();
+  print("STRIPE KEY: ${const String.fromEnvironment('STRIPE_PK_TEST')}");
+  Stripe.publishableKey = const String.fromEnvironment('STRIPE_PK_TEST');
+  await Stripe.instance.applySettings();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
@@ -53,7 +57,7 @@ class MyApp extends StatelessWidget {
         onGenerateRoute: router.generator,
         title: 'TripSitter',
         theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple, brightness: Brightness.dark),
+          colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple, brightness: Brightness.light),
           useMaterial3: true,
         ),
       ),
