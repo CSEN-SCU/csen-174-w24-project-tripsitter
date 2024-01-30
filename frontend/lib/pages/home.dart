@@ -38,13 +38,13 @@ class _HomePageState extends State<HomePage> {
                 context: context,
                 builder:(context) => NewTrip()
               );
-            }, 
+            },
             child: Text("New Trip popup!")
           ),
           ElevatedButton(
             onPressed: () {
               Navigator.pushNamed(context, "/trip/1234");
-            }, 
+            },
             child: Text("View existing trip")
           )
         ]
