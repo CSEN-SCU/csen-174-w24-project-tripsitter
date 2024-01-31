@@ -20,6 +20,27 @@ class FlightsDashBoard extends StatefulWidget {
 
 class _FlightsDashBoardState extends State<FlightsDashBoard> {
   String _selectedStops = 'Any number of stops';
+
+  List<String> airlines = [
+    'Select All',
+    'Deselect All',
+    'Alaska',
+    'American',
+    'Breeze',
+    'China Eastern',
+    'Condor',
+    'Delta',
+    'Emirates',
+    'Frontier',
+    'JetBlue',
+    'Qatar Airways',
+    'Scandinavian Airlines',
+    'Southern Airways Express',
+    'Southwest',
+    'Spirit',
+    'United'
+  ];
+
   List<String> _selectedAirlines = [];
   final GlobalKey _stopsButtonKey = GlobalKey();
   final GlobalKey _airlinesButtonKey = GlobalKey();
@@ -150,38 +171,32 @@ class _FlightsDashBoardState extends State<FlightsDashBoard> {
       Offset.zero & overlay.size,
     );
 
-    List<String> airlines = [
-      'Alaska',
-      'American',
-      'Breeze',
-      'China Eastern',
-      'Condor',
-      'Delta',
-      'Emirates',
-      'Frontier',
-      'JetBlue',
-      'Qatar Airways',
-      'Scandinavian Airlines',
-      'Southern Airways Express',
-      'Southwest',
-      'Spirit',
-      'United'
-    ];
-
     await showMenu<String>(
       context: context,
       position: position,
       items: airlines.map((String airline) {
+        if (airline == 'Select All' || airline == 'Deselect All') {
+          return PopupMenuItem<String>(
+            value: airline,
+            child: Text(airline),
+          );
+        }
         return CheckedPopupMenuItem<String>(
           value: airline,
           checked: _selectedAirlines.contains(airline),
           child: Text(airline),
         );
-      }).toList(), // Don't forget to convert the Iterable returned by map to a List
+      }).toList(),
     ).then((String? selectedAirline) {
       if (selectedAirline != null) {
         setState(() {
-          if (_selectedAirlines.contains(selectedAirline)) {
+          if (selectedAirline == 'Select All') {
+            _selectedAirlines = List.from(airlines)
+              ..remove('Select All')
+              ..remove('Deselect All');
+          } else if (selectedAirline == 'Deselect All') {
+            _selectedAirlines.clear();
+          } else if (_selectedAirlines.contains(selectedAirline)) {
             _selectedAirlines.remove(selectedAirline);
           } else {
             _selectedAirlines.add(selectedAirline);
