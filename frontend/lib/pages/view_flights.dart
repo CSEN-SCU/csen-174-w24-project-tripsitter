@@ -1,18 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:tripsitter/components/flights_dash.dart';
 import 'package:tripsitter/components/select_flight.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:provider/provider.dart';
 import 'package:tripsitter/components/navbar.dart';
-import 'package:tripsitter/components/trip_dash.dart';
 
-class ViewTrip extends StatelessWidget {
+class ViewFlights extends StatelessWidget {
   final String tripId;
-  const ViewTrip(this.tripId, {super.key});
+  const ViewFlights(this.tripId, {super.key});
 
   @override
   Widget build(BuildContext context) {
-    print("TRIP $tripId");
     return Scaffold(
       appBar: TripSitterNavbar(),
       body: ConstrainedBox(
@@ -25,12 +24,12 @@ class ViewTrip extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Container(
-                  child: TripDashBoard(),
-                  width: constraints.maxWidth * 0.8,
+                  child: FlightsDashBoard(),
+                  width: constraints.maxWidth * 0.6,
                 ),
                 Container(
                   color: Color.fromARGB(255, 127, 166, 198),
-                  width: constraints.maxWidth * 0.2,
+                  width: constraints.maxWidth * 0.4,
                   child: const Center(
                     child: Text('Right Side'),
                   ),
