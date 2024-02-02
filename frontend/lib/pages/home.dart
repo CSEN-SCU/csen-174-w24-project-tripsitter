@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:provider/provider.dart';
 import 'package:tripsitter/components/new_trip_popup.dart';
+import 'package:tripsitter/components/payment.dart';
 import 'package:tripsitter/pages/login.dart';
 
 class HomePage extends StatefulWidget {
@@ -30,24 +31,28 @@ class _HomePageState extends State<HomePage> {
       appBar: AppBar(
         title: Text('Home'),
       ),
-      body: Column(
-        children: [
-          ElevatedButton(
-            onPressed: () {
-              showDialog(
-                context: context,
-                builder:(context) => NewTrip()
-              );
-            },
-            child: Text("New Trip popup!")
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pushNamed(context, "/trip/1234");
-            },
-            child: Text("View existing trip")
-          )
-        ]
+      body: Center(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            ElevatedButton(
+              onPressed: () {
+                showDialog(
+                  context: context,
+                  builder:(context) => NewTrip()
+                );
+              }, 
+              child: Text("New Trip popup!")
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pushNamed(context, "/trip/1234");
+              }, 
+              child: Text("View existing trip")
+            ),
+            Payment()
+          ]
+        ),
       ),
     );
   }

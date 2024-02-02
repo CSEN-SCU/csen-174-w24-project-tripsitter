@@ -45,5 +45,11 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Your precise location is used on the map when selecting hotels.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Scan your card to add it automatically</string>
+	<key>NSCameraUsageDescription</key>
+	<string>To scan cards</string>
 </dict>
 </plist>
