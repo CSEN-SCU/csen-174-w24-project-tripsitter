@@ -294,11 +294,11 @@ class Airline {
 
   static Future<void> cacheAirlines(BuildContext context) async {
     if(_airlineCache.isNotEmpty) return;
-    String data = await DefaultAssetBundle.of(context).loadString("airlines.json");
-    List<Airline> airlines = jsonDecode(data).map<Airline>((a) => Airline.fromJson(a)).toList(); //latest Dart
-    for (Airline airline in airlines) {
-      _airlineCache[airline.code] = airline;
-    }
+    // String data = await DefaultAssetBundle.of(context).loadString("airlines.json");
+    // List<Airline> airlines = jsonDecode(data).map<Airline>((a) => Airline.fromJson(a)).toList(); //latest Dart
+    // for (Airline airline in airlines) {
+    //   _airlineCache[airline.code] = airline;
+    // }
   }
 
   static Airline? fromCode(String iata) {
