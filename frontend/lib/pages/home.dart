@@ -1,5 +1,7 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:provider/provider.dart';
 import 'package:tripsitter/components/new_trip_popup.dart';
 import 'package:tripsitter/pages/login.dart';
 
@@ -15,17 +17,15 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    if(!loggedIn) {
-      SchedulerBinding.instance.addPostFrameCallback((_) {
-        // Don't allow the user to go back to the home page without logging in
-        Navigator.pushReplacementNamed(context, "/login");
-      });
-    }
   }
 
 
   @override
   Widget build(BuildContext context) {
+    User? user = Provider.of<User?>(context);
+    if(user == null) {
+      return const LoginPage();
+    }
     return Scaffold(
       appBar: AppBar(
         title: Text('Home'),
