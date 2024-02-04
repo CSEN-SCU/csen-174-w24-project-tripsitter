@@ -26,10 +26,6 @@ void main() async {
       handlerFunc: (BuildContext? context, Map<String, dynamic> params) {
     return const HomePage();
   });
-  Handler loginHandler = Handler(
-      handlerFunc: (BuildContext? context, Map<String, dynamic> params) {
-    return const LoginPage();
-  });
   Handler viewTrip = Handler(
     handlerFunc: (BuildContext? context, Map<String, dynamic> params) {
       // if constraints.maxWidth > 600 { go to desktop }
@@ -40,8 +36,6 @@ void main() async {
   router.define("/", handler: homeHandler, transitionType: TransitionType.none);
   router.define("/trip/:id",
       handler: viewTrip, transitionType: TransitionType.none);
-  router.define("/login",
-      handler: loginHandler, transitionType: TransitionType.none);
   router.notFoundHandler = Handler(
       handlerFunc: (BuildContext? context, Map<String, dynamic> params) {
     return HomePage();

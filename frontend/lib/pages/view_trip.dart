@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:tripsitter/components/map.dart';
 import 'package:tripsitter/components/select_flight.dart';
@@ -6,6 +7,7 @@ import 'package:hexcolor/hexcolor.dart';
 import 'package:provider/provider.dart';
 import 'package:tripsitter/components/navbar.dart';
 import 'package:tripsitter/components/trip_dash.dart';
+import 'package:tripsitter/pages/login.dart';
 
 class ViewTrip extends StatelessWidget {
   final String tripId;
@@ -13,6 +15,10 @@ class ViewTrip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    User? user = Provider.of<User?>(context);
+    if(user == null) {
+      return const LoginPage();
+    }
     return Scaffold(
       appBar: TripSitterNavbar(),
       body: ConstrainedBox(

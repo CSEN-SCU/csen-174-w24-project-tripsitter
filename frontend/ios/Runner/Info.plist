@@ -51,5 +51,18 @@
 	<string>Scan your card to add it automatically</string>
 	<key>NSCameraUsageDescription</key>
 	<string>To scan cards</string>
+	<key>GIDClientID</key>
+	<string>375915765659-b58lp2ishjm8cbhm1ag6iv4po93glg33.apps.googleusercontent.com</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>com.googleusercontent.apps.375915765659-b58lp2ishjm8cbhm1ag6iv4po93glg33</string>
+			</array>
+		</dict>
+	</array>
 </dict>
 </plist>
