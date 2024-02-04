@@ -50,7 +50,6 @@ class _HomePageState extends State<HomePage> {
               }, 
               child: Text("View existing trip")
             ),
-            Payment()
           ]
         ),
       ),
