@@ -6,10 +6,10 @@ const fs = require('fs');
 const path = require('path');
 import 'dotenv/config';
 import { searchFlights, searchAirlines, searchAirports } from "./flights";
+import { searchEvents } from "./ticketmaster";
 const app = express();
 const cors = require('cors')({origin: true});
 app.use(cors);
-const port = 3000;
 
 app.get('/', (req, res) => {
   res.send('Hello World!');
@@ -18,6 +18,8 @@ app.get('/', (req, res) => {
 app.get("/search/airports", searchAirports);
 app.get("/search/airlines", searchAirlines);
 app.get('/search/flights', searchFlights);
+
+app.get('/search/events', searchEvents);
 
 app.get('/airline-logo', async (req, res) => {
   const iata = req.query.iata;
@@ -47,10 +49,5 @@ app.get('/airline-logo', async (req, res) => {
     }
   }
 });
-
-
-app.listen(port, () => {
-  console.log(`Example app listening on port ${port}`)
-})
 
 exports.api = functions.https.onRequest(app);
