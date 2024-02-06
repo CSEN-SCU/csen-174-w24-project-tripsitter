@@ -3,7 +3,7 @@ const Amadeus = require('amadeus');
 
 import amadeus from "./amadeusClient";
 
-import { parse } from 'tinyduration'
+import { parse } from 'tinyduration';
 
 var flightData = require('./flightData.json');
 
