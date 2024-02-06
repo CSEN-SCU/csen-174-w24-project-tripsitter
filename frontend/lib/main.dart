@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:tripsitter/classes/flights.dart';
+import 'package:tripsitter/classes/profile.dart';
 import 'package:tripsitter/helpers/api.dart';
 import 'package:tripsitter/pages/view_trip.dart';
 import 'package:tripsitter/pages/home.dart';
@@ -56,13 +57,37 @@ class MyApp extends StatelessWidget {
         StreamProvider<User?>.value(
             value: FirebaseAuth.instance.authStateChanges(), initialData: null),
       ],
-      child: MaterialApp(
-        onGenerateRoute: router.generator,
-        title: 'TripSitter',
-        theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple, brightness: Brightness.light),
-          useMaterial3: true,
-        ),
+      child: Builder(
+        builder: (context) {
+          User? user = Provider.of<User?>(context);
+          if (user == null) {
+            return MaterialApp(
+              onGenerateRoute: router.generator,
+              title: 'TripSitter',
+              theme: ThemeData(
+                colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple, brightness: Brightness.light),
+                useMaterial3: true,
+              ),
+              home: const LoginPage(),
+            );
+          }
+          return MultiProvider(
+            providers: [
+              StreamProvider<UserProfile?>.value(
+                initialData: null,
+                value: UserProfile.getProfile(user.uid),
+              )
+            ],
+            child: MaterialApp(
+              onGenerateRoute: router.generator,
+              title: 'TripSitter',
+              theme: ThemeData(
+                colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple, brightness: Brightness.light),
+                useMaterial3: true,
+              ),
+            ),
+          );
+        }
       ),
     );
   }
