@@ -4,7 +4,10 @@ import amadeus from "./amadeusClient";
 
 export async function getHotels(req: Request, res: Response){
     const cityCode = req.query.cityCode;
-    if (!cityCode) {
+    const checkInDate = req.query.checkInDate;
+    const checkOutDate = req.query.checkOutDate;
+    const adults = req.query.adults;
+    if (!cityCode || !checkInDate || !checkOutDate || !adults) {
       res.status(400).send('Missing required query parameters');
       return;
     }
@@ -16,15 +19,16 @@ export async function getHotels(req: Request, res: Response){
 
     let results: any[] = [];
     let promises = [];
+    let k = 10;
 
-    for (let i = 0; i < hotelIds.length; i += 10) {
-        let h = hotelIds.slice(i, i + 10);
+    for (let i = 0; i < hotelIds.length; i += k) {
+        let h = hotelIds.slice(i, i + k);
         console.log(h);
-        let request = await amadeus.shopping.hotelOffersSearch.get({
+        let request = amadeus.shopping.hotelOffersSearch.get({
             hotelIds: h.join(','),
-            checkInDate: "2024-03-01",
-            checkOutDate: "2024-03-02",
-            adults: 1,
+            checkInDate: checkInDate,
+            checkOutDate: checkOutDate,
+            adults: adults,
         }).then((response: any) => {
             console.log('HotelOffersSearch Response:', response.data);
             results.push(response.data);
@@ -36,7 +40,6 @@ export async function getHotels(req: Request, res: Response){
                 checkOutDate: "2024-03-02",
                 adults: 1,
             });
-            res.status(500).send('Internal Server Error');
         });
         promises.push(request);
     }
