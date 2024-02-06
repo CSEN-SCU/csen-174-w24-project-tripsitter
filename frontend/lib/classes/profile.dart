@@ -34,4 +34,12 @@ class UserProfile {
       stripeId: data['stripeId'],
     );
   }
+
+  static Stream<UserProfile?> getProfile(String uid) {
+    return FirebaseFirestore.instance
+      .collection('users')
+      .doc(uid)
+      .snapshots()
+      .map((doc) => doc.exists ? UserProfile.fromFirestore(doc) : null);
+  }
 }
