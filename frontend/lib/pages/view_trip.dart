@@ -14,7 +14,7 @@ class ViewTrip extends StatelessWidget {
   Widget build(BuildContext context) {
     print("TRIP $tripId");
     return Scaffold(
-      appBar: TripSitterNavbar(),
+      appBar: const TripSitterNavbar(),
       body: ConstrainedBox(
         constraints: const BoxConstraints.expand(),
         child: Container(

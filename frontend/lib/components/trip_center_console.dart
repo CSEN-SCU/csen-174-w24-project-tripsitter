@@ -1,7 +1,9 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:tripsitter/components/trip_console_dot.dart';
+import 'package:tripsitter/components/trip_console_popup.dart';
 
 class TripCenterConsole extends StatefulWidget {
   final double maxHeight, maxWidth;
@@ -37,6 +39,9 @@ class _MyStatefulWidgetState extends State<TripCenterConsole>
   late double radius;
   late double centerX;
   late double centerY;
+
+  String currentPopupState = "None";
+  // will only ever have values of "Hotel","Rental Car","Flights","Activities","City"
 
   @override
   void initState() {
@@ -146,19 +151,18 @@ class _MyStatefulWidgetState extends State<TripCenterConsole>
     return Stack(
       children: [
         TripConsoleDot(
-          "Hotel",
-          positions,
-          _iconAnimationControllers,
-          _iconAnimations,
-          defaultAngles,
-          radius,
-          centerX,
-          centerY,
-          setElementAngleDegrees,
-          updateDotSize,
-          updateDotX,
-          updateDotY,
-        ),
+            "Hotel",
+            positions,
+            _iconAnimationControllers,
+            _iconAnimations,
+            defaultAngles,
+            radius,
+            centerX,
+            centerY,
+            setElementAngleDegrees,
+            updateDotSize,
+            updateDotX,
+            updateDotY),
         // Hotel
         // AnimatedPositioned(
         //   duration: const Duration(milliseconds: 200),
@@ -414,6 +418,10 @@ class _MyStatefulWidgetState extends State<TripCenterConsole>
             ),
           ),
         ),
+        // Positioned(
+        //   top: -50,
+        //   child: TripsConsolePopup(currentPopupState),
+        // ),
       ],
     );
   }

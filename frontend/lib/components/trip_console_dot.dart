@@ -54,6 +54,40 @@ class TripConsoleDot extends StatefulWidget {
 }
 
 class _TripConsoleDotState extends State<TripConsoleDot> {
+  Widget popupPage(String name) {
+    return Container(
+      color: Colors.red,
+      width: 100,
+      height: 100,
+    );
+  }
+
+  void openPopup(myContext, name) {
+    showDialog(
+      context: myContext,
+      builder: (BuildContext context) {
+        return Dialog(
+          child: Container(
+            width: MediaQuery.of(context).size.width * 0.95,
+            height: MediaQuery.of(context).size.height * 0.9,
+            decoration: const BoxDecoration(
+              borderRadius: BorderRadius.all(Radius.circular(25.0)),
+              color: Colors.grey,
+            ),
+            child: Stack(children: [
+              const Positioned(
+                top: 10.0,
+                right: 10.0,
+                child: CloseButton(),
+              ),
+              popupPage(widget.name),
+            ]),
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return AnimatedPositioned(
@@ -105,18 +139,57 @@ class _TripConsoleDotState extends State<TripConsoleDot> {
                 widget.defaultAngles["Activities"]!, "Activities");
             widget._iconAnimationControllers["Hotel"]?.reverse();
           },
-          child: AnimatedBuilder(
-            animation: widget._iconAnimationControllers["Hotel"]!,
-            builder: (context, child) {
-              return Icon(
-                Icons.hotel,
-                color: Colors.white,
-                size: widget._iconAnimations["Hotel"]!.value *
-                    widget.defaultDotSize *
-                    widget.iconSizeFactor,
-              );
+          child: GestureDetector(
+            onTap: () {
+              openPopup(context, widget.name);
             },
+            child: AnimatedBuilder(
+              animation: widget._iconAnimationControllers["Hotel"]!,
+              builder: (context, child) {
+                return Icon(
+                  Icons.hotel,
+                  color: Colors.white,
+                  size: widget._iconAnimations["Hotel"]!.value *
+                      widget.defaultDotSize *
+                      widget.iconSizeFactor,
+                );
+              },
+            ),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class CloseButton extends StatelessWidget {
+  const CloseButton({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 50,
+      height: 50,
+      child: ElevatedButton(
+        onPressed: () {
+          Navigator.of(context).pop();
+        },
+        style: const ButtonStyle(
+          iconColor:
+              MaterialStatePropertyAll<Color>(Color.fromARGB(255, 95, 95, 95)),
+          backgroundColor:
+              MaterialStatePropertyAll<Color>(Color.fromARGB(0, 0, 0, 0)),
+          shadowColor: MaterialStatePropertyAll(
+            Color.fromARGB(0, 1, 1, 1),
+          ),
+          alignment: Alignment.center,
+          padding: MaterialStatePropertyAll<EdgeInsetsGeometry>(
+            EdgeInsets.zero,
+          ),
+        ),
+        child: const Icon(
+          Icons.close,
+          size: 50,
         ),
       ),
     );
