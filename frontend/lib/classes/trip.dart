@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:tripsitter/classes/city.dart';
 
 class Trip {
   final String _id;
@@ -9,7 +10,7 @@ class Trip {
   String _name;
   DateTime _startDate;
   DateTime _endDate;
-  String _destination;
+  City _destination;
   bool _isConfirmed;
   List<FlightGroup> _flights;
   List<HotelGroup> _hotels;
@@ -24,7 +25,7 @@ class Trip {
     required String name,
     required DateTime startDate,
     required DateTime endDate,
-    required String destination,
+    required City destination,
     required bool isConfirmed,
     required List<FlightGroup> flights,
     required List<HotelGroup> hotels,
@@ -51,12 +52,16 @@ class Trip {
   String get name => _name;
   DateTime get startDate => _startDate;
   DateTime get endDate => _endDate;
-  String get destination => _destination;
+  City get destination => _destination;
   bool get isConfirmed => _isConfirmed;
   List<FlightGroup> get flights => _flights;
   List<HotelGroup> get hotels => _hotels;
   List<RentalCarGroup> get rentalCars => _rentalCars;
   List<ActivitySelection> get activities => _activities;
+
+  Future<void> save() async {
+    await _save();
+  }
 
   Future<void> _save() async {
     await FirebaseFirestore.instance.collection("trips").doc(_id).set({
@@ -66,7 +71,7 @@ class Trip {
       "name": _name,
       "startDate": _startDate,
       "endDate": _endDate,
-      "destination": _destination,
+      "destination": _destination.toJson(),
       "isConfirmed": _isConfirmed,
       "flights": _flights.map((flight) => flight.toJson()).toList(),
       "hotels": _hotels.map((hotel) => hotel.toJson()).toList(),
@@ -85,7 +90,7 @@ class Trip {
       name: data['name'],
       startDate: data['startDate'].toDate(),
       endDate: data['endDate'].toDate(),
-      destination: data['destination'],
+      destination: City.fromJson(data['destination']),
       isConfirmed: data['isConfirmed'],
       flights: [],
       hotels: [],
@@ -161,7 +166,7 @@ class Trip {
     await _save();
   }
 
-  Future<void> changeDestination(String destination) async {
+  Future<void> changeDestination(City destination) async {
     _destination = destination;
     await _save();
   }
