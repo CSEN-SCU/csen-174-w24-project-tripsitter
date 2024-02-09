@@ -3,7 +3,6 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:tripsitter/classes/flights.dart';
 import 'package:tripsitter/classes/profile.dart';
-import 'package:tripsitter/components/select_flight.dart';
 import 'package:tripsitter/helpers/api.dart';
 import 'package:tripsitter/pages/create_trip.dart';
 import 'package:tripsitter/pages/view_trip.dart';
@@ -33,10 +32,6 @@ void main() async {
       handlerFunc: (BuildContext? context, Map<String, dynamic> params) {
     return const CreateTrip();
   });
-  Handler selectFlightHandler = Handler(
-      handlerFunc: (BuildContext? context, Map<String, dynamic> params) {
-    return const SelectFlight();
-  });
   Handler viewTrip = Handler(
     handlerFunc: (BuildContext? context, Map<String, dynamic> params) {
       // if constraints.maxWidth > 600 { go to desktop }
@@ -48,7 +43,6 @@ void main() async {
   router.define("/trip/:id",
       handler: viewTrip, transitionType: TransitionType.none);
   router.define("/new", handler: newTripHandler, transitionType: TransitionType.none);
-  router.define("/flights", handler: selectFlightHandler, transitionType: TransitionType.none);
   router.notFoundHandler = Handler(
       handlerFunc: (BuildContext? context, Map<String, dynamic> params) {
     return HomePage();
