@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:tripsitter/classes/profile.dart';
 import 'package:tripsitter/components/new_trip_popup.dart';
 import 'package:tripsitter/components/payment.dart';
+import 'package:tripsitter/components/select_flight.dart';
 import 'package:tripsitter/pages/login.dart';
 
 class HomePage extends StatefulWidget {
@@ -30,8 +31,8 @@ class _HomePageState extends State<HomePage> {
         title: Text('Home'),
       ),
       body: Center(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
+        child: ListView(
+          // crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             ElevatedButton(
               onPressed: () {
@@ -45,6 +46,7 @@ class _HomePageState extends State<HomePage> {
               }, 
               child: Text("View existing trip")
             ),
+            SelectFlight()
           ]
         ),
       ),

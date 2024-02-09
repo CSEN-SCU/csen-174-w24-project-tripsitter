@@ -3,3 +3,4 @@
 firebase-debug.log
 frontend/config.json
 config.json
+*.log
