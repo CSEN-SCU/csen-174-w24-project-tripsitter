@@ -2,49 +2,7 @@ import { Request, Response } from "express";
 const Amadeus = require('amadeus');
 
 import amadeus from "./amadeusClient";
-
-import { parse } from 'tinyduration'
-
 var flightData = require('./flightData.json');
-
-function checkExistingFlight(i: any, existing: any) {
-  if(i.id == existing.id) {
-    return true;
-  }
-  if(i.segments.length != existing.segments.length) {
-    return false;
-  }
-  for(let j = 0; j < i.segments.length; j++) {
-     if(i.segments[j].departureAirport != existing.segments[j].departureAirport) {
-      return false;
-    }
-    // if(i.segments[j].departureTerminal != existing.segments[j].departureTerminal) {
-    //   return false;
-    // }
-    if(i.segments[j].departureTime != existing.segments[j].departureTime) {
-      return false;
-    }
-    if(i.segments[j].arrivalAirport != existing.segments[j].arrivalAirport) {
-      return false;
-    }
-    // if(i.segments[j].arrivalTerminal != existing.segments[j].arrivalTerminal) {
-    //   return false;
-    // }
-    if(i.segments[j].arrivalTime != existing.segments[j].arrivalTime) {
-      return false;
-    }
-    if(i.segments[j].airlineOperating != existing.segments[j].airlineOperating) {
-      return false;
-    }
-    // if(i.segments[j].aircraft != existing.segments[j].aircraft) {
-    //   return false;
-    // }
-    if(i.segments[j].numberOfStops != existing.segments[j].numberOfStops) {
-      return false;
-    }
-  }
-  return true;
-}
 
 /* 
   Input: query parameters for the following fields
@@ -151,80 +109,9 @@ export async function searchFlights(req: Request, res: Response){
     //   currencyCode: currency,
     //   travelClass: travelClass,
     // });
-    // const offers = flightSearch.data.map((offer: any) => {
-  const offers = flightData.map((offer: any) => {
-      return {
-        type: "flight",
-        id: offer.id,
-        oneWay: offer.oneWay,
-        seats: offer.numberOfBookableSeats,
-        price: Number(offer.price.total),
-        priceCurrency: offer.price.currency,
-        priceInfo: offer.price,
-        itineraries: offer.itineraries.map((itinerary: any) => {
-          return {
-            duration: parse(itinerary.duration),
-            segments: itinerary.segments.map((segment: any) => {
-              return {
-                departureAirport: segment.departure.iataCode,
-                departureTerminal: segment.departure.terminal,
-                departureTime: segment.departure.at,
-                arrivalAirport: segment.arrival.iataCode,
-                arrivalTerminal: segment.arrival.terminal,
-                arrivalTime: segment.arrival.at,
-                // airlineOffering: segment.carrierCode,
-                airlineOperating: segment.operating?.carrierCode ?? segment.carrierCode,
-                flightNumbers: [segment.carrierCode+""+segment.number.toString()],
-                aircraft: segment.aircraft.code,
-                duration: parse(segment.duration),
-                id: segment.id,
-                numberOfStops: segment.numberOfStops,
-              }
-            })
-          }
-        }),
-        airlines: offer.validatingAirlineCodes,
-      }
-    });
-    for(let o of offers){
-      for(let i of o.itineraries){
-        i.id = i.segments.map((s: any) => s.id).join('-');
-      }
-    }
-
-    const offersMap: any[] = [];
-
-    for(let o of offers) {
-      let currentObj: any = offersMap;
-      for(let i of o.itineraries) {
-        if(!currentObj.find((s: any) => checkExistingFlight(i, s))) {
-          currentObj.push({
-            ...i,
-            next: [],
-            minPrice: -1,
-            offerIds: [],
-            isOneWay: o.oneWay,
-            seats: o.seats,
-            offeredBy: [],
-          });
-        }
-        currentObj = currentObj.find((s: any) => checkExistingFlight(i, s));
-        currentObj.offerIds = [...new Set([...currentObj.offerIds, o.id])];
-        currentObj.offeredBy = [...new Set([...currentObj.offeredBy, ...o.airlines])];
-        for(let j = 0; j<currentObj.segments.length; j++) {
-          currentObj.segments[j].flightNumbers = [...new Set([...currentObj.segments[j].flightNumbers, ...i.segments[j].flightNumbers])];
-        }
-        if(o.price < currentObj.minPrice || currentObj.minPrice < 0 ) {
-          currentObj.minPrice = o.price;
-          currentObj.priceInfo = o.priceInfo;
-          currentObj.priceCurrency = o.priceCurrency;
-        }
-        currentObj = currentObj.next;
-      }
-    }
-    res.send(offersMap);
-
-    // res.send(offers);
+  // const offers = flightSearch.data;
+  const offers = flightData;
+  res.send(offers);
   }
 
 

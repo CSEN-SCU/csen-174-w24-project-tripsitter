@@ -43,13 +43,13 @@ class TripsitterApi {
     }
   }
 
-  static Future<List<FlightItinerary>> getFlights(FlightsQuery query) async {
+  static Future<List<FlightItineraryRecursive>> getFlights(FlightsQuery query) async {
     Uri uri = Uri.http(baseUrl, searchFlightsUrl, query.toJson());
     http.Response response = await http.get(uri);
     if (response.statusCode == 200) {
       List<dynamic> data = jsonDecode(response.body);
-      List<FlightItinerary> flights = data.map((json) => FlightItinerary.fromJson(json)).toList();
-      return flights;
+      List<FlightOffer> offers = data.map((json) => FlightOffer.fromJson(json)).toList();
+      return FlightItineraryRecursive.fromOffersList(offers);
     } else {
       throw Exception('Failed to load flights');
     }

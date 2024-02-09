@@ -13,9 +13,9 @@ class SelectFlight extends StatefulWidget {
 
 class _SelectFlightState extends State<SelectFlight> {
 
-  List<FlightItinerary> flights = [];
+  List<FlightItineraryRecursive> flights = [];
 
-  List<FlightItinerary> selected = [];
+  List<FlightItineraryRecursive> selected = [];
 
   FlightsQuery query = FlightsQuery(
     origin: 'LAX',
@@ -28,9 +28,10 @@ class _SelectFlightState extends State<SelectFlight> {
 
   int currentDepth = 0;
 
-  void selectFlight(FlightItinerary flight) {
+  void selectFlight(FlightItineraryRecursive flight) {
     setState(() {
       selected.add(flight);
+      print("Select flight with ${flight.offers.length} offers");
       currentDepth++;
       flights = flight.next;
     });
@@ -50,8 +51,9 @@ class _SelectFlightState extends State<SelectFlight> {
     adultsController = TextEditingController(text: query.adults.toString());
     childrenController = TextEditingController(text: query.children?.toString() ?? "");
     TripsitterApi.getFlights(query).then((flights) {
+      print("GOT FLIGHTS ${flights.length}");
       setState(() {
-        // flights.sort((a,b) => a.duration.compareTo(b.duration));
+        // flights.sort((a,b) => a.duration.toDuration().compareTo(b.duration));
         this.flights = flights;
       });
     });
@@ -225,16 +227,16 @@ class _SelectFlightState extends State<SelectFlight> {
             cells: [
               DataCell(
                 Stack(
-                  children: flight.segments.map((s) => s.airlineOperating).toSet().map((iata) => TripsitterApi.getAirlineImage(iata)).toList()
+                  children: flight.offers.first.itineraries[flight.depth].segments.map((s) => s.operating?.carrierCode ?? s.carrierCode).toSet().map((iata) => TripsitterApi.getAirlineImage(iata)).toList()
                 )
               ),
               DataCell(
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text("${flight.next.isNotEmpty ? "From " : ""}\$${flight.minPrice}"),
+                    Text("${flight.next.isNotEmpty ? "From " : ""}\$${flight.minPrice?.total ?? ''}"),
                     // Text("Offered by ${flight.offeredBy.toSet().join(", ")}"),
-                    Text("Operated by ${flight.segments.map((s) => Airline.fromCode(s.airlineOperating)?.name ?? s.airlineOperating).toSet().join(", ")}"),
+                    Text("Operated by ${flight.offers.first.itineraries[flight.depth].segments.map((s) => Airline.fromCode(s.operating?.carrierCode ?? s.carrierCode)?.name ?? s.operating?.carrierCode ?? s.carrierCode).toSet().join(", ")}"),
                   ],
                 ),
               ),
@@ -244,8 +246,8 @@ class _SelectFlightState extends State<SelectFlight> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text(DateFormat.jm().format(flight.segments.first.departureTime)+" - "+DateFormat.jm().format(flight.segments.last.arrivalTime)),
-                      Text(flight.duration.format())
+                      Text(DateFormat.jm().format(flight.segments.first.departure.at)+" - "+DateFormat.jm().format(flight.segments.last.arrival.at)),
+                      Text(flight.itineraries.first.duration.toDuration().format())
                     ],
                   ),
                 ),
@@ -257,7 +259,7 @@ class _SelectFlightState extends State<SelectFlight> {
                   children: [
                     Text(flight.segments.length == 1 ? "Nonstop" : "${(flight.segments.length-1).toString()} stop${flight.segments.length > 2 ? "s" : ""}"),
                     // list all segment arrivalIataCodes in all but the first segment
-                    flight.segments.length == 1 ? Text("") : Text("Stops in "+flight.segments.sublist(1).map((s) => s.departureAirport).join(", ")), 
+                    flight.segments.length == 1 ? Text("") : Text("Stops in "+flight.segments.sublist(1).map((s) => s.departure.iataCode).join(", ")), 
                   ],
                 ),
               ),
@@ -276,16 +278,16 @@ class _SelectFlightState extends State<SelectFlight> {
                               ...[
                                 Text("Flight ${j+1}"),
                                 // LHR - SFO
-                                Text("${flight.segments[j].departureAirport} - ${flight.segments[j].arrivalAirport}"),
+                                Text("${flight.segments[j].departure.iataCode} - ${flight.segments[j].arrival.iataCode}"),
                                 Text("Operated by ${Airline.fromCode(flight.segments[j].airlineOperating)?.name ?? flight.segments[j].airlineOperating}"),
-                                Text("${DateFormat.yMMMMd().add_jm().format(flight.segments[j].departureTime)} - ${DateFormat.yMMMMd().add_jm().format(flight.segments[j].arrivalTime)}"),
-                                Text("Duration: ${flight.segments[j].duration.format()}"),
-                                Text("Aircraft: ${flight.segments[j].aircraft.toPlaneName()}"),
+                                Text("${DateFormat.yMMMMd().add_jm().format(flight.segments[j].departure.at)} - ${DateFormat.yMMMMd().add_jm().format(flight.segments[j].departure.at)}"),
+                                Text("Duration: ${flight.segments[j].duration.toDuration().format()}"),
+                                Text("Aircraft: ${flight.segments[j].aircraft.code.toPlaneName()}"),
                                 Container(height: 10),
                                 if(j < flight.segments.length-1)
                                   ...[
-                                    Text("Layover in ${flight.segments[j+1].departureAirport}"),
-                                    Text("Duration: ${flight.segments[j+1].departureTime.difference(flight.segments[j].arrivalTime).format()}"),
+                                    Text("Layover in ${flight.segments[j+1].departure.iataCode}"),
+                                    Text("Duration: ${flight.segments[j+1].departure.at.difference(flight.segments[j].arrival.at).format()}"),
                                     Container(height: 10),
                                   ]
                               ]

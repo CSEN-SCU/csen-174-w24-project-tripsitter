@@ -58,6 +58,7 @@ dependencies:
   google_fonts: ^6.1.0
   google_sign_in: ^6.2.1
   csv: ^5.1.1
+  collection: ^1.18.0
 
 dev_dependencies:
   flutter_test:
