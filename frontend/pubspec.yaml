@@ -37,7 +37,7 @@ dependencies:
   cupertino_icons: ^1.0.2
   firebase_core: ^2.24.2
   firebase_auth: ^4.16.0
-  firebase_analytics: ^10.8.0
+  firebase_analytics: ^10.8.4
   cloud_firestore: ^4.14.0
   cloud_functions: ^4.6.0
   firebase_messaging: ^14.7.10
@@ -45,10 +45,20 @@ dependencies:
   provider: ^6.1.1
   fluro: ^2.0.5
   url_strategy: ^0.2.0
+  sign_in_button: ^3.2.0
+  mapbox_gl:
+    git:
+      url: https://github.com/Marco4763/maps
+      ref: feature/agp-8
+  flutter_stripe: ^10.0.0
+  flutter_stripe_web: ^5.0.0
   http: ^1.2.0
   intl: ^0.19.0
   hexcolor: ^3.0.1
   google_fonts: ^6.1.0
+  google_sign_in: ^6.2.1
+  csv: ^5.1.1
+  collection: ^1.18.0
 
 dev_dependencies:
   flutter_test:
