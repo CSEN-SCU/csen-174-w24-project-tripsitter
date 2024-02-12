@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:tripsitter/classes/flights.dart';
 
 import 'package:http/http.dart' as http;
+import 'package:tripsitter/classes/hotels.dart';
 
 class TripsitterApi {
   static const String baseUrl = '127.0.0.1:5001';
@@ -13,6 +14,7 @@ class TripsitterApi {
   static const String searchFlightsUrl = '$baseApiUrl/search/flights';
   static const String searchAirlinesUrl = '$baseApiUrl/search/airlines';
   static const String searchAirportsUrl = '$baseApiUrl/search/airports';
+  static const String searchHotelsUrl = '$baseApiUrl/search/hotels';
   static const String airlineLogoUrl = "$baseApiUrl/airline-logo";
 
   static Image getAirlineImage(String iata) {
@@ -55,5 +57,16 @@ class TripsitterApi {
     }
   }
 
-
+  static Future<List<HotelOption>> getHotels(HotelQuery query) async {
+    print( query.toJson());
+    Uri uri = Uri.http(baseUrl, searchHotelsUrl, query.toJson());
+    http.Response response = await http.get(uri);
+    if (response.statusCode == 200) {
+      List<dynamic> data = jsonDecode(response.body);
+      List<HotelOption> offers = data.map((json) => HotelOption.fromJson(json)).toList();
+      return offers;
+    } else {
+      throw Exception('Failed to load hotels');
+    }
+  }
 }

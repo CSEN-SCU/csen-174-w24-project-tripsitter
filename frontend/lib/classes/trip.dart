@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:tripsitter/classes/city.dart';
+import 'package:tripsitter/classes/flights.dart';
+import 'package:tripsitter/classes/hotels.dart';
 
 class Trip {
   final String _id;
@@ -263,18 +265,6 @@ class FlightGroup {
   }
 }
 
-class FlightOffer {
-  FlightOffer();
-
-  factory FlightOffer.fromJson(Map<String, dynamic> json) {
-    return FlightOffer();
-  }
-
-  Map<String, dynamic> toJson() {
-    return {};
-  }
-}
-
 class HotelGroup {
   List<String> _members;
   List<HotelOffer> _options;
@@ -328,18 +318,6 @@ class HotelGroup {
   Future<void> removeMember(String member) async {
     _members.remove(member);
     await _save();
-  }
-}
-
-class HotelOffer {
-  HotelOffer();
-
-  factory HotelOffer.fromJson(Map<String, dynamic> json) {
-    return HotelOffer();
-  }
-
-  Map<String, dynamic> toJson() {
-    return {};
   }
 }
 

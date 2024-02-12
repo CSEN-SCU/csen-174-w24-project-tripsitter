@@ -164,22 +164,22 @@ class FlightItineraryRecursive {
 }
 
 class FlightOffer {
-  String type;
-  String id;
-  String source;
-  bool instantTicketingRequired;
-  bool nonHomogeneous;
-  bool oneWay;
-  String lastTicketingDate;
-  String lastTicketingDateTime;
-  int numberOfBookableSeats;
-  List<FlightItinerary> itineraries;
-  FlightPrice price;
-  FlightPricingOptions pricingOptions;
-  List<String> validatingAirlineCodes;
-  List<FlightTravelerPricing> travelerPricings;
+  final String type;
+  final String id;
+  final String source;
+  final bool instantTicketingRequired;
+  final bool nonHomogeneous;
+  final bool oneWay;
+  final String lastTicketingDate;
+  final String lastTicketingDateTime;
+  final int numberOfBookableSeats;
+  final List<FlightItinerary> itineraries;
+  final FlightPrice price;
+  final FlightPricingOptions pricingOptions;
+  final List<String> validatingAirlineCodes;
+  final List<FlightTravelerPricing> travelerPricings;
 
-  FlightOffer({
+  const FlightOffer({
     required this.type,
     required this.id,
     required this.source,
@@ -240,9 +240,9 @@ class FlightOffer {
 }
 
 class FlightItinerary {
-  String duration;
-  List<FlightSegment> segments;
-  String id;
+  final String duration;
+  final List<FlightSegment> segments;
+  final String id;
 
   FlightItinerary({required this.duration, required this.segments}) : id = segments.map((segment) => segment.id).join('-');
 
@@ -263,22 +263,22 @@ class FlightItinerary {
 }
 
 class FlightSegment {
-  FlightDepartureArrival departure;
-  FlightDepartureArrival arrival;
-  String carrierCode;
-  String number;
-  FlightAircraft aircraft;
-  FlightOperating? operating;
-  String duration;
-  String id;
-  int numberOfStops;
-  bool blacklistedInEU;
+  final FlightDepartureArrival departure;
+  final FlightDepartureArrival arrival;
+  final String carrierCode;
+  final String number;
+  final FlightAircraft aircraft;
+  final FlightOperating? operating;
+  final String duration;
+  final String id;
+  final int numberOfStops;
+  final bool blacklistedInEU;
 
   String get airlineOperating {
     return operating?.carrierCode ?? carrierCode;
   }
 
-  FlightSegment({
+  const FlightSegment({
     required this.departure,
     required this.arrival,
     required this.carrierCode,
@@ -326,11 +326,11 @@ class FlightSegment {
 }
 
 class FlightDepartureArrival {
-  String iataCode;
-  String? terminal;
-  DateTime at;
+  final String iataCode;
+  final String? terminal;
+  final DateTime at;
 
-  FlightDepartureArrival({required this.iataCode, this.terminal, required this.at});
+  const FlightDepartureArrival({required this.iataCode, this.terminal, required this.at});
 
   factory FlightDepartureArrival.fromJson(Map<String, dynamic> json) {
     return FlightDepartureArrival(
@@ -353,9 +353,9 @@ class FlightDepartureArrival {
 }
 
 class FlightAircraft {
-  String code;
+  final String code;
 
-  FlightAircraft({required this.code});
+  const FlightAircraft({required this.code});
 
   factory FlightAircraft.fromJson(Map<String, dynamic> json) {
     return FlightAircraft(
@@ -371,9 +371,9 @@ class FlightAircraft {
 }
 
 class FlightOperating {
-  String carrierCode;
+  final String carrierCode;
 
-  FlightOperating({required this.carrierCode});
+  const FlightOperating({required this.carrierCode});
 
   factory FlightOperating.fromJson(Map<String, dynamic> json) {
     return FlightOperating(
@@ -389,13 +389,13 @@ class FlightOperating {
 }
 
 class FlightPrice {
-  String currency;
-  String total;
-  String base;
-  List<FlightFee> fees;
-  String? grandTotal;
+  final String currency;
+  final String total;
+  final String base;
+  final List<FlightFee> fees;
+  final String? grandTotal;
 
-  FlightPrice({
+  const FlightPrice({
     required this.currency,
     required this.total,
     required this.base,
@@ -428,10 +428,10 @@ class FlightPrice {
 }
 
 class FlightFee {
-  String amount;
-  String type;
+  final String amount;
+  final String type;
 
-  FlightFee({required this.amount, required this.type});
+  const FlightFee({required this.amount, required this.type});
 
   factory FlightFee.fromJson(Map<String, dynamic> json) {
     return FlightFee(
@@ -449,10 +449,10 @@ class FlightFee {
 }
 
 class FlightPricingOptions {
-  List<String> fareType;
-  bool includedCheckedBagsOnly;
+  final List<String> fareType;
+  final bool includedCheckedBagsOnly;
 
-  FlightPricingOptions({
+  const FlightPricingOptions({
     required this.fareType,
     required this.includedCheckedBagsOnly,
   });
@@ -473,13 +473,13 @@ class FlightPricingOptions {
 }
 
 class FlightTravelerPricing {
-  String travelerId;
-  String fareOption;
-  String travelerType;
-  FlightPrice price;
-  List<FlightFareDetailsBySegment> fareDetailsBySegment;
+  final String travelerId;
+  final String fareOption;
+  final String travelerType;
+  final FlightPrice price;
+  final List<FlightFareDetailsBySegment> fareDetailsBySegment;
 
-  FlightTravelerPricing({
+  const FlightTravelerPricing({
     required this.travelerId,
     required this.fareOption,
     required this.travelerType,
@@ -511,16 +511,16 @@ class FlightTravelerPricing {
 }
 
 class FlightFareDetailsBySegment {
-  String segmentId;
-  String cabin;
-  String fareBasis;
-  String brandedFare;
-  String brandedFareLabel;
-  String classType;
-  FlightIncludedCheckedBags includedCheckedBags;
-  List<FlightAmenity> amenities;
+  final String segmentId;
+  final String cabin;
+  final String fareBasis;
+  final String brandedFare;
+  final String brandedFareLabel;
+  final String classType;
+  final FlightIncludedCheckedBags includedCheckedBags;
+  final List<FlightAmenity> amenities;
 
-  FlightFareDetailsBySegment({
+  const FlightFareDetailsBySegment({
     required this.segmentId,
     required this.cabin,
     required this.fareBasis,
@@ -561,9 +561,9 @@ class FlightFareDetailsBySegment {
 }
 
 class FlightIncludedCheckedBags {
-  int quantity;
+  final int quantity;
 
-  FlightIncludedCheckedBags({required this.quantity});
+  const FlightIncludedCheckedBags({required this.quantity});
 
   factory FlightIncludedCheckedBags.fromJson(Map<String, dynamic> json) {
     return FlightIncludedCheckedBags(
@@ -579,12 +579,12 @@ class FlightIncludedCheckedBags {
 }
 
 class FlightAmenity {
-  String description;
-  bool isChargeable;
-  String amenityType;
-  FlightAmenityProvider amenityProvider;
+  final String description;
+  final bool isChargeable;
+  final String amenityType;
+  final FlightAmenityProvider amenityProvider;
 
-  FlightAmenity({
+  const FlightAmenity({
     required this.description,
     required this.isChargeable,
     required this.amenityType,
@@ -611,9 +611,9 @@ class FlightAmenity {
 }
 
 class FlightAmenityProvider {
-  String name;
+  final String name;
 
-  FlightAmenityProvider({required this.name});
+  const FlightAmenityProvider({required this.name});
 
   factory FlightAmenityProvider.fromJson(Map<String, dynamic> json) {
     return FlightAmenityProvider(
@@ -629,7 +629,6 @@ class FlightAmenityProvider {
 }
 
 class AirportInfo {
-
   final String type;
   final String iataCode;
   final String airportName;
@@ -639,7 +638,7 @@ class AirportInfo {
   final String lon;
   final String timeZoneOffset;
 
-  AirportInfo({
+  const AirportInfo({
     required this.type,
     required this.iataCode,
     required this.airportName,
@@ -670,7 +669,7 @@ class AirlineInfo {
   final String businessName;
   final String commonName;
 
-  AirlineInfo({
+  const AirlineInfo({
     required this.iataCode,
     required this.icaoCode,
     required this.businessName,

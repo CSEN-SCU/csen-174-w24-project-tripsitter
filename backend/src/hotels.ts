@@ -2,6 +2,8 @@ import { Request, Response } from "express";
 
 import amadeus from "./amadeusClient";
 
+var hotelData = require('./hotelData.json');
+
 export async function getHotels(req: Request, res: Response){
     const cityCode = req.query.cityCode;
     const checkInDate = req.query.checkInDate;
@@ -11,6 +13,7 @@ export async function getHotels(req: Request, res: Response){
       res.status(400).send('Missing required query parameters');
       return;
     }
+    res.send(hotelData); return;
     // Docs: https://developers.amadeus.com/self-service/category/hotel/api-doc/hotel-search
     let hotels = await amadeus.referenceData.locations.hotels.byCity.get({
       cityCode: cityCode,
@@ -23,7 +26,7 @@ export async function getHotels(req: Request, res: Response){
 
     for (let i = 0; i < hotelIds.length; i += k) {
         let h = hotelIds.slice(i, i + k);
-        console.log(h);
+        // console.log(h);
         let request = amadeus.shopping.hotelOffersSearch.get({
             hotelIds: h.join(','),
             checkInDate: checkInDate,
@@ -31,17 +34,21 @@ export async function getHotels(req: Request, res: Response){
             adults: adults,
         }).then((response: any) => {
             console.log('HotelOffersSearch Response:', response.data);
-            results.push(response.data);
+            results.push(...response.data);
         }).catch((error: any) => {
-            console.error('Error in hotelOffersSearch:', error);
+            console.error('Error in hotelOffersSearch:', error.description);
             console.error('Request parameters:', {
                 hotelIds: h.join(','),
-                checkInDate: "2024-03-01",
-                checkOutDate: "2024-03-02",
-                adults: 1,
+                checkInDate,
+                checkOutDate,
+                adults,
             });
         });
         promises.push(request);
+        if(promises.length >= 5) {
+            await Promise.all(promises);
+            promises = [];
+        }
     }
     await Promise.all(promises);
     res.send(results);
