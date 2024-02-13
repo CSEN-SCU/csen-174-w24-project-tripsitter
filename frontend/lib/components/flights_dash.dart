@@ -19,8 +19,6 @@ class FlightsDashBoard extends StatefulWidget {
 }
 
 class _FlightsDashBoardState extends State<FlightsDashBoard> {
-  String _selectedStops = 'Any number of stops';
-
   List<String> airlines = [
     'Select All',
     'Deselect All',
@@ -41,25 +39,38 @@ class _FlightsDashBoardState extends State<FlightsDashBoard> {
     'United'
   ];
 
+  String _selectedStops = 'Any number of stops';
   List<String> _selectedAirlines = [];
+  int numCarryOnBags = 0;
+  int numCheckedBags = 0;
   final GlobalKey _stopsButtonKey = GlobalKey();
   final GlobalKey _airlinesButtonKey = GlobalKey();
   final GlobalKey _bagsButtonKey = GlobalKey();
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(
-          title: Text('Select Flights'),
-          leading: IconButton(
-            icon: Icon(Icons.close),
-            onPressed: () {
-              Navigator.pushNamed(context, "/trip/1234");
-            },
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        Padding(
+          padding: EdgeInsets.all(16.0),
+          child: Row(
+            children: [
+              IconButton(
+                icon: Icon(Icons.close),
+                onPressed: () {
+                  Navigator.pushNamed(context, "/trip/1234");
+                },
+              ),
+              SizedBox(width: 8),
+              Text(
+                'Select Flights',
+                style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold),
+              ),
+            ],
           ),
         ),
-        body: Padding(
+        Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -90,8 +101,7 @@ class _FlightsDashBoardState extends State<FlightsDashBoard> {
                 children: <Widget>[
                   FilterButton(
                     text: 'Stops',
-                    globalKey:
-                        _stopsButtonKey, // Pass the key to the FilterButton
+                    globalKey: _stopsButtonKey,
                     onPressed: () =>
                         _showStopsPopup(_stopsButtonKey.currentContext),
                   ),
@@ -100,21 +110,19 @@ class _FlightsDashBoardState extends State<FlightsDashBoard> {
                     globalKey: _airlinesButtonKey,
                     onPressed: () =>
                         _showAirlinesPopup(_airlinesButtonKey.currentContext),
-                    //_showAirlinesPopup(context),
                   ),
                   FilterButton(
                     text: 'Bags',
                     globalKey: _bagsButtonKey,
-                    onPressed: () {
-                      // Handle Bags button press
-                    },
+                    onPressed: () =>
+                        _showBagsPopup(_bagsButtonKey.currentContext),
                   ),
                 ],
               ),
             ],
           ),
         ),
-      ),
+      ],
     );
   }
 
@@ -206,62 +214,82 @@ class _FlightsDashBoardState extends State<FlightsDashBoard> {
     });
   }
 
-  // void _showAirlinesPopup(BuildContext context) {
-  //   List<String> airlines = [
-  //     'Alaska',
-  //     'American',
-  //     'Breeze',
-  //     'China Eastern',
-  //     'Condor',
-  //     'Delta',
-  //     'Emirates',
-  //     'Frontier',
-  //     'JetBlue',
-  //     'Qatar Airways',
-  //     'Scandinavian Airlines',
-  //     'Southern Airways Express',
-  //     'Southwest',
-  //     'Spirit',
-  //     'United'
-  //   ];
-  //   showDialog(
-  //     context: context,
-  //     builder: (BuildContext context) {
-  //       return AlertDialog(
-  //         title: const Text('Select Airlines'),
-  //         content: SingleChildScrollView(
-  //           child: ListBody(
-  //             children: airlines.map((String airline) {
-  //               return CheckboxListTile(
-  //                 title: Text(airline),
-  //                 value: _selectedAirlines.contains(airline),
-  //                 onChanged: (bool? value) {
-  //                   setState(() {
-  //                     if (value ?? false) {
-  //                       _selectedAirlines.add(airline);
-  //                     } else {
-  //                       _selectedAirlines.remove(airline);
-  //                     }
-  //                   });
-  //                   // Do not pop the dialog on change.
-  //                 },
-  //               );
-  //             }).toList(),
-  //           ),
-  //         ),
-  //         actions: <Widget>[
-  //           TextButton(
-  //             child: const Text('Done'),
-  //             onPressed: () {
-  //               Navigator.of(context)
-  //                   .pop(); // Close the dialog when the user is done with the selection
-  //             },
-  //           ),
-  //         ],
-  //       );
-  //     },
-  //   );
-  // }
+  void _showBagsPopup(BuildContext? buttonContext) async {
+    if (buttonContext == null) return;
+
+    final RenderBox button = buttonContext.findRenderObject() as RenderBox;
+    final RenderBox overlay =
+        Overlay.of(buttonContext).context.findRenderObject() as RenderBox;
+    final RelativeRect position = RelativeRect.fromRect(
+      Rect.fromPoints(
+        button.localToGlobal(Offset.zero + Offset(0, button.size.height)),
+        button.localToGlobal(Offset.zero) +
+            Offset(button.size.width, button.size.height),
+      ),
+      Offset.zero & overlay.size,
+    );
+
+    await showMenu<void>(
+      context: context,
+      position: position,
+      items: [
+        PopupMenuItem<void>(
+          enabled: false, // Disable interaction with this item
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return Column(
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text('# Carry On Bags'),
+                      IconButton(
+                        icon: Icon(Icons.remove),
+                        onPressed: () {
+                          if (numCarryOnBags > 0) {
+                            setState(() => numCarryOnBags--);
+                          }
+                        },
+                      ),
+                      Text('$numCarryOnBags'),
+                      IconButton(
+                        icon: Icon(Icons.add),
+                        onPressed: () {
+                          setState(() => numCarryOnBags++);
+                        },
+                      ),
+                    ],
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text('# Checked Bags'),
+                      IconButton(
+                        icon: Icon(Icons.remove),
+                        onPressed: () {
+                          if (numCheckedBags > 0) {
+                            setState(() => numCheckedBags--);
+                          }
+                        },
+                      ),
+                      Text('$numCheckedBags'),
+                      IconButton(
+                        icon: Icon(Icons.add),
+                        onPressed: () {
+                          setState(() => numCheckedBags++);
+                        },
+                      ),
+                    ],
+                  ),
+                ],
+              );
+            },
+          ),
+        ),
+      ],
+      elevation: 8.0,
+    );
+  }
 }
 
 class FilterButton extends StatelessWidget {
