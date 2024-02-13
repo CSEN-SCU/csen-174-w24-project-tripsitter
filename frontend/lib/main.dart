@@ -5,6 +5,7 @@ import 'package:tripsitter/classes/flights.dart';
 import 'package:tripsitter/classes/profile.dart';
 import 'package:tripsitter/helpers/api.dart';
 import 'package:tripsitter/pages/create_trip.dart';
+import 'package:tripsitter/pages/profile_page.dart';
 import 'package:tripsitter/pages/view_trip.dart';
 import 'package:tripsitter/pages/home.dart';
 import 'package:tripsitter/pages/login.dart';
@@ -18,9 +19,9 @@ import 'package:tripsitter/no_animation_page_route.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   setPathUrlStrategy();
-  print("STRIPE KEY: ${const String.fromEnvironment('STRIPE_PK_TEST')}");
-  Stripe.publishableKey = const String.fromEnvironment('STRIPE_PK_TEST');
-  await Stripe.instance.applySettings();
+  // print("STRIPE KEY: ${const String.fromEnvironment('STRIPE_PK_TEST')}");
+  // Stripe.publishableKey = const String.fromEnvironment('STRIPE_PK_TEST');
+  // await Stripe.instance.applySettings();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
