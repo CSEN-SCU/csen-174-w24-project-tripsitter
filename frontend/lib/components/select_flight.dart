@@ -61,7 +61,7 @@ class _SelectFlightState extends State<SelectFlight> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
+    return ListView(
       children: [
         Text("Select ${currentDepth == 0 ? "Outbound" : "Return"} Flight"),
         Row(
