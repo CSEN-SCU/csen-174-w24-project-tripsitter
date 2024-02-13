@@ -7,6 +7,7 @@ import 'package:tripsitter/helpers/api.dart';
 import 'package:tripsitter/pages/create_trip.dart';
 import 'package:tripsitter/pages/profile_page.dart';
 import 'package:tripsitter/pages/view_trip.dart';
+import 'package:tripsitter/pages/view_flights.dart';
 import 'package:tripsitter/pages/home.dart';
 import 'package:tripsitter/pages/login.dart';
 import 'package:url_strategy/url_strategy.dart';
@@ -39,8 +40,16 @@ void main() async {
       return ViewTrip(params["id"][0]);
     },
   );
+  Handler viewFlights = Handler(
+    handlerFunc: (BuildContext? context, Map<String, dynamic> params) {
+      // if constraints.maxWidth > 600 { go to desktop }
+      return ViewFlights(params["id"][0]);
+    },
+  );
 
   router.define("/", handler: homeHandler, transitionType: TransitionType.none);
+  router.define("/trip/:id/flights",
+      handler: viewFlights, transitionType: TransitionType.none);
   router.define("/trip/:id",
       handler: viewTrip, transitionType: TransitionType.none);
   router.define("/new", handler: newTripHandler, transitionType: TransitionType.none);

@@ -88,12 +88,16 @@ class Trip {
     });
   }
 
+  static Stream<Trip> getTripById(String id) {
+    return FirebaseFirestore.instance.collection("trips").doc(id).snapshots().map((doc) => Trip.fromFirestore(doc));
+  }
+
   factory Trip.fromFirestore(DocumentSnapshot doc) {
     Map data = doc.data() as Map;
     Trip t = Trip(
       id: doc.id,
-      uids: data['uids'],
-      prices: data['prices'],
+      uids: (data['uids'] as List).map((item) => item as String).toList(),
+      prices: Map<String,double>.from(data['prices']),
       totalPrice: data['totalPrice'],
       name: data['name'],
       startDate: data['startDate'].toDate(),
@@ -106,10 +110,10 @@ class Trip {
       activities: [],
     );
 
-    t._flights = data['flights'].map((flight) => FlightGroup.fromJson(flight, t._save)).toList();
-    t._hotels = data['hotels'].map((hotel) => HotelGroup.fromJson(hotel, t._save)).toList();
-    t._rentalCars = data['rentalCars'].map((rentalCar) => RentalCarGroup.fromJson(rentalCar, t._save)).toList();
-    t._activities = data['activities'].map((activity) => ActivitySelection.fromJson(activity)).toList();
+    t._flights = (data['flights'] as List).map((flight) => FlightGroup.fromJson(flight, t._save)).toList();
+    t._hotels = (data['hotels'] as List).map((hotel) => HotelGroup.fromJson(hotel, t._save)).toList();
+    t._rentalCars = (data['rentalCars'] as List).map((rentalCar) => RentalCarGroup.fromJson(rentalCar, t._save)).toList();
+    t._activities = (data['activities'] as List).map((activity) => ActivitySelection.fromJson(activity)).toList();
 
     return t;
   }
@@ -214,7 +218,7 @@ class FlightGroup {
       members: json['members'],
       departureAirport: json['departureAirport'],
       arrivalAirport: json['arrivalAirport'],
-      options: json['options'].map((option) => FlightOffer.fromJson(option)).toList(),
+      options: (json['options'] as List).map((option) => FlightOffer.fromJson(option)).toList(),
       selected: json['selected'] != null ? FlightOffer.fromJson(json['selected']) : null,
     );
   }
@@ -291,7 +295,7 @@ class HotelGroup {
   factory HotelGroup.fromJson(Map<String, dynamic> json, Future<void> Function() save) {
     return HotelGroup(
       members: json['members'],
-      options: json['options'].map((option) => HotelOffer.fromJson(option)).toList(),
+      options: (json['options'] as List).map((option) => HotelOffer.fromJson(option)).toList(),
       selected: json['selected'] != null ? HotelOffer.fromJson(json['selected']) : null,
       save: save
     );
@@ -347,7 +351,7 @@ class RentalCarGroup {
   factory RentalCarGroup.fromJson(Map<String, dynamic> json, Future<void> Function() save) {
     return RentalCarGroup(
       members: json['members'],
-      options: json['options'].map((option) => RentalCarOffer.fromJson(option)).toList(),
+      options: (json['options'] as List).map((option) => RentalCarOffer.fromJson(option)).toList(),
       selected: json['selected'] != null ? RentalCarOffer.fromJson(json['selected']) : null,
       save: save
     );
