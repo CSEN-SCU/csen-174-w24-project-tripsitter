@@ -35,12 +35,9 @@ class _HomePageState extends State<HomePage> {
           children: [
             ElevatedButton(
               onPressed: () {
-                showDialog(
-                  context: context,
-                  builder:(context) => NewTrip()
-                );
+                Navigator.pushNamed(context, "/new");
               }, 
-              child: Text("New Trip popup!")
+              child: Text("New Trip")
             ),
             ElevatedButton(
               onPressed: () {

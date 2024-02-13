@@ -6,10 +6,11 @@ const fs = require('fs');
 const path = require('path');
 import 'dotenv/config';
 import { searchFlights, searchAirlines, searchAirports } from "./flights";
+import { getHotels } from "./hotels";
 const app = express();
 const cors = require('cors')({origin: true});
 app.use(cors);
-const port = 3000;
+// const port = 3000;
 
 app.get('/', (req, res) => {
   res.send('Hello World!');
@@ -48,9 +49,7 @@ app.get('/airline-logo', async (req, res) => {
   }
 });
 
+app.get('/search/hotels', getHotels);
 
-app.listen(port, () => {
-  console.log(`Example app listening on port ${port}`)
-})
 
 exports.api = functions.https.onRequest(app);
