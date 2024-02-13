@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:tripsitter/classes/ticketmaster.dart';
+import 'package:tripsitter/classes/trip.dart';
 import 'package:tripsitter/helpers/api.dart';
 
 class SelectEvents extends StatefulWidget {
-  const SelectEvents({super.key});
+  final Trip trip;
+
+  const SelectEvents(this.trip,{super.key});
 
   @override
   State<SelectEvents> createState() => _SelectEventsState();
@@ -11,6 +15,8 @@ class SelectEvents extends StatefulWidget {
 
 class _SelectEventsState extends State<SelectEvents> {
   List<TicketmasterEvent> events = [];
+
+  Trip get trip => widget.trip;
   
   @override
   void initState() {
@@ -20,12 +26,12 @@ class _SelectEventsState extends State<SelectEvents> {
   }
 
   Future<void> getEvents() async {
+    print("Getting events for trip ${trip.id}");
     List<TicketmasterEvent> call = await TripsitterApi.getEvents(TicketmasterQuery(
-      query: "Rockies",
-      lat: 37.7749,
-      long: -122.4194,
-      startDateTime: DateTime.now(),
-      endDateTime: DateTime.now().add(Duration(days: 30)),
+      lat: trip.destination.lat,
+      long: trip.destination.lon,
+      startDateTime: trip.startDate,
+      endDateTime: trip.endDate,
     ));
 
     setState(() {
@@ -35,14 +41,12 @@ class _SelectEventsState extends State<SelectEvents> {
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(
-      child: ListView(
-        children: events.map((event) => ListTile(
-          title: Text(event.name),
-          isThreeLine: true,
-          subtitle: Text('${event.venues.firstOrNull?.name}\n${event.startTime.localDate} ${event.startTime.localTime}'),
-        )).toList(),
-      ),
+    return ListView(
+      children: events.map((event) => ListTile(
+        title: Text(event.name),
+        isThreeLine: true,
+        subtitle: Text('${event.venues.firstOrNull?.name}\n${event.startTime.localDate} ${event.startTime.localTime}'),
+      )).toList(),
     );
   }
 }

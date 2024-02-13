@@ -2,6 +2,7 @@ import "dart:math";
 
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
+import "package:tripsitter/classes/trip.dart";
 import "package:tripsitter/components/select_events.dart";
 import "package:tripsitter/components/select_flight.dart";
 import "package:tripsitter/components/select_hotel.dart";
@@ -9,6 +10,7 @@ import "package:tripsitter/components/trip_center_console.dart";
 
 class TripConsoleDot extends StatefulWidget {
   final String type;
+  final Trip trip;
 
   final Map<String, XYPairSized> positions;
   final Map<String, AnimationController> iconAnimationControllers;
@@ -38,6 +40,7 @@ class TripConsoleDot extends StatefulWidget {
 
   TripConsoleDot(
     {
+      required this.trip,
       required this.type,
       required this.positions,
       required this.iconAnimationControllers,
@@ -69,7 +72,7 @@ class _TripConsoleDotState extends State<TripConsoleDot> {
       case PageType.RentalCar:
         return const Text("Rental cars");
       case PageType.Activities:
-        return const SelectEvents();
+        return SelectEvents(widget.trip);
       case PageType.Cities:
         return const Text("Change city");
     }

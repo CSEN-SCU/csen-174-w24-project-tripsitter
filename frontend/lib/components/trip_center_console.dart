@@ -2,11 +2,13 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:tripsitter/classes/trip.dart';
 import 'package:tripsitter/components/trip_console_dot.dart';
 
 class TripCenterConsole extends StatefulWidget {
+  final Trip trip;
   final double maxHeight, maxWidth;
-  const TripCenterConsole(this.maxWidth, this.maxHeight, {super.key});
+  const TripCenterConsole(this.trip, this.maxWidth, this.maxHeight, {super.key});
 
   @override
   // ignore: library_private_types_in_public_api
@@ -150,6 +152,7 @@ class _MyStatefulWidgetState extends State<TripCenterConsole>
     return Stack(
       children: [
         TripConsoleDot(
+            trip: widget.trip,
             type: PageType.Hotel,
             positions: positions,
             iconAnimationControllers: _iconAnimationControllers,
@@ -185,6 +188,7 @@ class _MyStatefulWidgetState extends State<TripCenterConsole>
         ),
         // Rental Car
         TripConsoleDot(
+            trip: widget.trip,
           type: PageType.RentalCar, 
           positions: positions, 
           iconAnimationControllers: _iconAnimationControllers, 
@@ -220,6 +224,7 @@ class _MyStatefulWidgetState extends State<TripCenterConsole>
         ),
         // Flights
         TripConsoleDot(
+            trip: widget.trip,
           type: PageType.Flights, 
           positions: positions, 
           iconAnimationControllers: _iconAnimationControllers, 
@@ -254,6 +259,7 @@ class _MyStatefulWidgetState extends State<TripCenterConsole>
         ),
         // Activities
         TripConsoleDot(
+          trip: widget.trip,
           type: PageType.Activities, 
           positions: positions, 
           iconAnimationControllers: _iconAnimationControllers, 
