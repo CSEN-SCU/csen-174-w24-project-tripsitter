@@ -1,3 +1,6 @@
 .DS_Store
 .firebase/
 firebase-debug.log
+frontend/config.json
+config.json
+*.log
