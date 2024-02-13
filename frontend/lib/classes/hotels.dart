@@ -1,23 +1,34 @@
 class HotelQuery {
-  String cityCode;
+  String? cityCode;
+  double? latitude;
+  double? longitude;
   String checkInDate;
   String checkOutDate;
   int adults;
 
   HotelQuery({
-    required this.cityCode,
+    this.cityCode,
+    this.latitude,
+    this.longitude,
     required this.checkInDate,
     required this.checkOutDate,
     required this.adults,
   });
 
   Map<String, dynamic> toJson() {
-    return {
-      'cityCode': cityCode,
+    Map<String,dynamic> map = {
       'checkInDate': checkInDate,
       'checkOutDate': checkOutDate,
       'adults': adults.toString(),
     };
+    if (cityCode != null) {
+      map['cityCode'] = cityCode;
+    }
+    if (cityCode == null && latitude != null && latitude != null) {
+      map['latitude'] = latitude.toString();
+      map['longitude'] = longitude.toString();
+    }
+    return map;
   }
 }
 

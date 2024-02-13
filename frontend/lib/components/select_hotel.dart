@@ -16,7 +16,9 @@ class _SelectHotelState extends State<SelectHotel> {
   List<HotelOption> hotels = [];
 
   HotelQuery query = HotelQuery(
-    cityCode: 'SFO',
+    // cityCode: 'SFO',
+    latitude: 40.0150,
+    longitude: -105.2705,
     checkInDate: '2024-03-03',
     checkOutDate: '2024-03-04',
     adults: 1,
