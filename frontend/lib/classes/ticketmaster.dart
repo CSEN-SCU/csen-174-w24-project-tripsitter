@@ -416,8 +416,8 @@ class TicketmasterAttraction {
   final List<TicketmasterImage> images;
   final TicketmasterLinks? externalLinks;
   final String locale;
-  final String name;
-  final String url;
+  final String? name;
+  final String? url;
 
   TicketmasterAttraction({
     required this.classifications,
@@ -425,8 +425,8 @@ class TicketmasterAttraction {
     required this.images,
     this.externalLinks,
     required this.locale,
-    required this.name,
-    required this.url,
+    this.name,
+    this.url,
   });
 
   factory TicketmasterAttraction.fromJson(Map<String, dynamic> json) {
