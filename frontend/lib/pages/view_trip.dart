@@ -20,7 +20,7 @@ class ViewTrip extends StatelessWidget {
       return const LoginPage();
     }
     return Scaffold(
-      appBar: TripSitterNavbar(),
+      appBar: const TripSitterNavbar(),
       body: ConstrainedBox(
         constraints: const BoxConstraints.expand(),
         child: Container(
