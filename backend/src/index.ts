@@ -2,6 +2,7 @@ import * as functions from "firebase-functions";
 
 import * as express from 'express';
 import 'dotenv/config';
+import { searchEvents } from "./ticketmaster";
 import { searchFlights, searchAirlines, getAirlineLogo } from "./flights";
 import { getHotels } from "./hotels";
 import { searchAirports } from "./autofill";
@@ -18,6 +19,7 @@ app.get('/search/airlines', searchAirlines);
 app.get('/search/flights', searchFlights);
 app.get('/search/hotels', getHotels);
 
+app.get('/search/events', searchEvents);
 app.get('/airline-logo', getAirlineLogo);
 
 

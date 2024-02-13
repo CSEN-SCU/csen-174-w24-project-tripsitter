@@ -1,11 +1,10 @@
-
-
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:tripsitter/classes/flights.dart';
 
 import 'package:http/http.dart' as http;
+import 'package:tripsitter/classes/ticketmaster.dart';
 import 'package:tripsitter/classes/hotels.dart';
 
 class TripsitterApi {
@@ -16,6 +15,7 @@ class TripsitterApi {
   static const String searchAirportsUrl = '$baseApiUrl/search/airports';
   static const String searchHotelsUrl = '$baseApiUrl/search/hotels';
   static const String airlineLogoUrl = "$baseApiUrl/airline-logo";
+  static const String eventsSearchUrl = "$baseApiUrl/search/events";
 
   static Image getAirlineImage(String iata) {
     return Image.network('http://$baseUrl$airlineLogoUrl?iata=$iata', width: 50, height: 50);
@@ -54,6 +54,19 @@ class TripsitterApi {
       return FlightItineraryRecursive.fromOffersList(offers);
     } else {
       throw Exception('Failed to load flights');
+    }
+  }
+
+  static Future<List<TicketmasterEvent>> getEvents(TicketmasterQuery query) async {
+    Map<String, dynamic> json = query.toJson();
+    Uri uri = Uri.http(baseUrl, eventsSearchUrl, json);
+    http.Response response = await http.get(uri);
+    if (response.statusCode == 200) {
+      var data = jsonDecode(response.body);
+      List<TicketmasterEvent> events = data['events']?.map<TicketmasterEvent>((json) => TicketmasterEvent.fromJson(json)).toList() ?? [];
+      return events;
+    } else {
+      throw Exception('Failed to load events');
     }
   }
 
