@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:tripsitter/classes/city.dart';
 import 'package:tripsitter/classes/flights.dart';
 import 'package:tripsitter/classes/hotels.dart';
+import 'package:tripsitter/classes/ticketmaster.dart';
 
 class Trip {
   final String _id;
@@ -17,7 +18,7 @@ class Trip {
   List<FlightGroup> _flights;
   List<HotelGroup> _hotels;
   List<RentalCarGroup> _rentalCars;
-  List<ActivitySelection> _activities;
+  List<TicketmasterEvent> _activities;
 
   Trip({
     required String id,
@@ -32,7 +33,7 @@ class Trip {
     required List<FlightGroup> flights,
     required List<HotelGroup> hotels,
     required List<RentalCarGroup> rentalCars,
-    required List<ActivitySelection> activities,
+    required List<TicketmasterEvent> activities,
   }) : _id = id,
        _uids = uids,
        _prices = prices,
@@ -59,7 +60,7 @@ class Trip {
   List<FlightGroup> get flights => _flights;
   List<HotelGroup> get hotels => _hotels;
   List<RentalCarGroup> get rentalCars => _rentalCars;
-  List<ActivitySelection> get activities => _activities;
+  List<TicketmasterEvent> get activities => _activities;
 
   Future<void> save() async {
     await _save();
@@ -107,7 +108,7 @@ class Trip {
     t._flights = (data['flights'] as List).map((flight) => FlightGroup.fromJson(flight, t._save)).toList();
     t._hotels = (data['hotels'] as List).map((hotel) => HotelGroup.fromJson(hotel, t._save)).toList();
     t._rentalCars = (data['rentalCars'] as List).map((rentalCar) => RentalCarGroup.fromJson(rentalCar, t._save)).toList();
-    t._activities = (data['activities'] as List).map((activity) => ActivitySelection.fromJson(activity)).toList();
+    t._activities = (data['activities'] as List).map((activity) => TicketmasterEvent.fromJson(activity)).toList();
 
     return t;
   }
@@ -142,12 +143,12 @@ class Trip {
     await _save();
   }
 
-  Future<void> addActivity(ActivitySelection activity) async {
+  Future<void> addActivity(TicketmasterEvent activity) async {
     _activities.add(activity);
     await _save();
   }
 
-  Future<void> removeActivity(ActivitySelection activity) async {
+  Future<void> removeActivity(TicketmasterEvent activity) async {
     _activities.remove(activity);
     await _save();
   }
@@ -391,39 +392,4 @@ class RentalCarOffer {
   Map<String, dynamic> toJson() {
     return {};
   }
-}
-
-class ActivitySelection {
-  double _price;
-  String _id;
-  String _name;
-
-  ActivitySelection({
-    required price,
-    required id,
-    required name,
-  }) : 
-    _price = price,
-    _id = id,
-    _name = name;
-
-  factory ActivitySelection.fromJson(Map<String, dynamic> json) {
-    return ActivitySelection(
-      price: json['price'],
-      id: json['id'],
-      name: json['name'],
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      "price": _price,
-      "id": _id,
-      "name": _name,
-    };
-  }
-
-  double get price => _price;
-  String get id => _id;
-  String get name => _name;
 }

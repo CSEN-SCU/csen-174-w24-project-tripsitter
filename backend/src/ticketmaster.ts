@@ -9,10 +9,11 @@ export async function searchEvents(req: Request, res: Response) {
     const geocode = geohash.encode(lat, long);
     console.log(geocode);
     console.log(startDateTime, endDateTime);
-    let url = `https://app.ticketmaster.com/discovery/v2/events.json?apikey=${TICKETMASTER_KEY}&geoPoint=${geocode}&startDateTime=${startDateTime}&endDateTime=${endDateTime}`;
+    let url = `https://app.ticketmaster.com/discovery/v2/events.json?apikey=${TICKETMASTER_KEY}&geoPoint=${geocode}&startDateTime=${startDateTime}&endDateTime=${endDateTime}&source=ticketmaster&size=100&sort=distance,date,asc`;
     if(query) {
         url += `&keyword=${query}`;
     }
+    console.log(url);
     const response = await axios.get(url);
     // console.log(Object.keys(response.data._embedded.events[0]));
     console.log(response.data);
@@ -35,7 +36,7 @@ export async function searchEvents(req: Request, res: Response) {
             name: e.name,
             prices: e.priceRanges,
             promoters: e.promoters,
-            seatmap: e.seatmap?.staticUrl || null,
+            seatmapUrl: e.seatmap?.staticUrl || null,
             sales: e.sales,
             type: e.type,
             distanceUnits: e.units,
@@ -57,8 +58,8 @@ export async function searchEvents(req: Request, res: Response) {
                     timezone: v.timezone,
                     postalCode: v.postalCode,
                     images: v.images,
-                    latitude: v.location.latitude,
-                    longitude: v.location.longitude,
+                    latitude: v.location?.latitude,
+                    longitude: v.location?.longitude,
                     url: v.url,
                 }
             }),
