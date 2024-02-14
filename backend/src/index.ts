@@ -6,6 +6,7 @@ import { searchEvents } from "./ticketmaster";
 import { searchFlights, searchAirlines, getAirlineLogo } from "./flights";
 import { getHotels } from "./hotels";
 import { searchAirports } from "./autofill";
+import { addUserToTrip, removeUserFromTrip } from "./firebase";
 const app = express();
 const cors = require('cors')({origin: true});
 app.use(cors);
@@ -18,9 +19,11 @@ app.get('/search/airports', searchAirports);
 app.get('/search/airlines', searchAirlines);
 app.get('/search/flights', searchFlights);
 app.get('/search/hotels', getHotels);
-
 app.get('/search/events', searchEvents);
+
 app.get('/airline-logo', getAirlineLogo);
 
+app.post('/trip/user', addUserToTrip);
+app.delete('/trip/user', removeUserFromTrip);
 
 exports.api = functions.https.onRequest(app);
