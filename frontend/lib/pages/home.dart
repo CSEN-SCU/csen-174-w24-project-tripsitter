@@ -41,7 +41,7 @@ class _HomePageState extends State<HomePage> {
             ),
             ElevatedButton(
               onPressed: () {
-                Navigator.pushNamed(context, "/trip/1234");
+                Navigator.pushNamed(context, "/trip/1gQxlrxbMuxjYqarAGHp");
               }, 
               child: Text("View existing trip")
             ),
