@@ -8,6 +8,7 @@ import 'package:hexcolor/hexcolor.dart';
 import 'package:provider/provider.dart';
 import 'package:tripsitter/components/navbar.dart';
 import 'package:tripsitter/components/trip_dash.dart';
+import 'package:tripsitter/components/trip_side_column.dart';
 import 'package:tripsitter/pages/login.dart';
 
 class ViewTrip extends StatelessWidget {
@@ -40,14 +41,12 @@ class ViewTrip extends StatelessWidget {
                 children: [
                   Container(
                     child: TripDashBoard(),
-                    width: constraints.maxWidth * 0.8,
+                    width: constraints.maxWidth * 0.7,
                   ),
                   Container(
                     color: Color.fromARGB(255, 127, 166, 198),
-                    width: constraints.maxWidth * 0.2,
-                    child: const Center(
-                      child: Text('Right Side'),
-                    ),
+                    width: constraints.maxWidth * 0.3,
+                    child: TripSideColumn()
                   ),
                 ],
               );
