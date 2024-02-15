@@ -6,6 +6,7 @@ import 'package:tripsitter/classes/profile.dart';
 import 'package:tripsitter/helpers/api.dart';
 import 'package:tripsitter/pages/create_trip.dart';
 import 'package:tripsitter/pages/profile_page.dart';
+import 'package:tripsitter/pages/update_Profile.dart';
 import 'package:tripsitter/pages/view_trip.dart';
 import 'package:tripsitter/pages/view_flights.dart';
 import 'package:tripsitter/pages/home.dart';
@@ -16,6 +17,7 @@ import 'package:fluro/fluro.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:tripsitter/no_animation_page_route.dart';
+import 'package:tripsitter/pages/create_Profile.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -34,6 +36,10 @@ void main() async {
       handlerFunc: (BuildContext? context, Map<String, dynamic> params) {
     return const CreateTrip();
   });
+   Handler updateProfileHandler = Handler(
+      handlerFunc: (BuildContext? context, Map<String, dynamic> params) {
+    return UpdateProfile();
+  });
   Handler viewTrip = Handler(
     handlerFunc: (BuildContext? context, Map<String, dynamic> params) {
       // if constraints.maxWidth > 600 { go to desktop }
@@ -47,6 +53,7 @@ void main() async {
     },
   );
 
+  router.define("/updateProfile", handler: updateProfileHandler);
   router.define("/", handler: homeHandler, transitionType: TransitionType.none);
   router.define("/trip/:id/flights",
       handler: viewFlights, transitionType: TransitionType.none);
@@ -90,7 +97,7 @@ class MyApp extends StatelessWidget {
           return MultiProvider(
             providers: [
               StreamProvider<UserProfile?>.value(
-                initialData: null,
+                initialData: UserProfile(id: "", name: "", email: "", hometown: "", numberTrips: 0, joinDate: DateTime.now()),
                 value: UserProfile.getProfile(user.uid),
               )
             ],

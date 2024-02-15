@@ -3,36 +3,33 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:provider/provider.dart';
 import 'package:tripsitter/classes/profile.dart';
+import 'package:tripsitter/classes/trip.dart';
 import 'package:tripsitter/components/new_trip_popup.dart';
 import 'package:tripsitter/components/payment.dart';
 import 'package:tripsitter/pages/login.dart';
 //TODO: pull and populate user info. have fallbacks for photo
 //pull the trip info from the DB and dynamically build the trip list
 //make the page not look like shit
-class tripInfo extends StatelessWidget{
-    final String price;
-    final String name;
-    final String city;
-    final String country;
-    final String start;
-    final String end;
+class TripInfo extends StatelessWidget{
+    final Trip trip;
     final Color col;
-    final VoidCallback onPressed;
 
-    tripInfo({
-      required this.price,
-      required this.name,
-      required this.city,
-      required this.country,
-      required this.start,
-      required this.end,
+    TripInfo({
+      required this.trip,
       required this.col,
-      required this.onPressed
     });
     @override
     Widget build(BuildContext context){
+      String name=trip.name;
+      String city=trip.destination.name;
+      String country=trip.destination.country;
+      String start=trip.startDate.toString();
+      String end=trip.endDate.toString();
+      String price=trip.totalPrice.toString();
       return ElevatedButton(
-        onPressed: onPressed,
+        onPressed: () {
+          Navigator.pushNamed(context, "/trip/${trip.id}");
+        },
         style: ElevatedButton.styleFrom(
           backgroundColor: col,
           textStyle: TextStyle(color: Colors.black),
@@ -84,98 +81,125 @@ class ProfilePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     UserProfile? profile = Provider.of<UserProfile?>(context);
-    return Scaffold(
-      appBar: AppBar(
-        //contains the logo and trip sitter name
-        title: Text('This Is the Profile Page'),
-      ),
-      //contains two columns to contain the user info in one and the trip info in the other
+    return MultiProvider(
+      providers: [
+        StreamProvider.value(value: Trip.getTripsByProfile(profile!.getId()), initialData: List<Trip>.empty(),)
+      ],
+      child: Scaffold(
+        appBar: AppBar(
+          //contains the logo and trip sitter name
+          title: Text('This Is the Profile Page'),
+        ),
+        //contains two columns to contain the user info in one and the trip info in the other
+        
+        body: Center(
+          child: Row(
+            children: [
+              Container(
+                width: MediaQuery.of(context).size.width*.55 ,
       
-      body: Center(
-        child: Row(
-          children: [
-            Container(
-              width: MediaQuery.of(context).size.width*.55 ,
-
-              child: 
-              
-                //profile info
-                Column(
-                  children: [
-                    Row(
-                      //profile part
-                      children: [
-                        Container(
-                         //width: MediaQuery.of(context).size.width*.45 ,
-
-                            child: Column(
-                              //the icon and change button
-                              children: [
-                                Icon(Icons.account_circle_rounded),
-                                Text('change')
-                              ],
-                            ),
-                          
-                        ),
-                        Container(
-                          //width: MediaQuery.of(context).size.width*.55 ,
-                          child: Column(
-                              children: [
-                                Text(profile!.getName()),
-                                Text("Tripping since "+profile!.getDate().toString()),
-                                Text("Number of trips:" + profile.getNumberTrips().toString()),
-                                
-                                
-                              ],
-                              
+                child: 
+                
+                  //profile info
+                  Column(
+                    children: [
+                      Row(
+                        //profile part
+                        children: [
+                          Container(
+                           //width: MediaQuery.of(context).size.width*.45 ,
+      
+                              child: Column(
+                                //the icon and change button
+                                children: [
+                                  Icon(Icons.account_circle_rounded),
+                                  ElevatedButton(onPressed: (){
+                                     Navigator.pushNamed(context, "/updateProfile");
+                                  }, child: Text("Edit Profile"))
+                                ],
+                              ),
+                            
                           ),
-                        )
+                          Container(
+                            //width: MediaQuery.of(context).size.width*.55 ,
+                            child: Column(
+                                children: [
+                                  Text(profile!.getName()),
+                                  Text("Tripping since "+profile!.getDate().toString()),
+                                  Text("Number of trips:" + profile.getNumberTrips().toString()),
+                                  
+                                  
+                                ],
+                                
+                            ),
+                          )
+                        ],
+                      ),
+                      ElevatedButton(onPressed: (){
+                         Navigator.pushNamed(context, "/new");
+                      }, child: Text("Create New Trip"))
+                      //button and possible picture/video
+                    ],
+                  
+                )
+                  ),
+                  //the trip info
+                  Container(
+                     width: MediaQuery.of(context).size.width*.45 ,
+                    child:
+                  Center(
+                    child: Column(
+                      children: [
+                        Text("My Trips"),
+                        Center(
+                          child: Row(
+                            children: [
+                              Text("Upcoming"),
+                              Icon(Icons.compare_arrows),
+                              Text("Past")
+                            ],
+                          ),
+                        ),
+                      // StreamBuilder<List<Trip>>(
+                      // stream: Trip.getTripsByProfile(profile.getId()),
+                      // builder: (BuildContext context, AsyncSnapshot<List<Trip>> snapshot) {
+                      //   if (snapshot.hasData) {
+                      //     return ListView.builder(
+                      //       itemCount: snapshot.data!.length,
+                      //       itemBuilder: (BuildContext context, int index) {
+                      //         // Generate a widget for each item in the list
+                      //         Trip itemData = snapshot.data![index];
+                      //         return tripInfo(price: '\$'+itemData.totalPrice.toString(), name: itemData.name, city: itemData.destination.name, country: itemData.destination.country, start: itemData.startDate.toString(), end: itemData.endDate.toString(), col: Color.fromARGB(255, 148, 148, 148), onPressed:(){ Navigator.pushNamed(context, "/trips/${itemData.id}");});
+                      //       },
+                      //     );
+                      //   } else if (snapshot.hasError) {
+                      //     return Text('Error: ${snapshot.error}');
+                      //   } else {
+                      //     return CircularProgressIndicator(); // Placeholder for loading indicator
+                      //   }
+                      // },
+                      Builder(
+                        builder: (context) {
+                          List<Trip> trips = Provider.of<List<Trip>>(context);
+                          return Expanded(
+                            child: ListView.builder(
+                              itemCount: trips.length,
+                              itemBuilder: (BuildContext context, int index) {
+                                // Generate a widget for each item in the list
+                                return TripInfo(trip: trips[index], col: Color.fromARGB(255, 148, 148, 148));
+                            }
+                                                ),
+                          );
+                        }
+                      ),
                       ],
                     ),
-                    Text("this is where a button will go")
-                    //button and possible picture/video
-                  ],
+                  )
+                  )
                 
-              )
-                ),
-                //the trip info
-                Container(
-                   width: MediaQuery.of(context).size.width*.45 ,
-                  child:
-                Center(
-                  child: Column(
-                    children: [
-                      Text("My Trips"),
-                      Center(
-                        child: Row(
-                          children: [
-                            Text("Upcoming"),
-                            Icon(Icons.compare_arrows),
-                            Text("Past")
-                          ],
-                        ),
-                      ),
-                     
-                    tripInfo(price: '\$420', name: "Uma's Unremarkable Jaunt", city: 'San Francisco', country: 'USA', start: '01-07', end: '01-13', col: Color.fromARGB(255, 214, 214, 214), onPressed: (){
-                      print('Uma');
-                    }),
-                    tripInfo(price: '\$69', name: "Jordan's Justified Journey", city: 'Seattle', country: 'USA', start: '05-07', end: '06-13', col: Color.fromARGB(255, 148, 148, 148), onPressed: (){
-                      print('Jordan');
-                    }),
-                    tripInfo(price: '\$10000', name: "Cameron's Costly Campagin", city: 'Fort Lauderdale', country: 'USA', start: '01-07', end: '01-6', col: Color.fromARGB(255, 214, 214, 214), onPressed: (){
-                      print('Cameron');
-                    }),
-                    tripInfo(price: '\$380', name: "Daryl's Daring Drive", city: 'San Jose', country: 'USA', start: '08-07', end: '08-08', col: Color.fromARGB(255, 148, 148, 148), onPressed: (){
-                      print('Daryl');
-                    }),
-                    
-                    ],
-                  ),
-                )
-                )
               
-            
-          ],
+            ],
+          ),
         ),
       ),
     );

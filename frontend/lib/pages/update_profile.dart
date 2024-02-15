@@ -10,15 +10,14 @@ import 'package:tripsitter/components/payment.dart';
 import 'package:tripsitter/pages/login.dart';
 import 'package:tripsitter/pages/profile_page.dart';
 
-class CreateProfile extends StatefulWidget {
-   CreateProfile({super.key});
+class UpdateProfile extends StatefulWidget {
+   UpdateProfile({super.key});
 
   @override
-  State<CreateProfile> createState() => _UpdateProfileState();
+  State<UpdateProfile> createState() => _UpdateProfileState();
 }
 
-
-class _UpdateProfileState extends State<CreateProfile> {
+class _UpdateProfileState extends State<UpdateProfile> {
   TextEditingController nameController = TextEditingController();
   TextEditingController emailController = TextEditingController();
   TextEditingController hometownController = TextEditingController();
@@ -30,27 +29,24 @@ class _UpdateProfileState extends State<CreateProfile> {
     getProfile();
   }
 
-  void getProfile()  {
+  Future<void> getProfile() async {
     User? user = FirebaseAuth.instance.currentUser;
-    nameController = TextEditingController(text: user?.displayName);
-    emailController = TextEditingController(text: user?.email);
-    hometownController = TextEditingController(text: "Hometown");
-    
+    UserProfile userProfile = UserProfile.fromFirestore(await FirebaseFirestore.instance
+      .collection('users')
+      .doc(user!.uid).get());
+      setState(() {
+ nameController = TextEditingController(text: userProfile.getName());
+    emailController = TextEditingController(text: userProfile.getEmail());
+    hometownController = TextEditingController(text: userProfile.getHometown());
+      });
+   
   }
+
 //text field widgit
-//text editing controller=attribute
-//on changed to check for update
   @override
   Widget build(BuildContext context) {
     User? user = Provider.of<User?>(context);//built in firebase stuff to get ID is who is currently using it 
     UserProfile? profile = Provider.of<UserProfile?>(context);//user info + stuff we want to store  what we made put the info here what we store
-    UserProfile newProfile = UserProfile(
-    id: user?.uid, 
-    name: user?.displayName!, 
-    email: user?.email!, 
-    hometown: "hometown", 
-    numberTrips: 0, 
-    joinDate: DateTime.now());
     return Scaffold(
       appBar: AppBar(
         
@@ -64,7 +60,7 @@ class _UpdateProfileState extends State<CreateProfile> {
             Text("Please Enter the Following Information:"),
             Text("Name"),
             TextField(
-              controller:nameController,
+              controller: nameController,
                onChanged:(value) {
                 profile!.updateName(value);
               },
@@ -86,8 +82,7 @@ class _UpdateProfileState extends State<CreateProfile> {
             ),
             Text("Upload Profile Picture"),
             ElevatedButton(onPressed: () async {
-                await newProfile.save();
-                print(profile?.getName());
+                await profile?.save();
                 Navigator.pushNamed(context, "/");
               
             }, child: Text("DONE"))
@@ -96,6 +91,4 @@ class _UpdateProfileState extends State<CreateProfile> {
     )
     );
   }
-
-  
 }

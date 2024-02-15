@@ -29,7 +29,8 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     UserProfile? profile = Provider.of<UserProfile?>(context);
     if(profile == null){
-      return createProfile();
+      print("no profile");
+      return CreateProfile();
     }
     else{
       return ProfilePage();
