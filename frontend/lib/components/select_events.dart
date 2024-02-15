@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:tripsitter/classes/profile.dart';
 import 'package:tripsitter/classes/ticketmaster.dart';
 import 'package:tripsitter/classes/trip.dart';
 import 'package:tripsitter/helpers/api.dart';
@@ -9,8 +10,9 @@ import 'package:url_launcher/url_launcher.dart';
 
 class SelectEvents extends StatefulWidget {
   final Trip trip;
+  final List<UserProfile> profiles;
 
-  const SelectEvents(this.trip,{super.key});
+  const SelectEvents(this.trip, this.profiles, {super.key});
 
   @override
   State<SelectEvents> createState() => _SelectEventsState();
@@ -54,72 +56,75 @@ class _SelectEventsState extends State<SelectEvents> {
               child: ListView(
                 children: [
                   Text("Choose Activites", style: Theme.of(context).textTheme.displayMedium?.copyWith(decoration: TextDecoration.underline, fontWeight: FontWeight.bold)),
-                  Table(
-                    columnWidths: const <int, TableColumnWidth>{
-                      0: FixedColumnWidth(75),
-                      1: FlexColumnWidth(1),
-                      2: FlexColumnWidth(1),
-                      3: FixedColumnWidth(50),
-                      4: FixedColumnWidth(150),
-                    },
-                    defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-                    children: events.map((event) => TableRow(
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: TableCell(
-                            child: event.images.isEmpty ? Icon(Icons.star) : Image.network(event.images.first.url, height: 50),
+                  if(events.isNotEmpty)
+                    Table(
+                      columnWidths: const <int, TableColumnWidth>{
+                        0: FixedColumnWidth(75),
+                        1: FlexColumnWidth(1),
+                        2: FlexColumnWidth(1),
+                        3: FixedColumnWidth(50),
+                        4: FixedColumnWidth(150),
+                      },
+                      defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+                      children: events.map((event) => TableRow(
+                        children: [
+                          TableCell(
+                            child: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: event.images.isEmpty ? Icon(Icons.star) : Image.network(event.images.first.url, height: 50),
+                            )
                           ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: TableCell(
-                            child: Text(event.prices.isEmpty ? event.name :"${event.name}\nFrom \$${event.prices.map((p) => p.min).reduce(min)}/person")
+                          TableCell(
+                            child: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Text(event.prices.isEmpty ? event.name :"${event.name}\nFrom \$${event.prices.map((p) => p.min).reduce(min)}/person"),
+                            )
                           ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: TableCell(
-                            child: Text('${event.venues.firstOrNull?.name}\nStarts ${event.startTime.localDate} ${event.startTime.localTime}')
+                          TableCell(
+                            child: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Text('${event.venues.firstOrNull?.name}\nStarts ${event.startTime.localDate} ${event.startTime.localTime}'),
+                            )
                           ),
-                        ),
-                        TableCell(
-                          child: IconButton(
-                            icon: Icon(Icons.info),
-                            onPressed: () {
-                              showDialog(
-                                context: context,
-                                builder: (BuildContext context) {
-                                  return EventPopup(event);
-                                },
-                              );
-                            }
-                          )
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: TableCell(
-                            child: Builder(
-                              builder: (context) {
-                                bool selected =  trip.activities.map((e) => e.id).contains(event.id);
-                                return ElevatedButton(
-                                  onPressed: selected ? null : () async {
-                                    
-                                    await trip.addActivity(event);
-                                    setState(() {});
-                                  },
-                                  style: ButtonStyle(
-                                    backgroundColor: MaterialStateProperty.all<Color>(selected ? Color.fromARGB(255, 127, 166, 198) : Colors.grey[300]!)
-                                  ),
-                                  child: Text('Select${selected ? 'ed' : ''}', style: TextStyle(color: Colors.black)),
-                                );
-                              }
+                          TableCell(
+                            child: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: IconButton(
+                                icon: Icon(Icons.info),
+                                onPressed: () {
+                                  showDialog(
+                                    context: context,
+                                    builder: (BuildContext context) {
+                                      return EventPopup(event);
+                                    },
+                                  );
+                                }
+                              ),
+                            )
+                          ),
+                          TableCell(
+                            child: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Builder(
+                                builder: (context) {
+                                  bool selected =  trip.activities.map((e) => e.event.id).contains(event.id);
+                                  return ElevatedButton(
+                                    onPressed: selected ? null : () async {
+                                      await trip.addActivity(event, widget.profiles.map((e) => e.id).toList());
+                                      setState(() {});
+                                    },
+                                    style: ButtonStyle(
+                                      backgroundColor: MaterialStateProperty.all<Color>(selected ? Color.fromARGB(255, 127, 166, 198) : Colors.grey[300]!)
+                                    ),
+                                    child: Text('Select${selected ? 'ed' : ''}', style: TextStyle(color: Colors.black)),
+                                  );
+                                }
+                              ),
                             ),
                           ),
-                        ),
-                      ]
-                    )).toList()
-                  ),
+                        ]
+                      )).toList()
+                    ),
                 ],
               )
             ),
@@ -132,22 +137,111 @@ class _SelectEventsState extends State<SelectEvents> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text('Itinerary', style: Theme.of(context).textTheme.displayMedium?.copyWith(decoration: TextDecoration.underline, fontWeight: FontWeight.bold)),
-                    Expanded(
-                      child: ListView(
-                        children: trip.activities.map((event) => ListTile(
-                          title: Text(event.name),
-                          isThreeLine: true,
-                          subtitle: Text('${event.venues.firstOrNull?.name}\n${event.startTime.localDate} ${event.startTime.localTime}'),
-                          trailing: ElevatedButton(
-                            onPressed: () async{
-                              await trip.removeActivity(event);
-                              setState(() {});
-                            },
-                            child: const Text('Remove'),
-                          ),
-                        )).toList(),
-                      ),
-                    ),
+                    ...trip.activities.map((activity) => Builder(
+                      builder: (context) {
+                        bool remove = widget.profiles.every((profile) => activity.participants.contains(profile.id));
+                        return Card(
+                          child: ListTile(
+                              title: Text(activity.event.name),
+                              isThreeLine: true,
+                              visualDensity: VisualDensity(vertical: 4), // to expand
+                              subtitle: Text('${activity.event.venues.firstOrNull?.name}\n${activity.event.startTime.localDate} ${activity.event.startTime.localTime}'),
+                              trailing: Column(
+                                children: [
+                                  ElevatedButton(
+                                    onPressed: () async {
+                                      await trip.removeActivity(activity);
+                                      setState(() {});
+                                    },
+                                    child: const Text('Remove'),
+                                  ),
+                                  SizedBox(height: 3),
+                                  PopupMenuButton<UserProfile>(
+                                    itemBuilder: (BuildContext context) {
+                                      return [
+                                        PopupMenuItem(
+                                          value: UserProfile(id: "id", name: "name", email: "email", hometown: null, numberTrips: 0, joinDate: DateTime.now()),
+                                          child: Text("${remove ? "Remove" : "Add"} all", style: TextStyle(fontWeight: FontWeight.bold)),
+                                        ),
+                                        ...widget.profiles.map((UserProfile profile) => PopupMenuItem(
+                                        value: profile,
+                                        child: Row(
+                                          children: [
+                                            if(activity.participants.contains(profile.id))
+                                              Icon(Icons.check),
+                                            if(!activity.participants.contains(profile.id))
+                                              Icon(Icons.add),
+                                            Text(profile.name),
+                                          ],
+                                        ),
+                                      )).toList()
+                                      ];
+                                    },
+                                    child: Container(
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: Text("Participants"),
+                                      ),
+                                      decoration: BoxDecoration(
+                                        border: Border.all(color: Colors.black),
+                                        borderRadius: BorderRadius.circular(5),
+                                      )
+                                    ),
+                                    onSelected: (UserProfile profile) async {
+                                      print("Selected $profile");
+                                      if(profile.id == "id") {
+                                        print("ADD/REMOVE ALL");
+                                        for(UserProfile profile in widget.profiles) {
+                                          if(!remove && !activity.participants.contains(profile.id)) {
+                                            await activity.addParticipant(profile.id);
+                                          }
+                                          else if(remove && activity.participants.contains(profile.id)) {
+                                            await activity.removeParticipant(profile.id);
+                                          }
+                                        }
+                                      }
+                                      else {
+                                        print("Adding ${profile.name}");
+                                        if(activity.participants.contains(profile.id)) {
+                                          await activity.removeParticipant(profile.id);
+                                        } else {
+                                          await activity.addParticipant(profile.id);
+                                        }
+                                      }
+                                      setState(() {});
+                                    },
+                                  ),
+                                ],
+                              ),
+                            //   trailing: PopupMenuButton<UserProfile?>(
+                            //         itemBuilder: (BuildContext context) {
+                            //           return [
+                            //             const PopupMenuItem(
+                            //               child: Text("Add all", style: TextStyle(fontWeight: FontWeight.bold)),
+                            //               value: null,
+                            //             ),
+                            //             ...widget.profiles.map((UserProfile profile) => PopupMenuItem(
+                            //             child: Text(profile.name),
+                            //             value: profile,
+                            //           )).toList()
+                            //           ];
+                            //         },
+                            //         child: Text("Add participants"),
+                            //         onSelected: (UserProfile? profile) async {
+                            //           if(profile == null) {
+                            //             // add all
+                          
+                            //           }
+                            //           else {
+                            //             await activity.addParticipant(profile.id);
+                            //           }
+                            //           setState(() {});
+                            //         },
+                            //       ),
+                            ),
+                        );
+                      }
+                    )).toList(),
                   ]
                 ),
               )

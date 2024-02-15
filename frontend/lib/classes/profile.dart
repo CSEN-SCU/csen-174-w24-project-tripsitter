@@ -32,7 +32,6 @@ class UserProfile {
 
   factory UserProfile.fromFirestore(DocumentSnapshot doc) {
     Map data = doc.data() as Map;
-    print(data);
     return UserProfile(
       id: doc.id,
       name: data['name'],
@@ -97,8 +96,15 @@ class UserProfile {
   }
 
   static Future<UserProfile> getProfileByUid(String uid) async {
-    print("Getting $uid");
     DocumentSnapshot doc = await FirebaseFirestore.instance.collection('users').doc(uid).get();
     return UserProfile.fromFirestore(doc);
+  }
+
+  static Stream<List<UserProfile>> getTripProfiles(List<String> uids) {
+    return FirebaseFirestore.instance
+      .collection('users')
+      .where(FieldPath.documentId, whereIn: uids)
+      .snapshots()
+      .map((snapshot) => snapshot.docs.map((doc) => UserProfile.fromFirestore(doc)).toList());
   }
 }

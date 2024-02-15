@@ -13,34 +13,24 @@ class TripSideColumn extends StatelessWidget {
     if(trip == null) {
       return Container();
     }
+    List<UserProfile> profiles = Provider.of<List<UserProfile>>(context);
     return Column(
       children: [
         Text("Members: ${trip.uids.length}", style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-        ...trip.uids.map((uid) => 
-          FutureBuilder<UserProfile>(
-            future: UserProfile.getProfileByUid(uid),
-            builder: (BuildContext context, AsyncSnapshot<UserProfile> snapshot) {
-              if(snapshot.connectionState == ConnectionState.done) {
-                return ListTile(
-                  leading: CircleAvatar(
-                    backgroundImage: snapshot.data?.photoUrl != null ? NetworkImage(snapshot.data!.photoUrl!) : null,
-                    child: snapshot.data?.photoUrl == null ? const Icon(Icons.person) : null,
-                  ),
-                  title: Text(snapshot.data?.name ?? "Unknown user"),
-                  subtitle: Text(snapshot.data?.email ?? ""),
-                  trailing: IconButton(
-                    icon: const Icon(Icons.remove),
-                    onPressed: () async {
-                      await TripsitterApi.removeUser(snapshot.data!.id, trip.id);
-                    },
-                  )
-                );
-              } else {
-                return Container();
-              }
+        ...profiles.map((UserProfile profile) => ListTile(
+          leading: CircleAvatar(
+            backgroundImage: profile.photoUrl != null ? NetworkImage(profile.photoUrl!) : null,
+            child: profile.photoUrl == null ? const Icon(Icons.person) : null,
+          ),
+          title: Text(profile.name),
+          subtitle: Text(profile.email),
+          trailing: IconButton(
+            icon: const Icon(Icons.remove),
+            onPressed: () async {
+              await TripsitterApi.removeUser(profile.id, trip.id);
             },
           )
-        ),
+        )).toList(),
         TextButton.icon(
           onPressed: () async {
             String? email = await showDialog<String>(

@@ -19,7 +19,7 @@ class Trip {
   List<FlightGroup> _flights;
   List<HotelGroup> _hotels;
   List<RentalCarGroup> _rentalCars;
-  List<TicketmasterEvent> _activities;
+  List<Activity> _activities;
 
   Trip({
     required String id,
@@ -34,7 +34,7 @@ class Trip {
     required List<FlightGroup> flights,
     required List<HotelGroup> hotels,
     required List<RentalCarGroup> rentalCars,
-    required List<TicketmasterEvent> activities,
+    required List<Activity> activities,
   }) : _id = id,
        _uids = uids,
        _prices = prices,
@@ -61,7 +61,7 @@ class Trip {
   List<FlightGroup> get flights => _flights;
   List<HotelGroup> get hotels => _hotels;
   List<RentalCarGroup> get rentalCars => _rentalCars;
-  List<TicketmasterEvent> get activities => _activities;
+  List<Activity> get activities => _activities;
 
   Future<void> save() async {
     await _save();
@@ -85,7 +85,6 @@ class Trip {
   }
 
   Future<void> _save() async {
-    print(toJson());
     await FirebaseFirestore.instance.collection("trips").doc(_id).set(toJson());
   }
   static Stream<List<Trip>> getTripsByProfile(String uid) {
@@ -119,7 +118,7 @@ class Trip {
     t._flights = (data['flights'] as List).map((flight) => FlightGroup.fromJson(flight, t._save)).toList();
     t._hotels = (data['hotels'] as List).map((hotel) => HotelGroup.fromJson(hotel, t._save)).toList();
     t._rentalCars = (data['rentalCars'] as List).map((rentalCar) => RentalCarGroup.fromJson(rentalCar, t._save)).toList();
-    t._activities = (data['activities'] as List).map((activity) => TicketmasterEvent.fromJson(activity)).toList();
+    t._activities = (data['activities'] as List).map((activity) => Activity.fromJson(activity, t._save)).toList();
 
     return t;
   }
@@ -154,12 +153,16 @@ class Trip {
     await _save();
   }
 
-  Future<void> addActivity(TicketmasterEvent activity) async {
-    _activities.add(activity);
+  Future<void> addActivity(TicketmasterEvent event, List<String> uids) async {
+    _activities.add(Activity(
+      event: event,
+      participants: uids,
+      save: _save,
+    ));
     await _save();
   }
 
-  Future<void> removeActivity(TicketmasterEvent activity) async {
+  Future<void> removeActivity(Activity activity) async {
     _activities.remove(activity);
     await _save();
   }
@@ -403,4 +406,46 @@ class RentalCarOffer {
   Map<String, dynamic> toJson() {
     return {};
   }
+}
+
+class Activity {
+  final TicketmasterEvent _event;
+  final List<String> _participants;
+  Future<void> Function() _save;
+
+  Activity({
+    required TicketmasterEvent event,
+    required List<String> participants,
+    required Future<void> Function() save,
+  }) : _event = event,
+       _participants = participants,
+       _save = save;
+
+  Map<String, dynamic> toJson() {
+    return {
+      "event": _event.toJson(),
+      "participants": _participants,
+    };
+  }
+
+  TicketmasterEvent get event => _event;
+  List<String> get participants => _participants;
+
+  Future<void> addParticipant(String uid) async {
+    _participants.add(uid);
+    await _save();
+  }
+
+  Future<void> removeParticipant(String uid) async {
+    _participants.remove(uid);
+    await _save();
+  }
+
+  factory Activity.fromJson(Map<String, dynamic> json, Future<void> Function() save){
+    return Activity(
+      event: TicketmasterEvent.fromJson(json['event']),
+      participants: (json['participants'] as List).map((item) => item as String).toList(),
+      save: save
+    );
+  } 
 }

@@ -2,6 +2,8 @@ import "dart:math";
 
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
+import "package:provider/provider.dart";
+import "package:tripsitter/classes/profile.dart";
 import "package:tripsitter/classes/trip.dart";
 import "package:tripsitter/components/select_events.dart";
 import "package:tripsitter/components/select_flight.dart";
@@ -63,7 +65,7 @@ class PageType {
 }
 
 class _TripConsoleDotState extends State<TripConsoleDot> {
-  Widget popupPage(String page) {
+  Widget popupPage(String page, List<UserProfile> profiles) {
     switch (page) {
       case PageType.Hotel:
         return const SelectHotel();
@@ -72,7 +74,7 @@ class _TripConsoleDotState extends State<TripConsoleDot> {
       case PageType.RentalCar:
         return const Text("Rental cars");
       case PageType.Activities:
-        return SelectEvents(widget.trip);
+        return SelectEvents(widget.trip, profiles);
       case PageType.Cities:
         return const Text("Change city");
     }
@@ -80,6 +82,7 @@ class _TripConsoleDotState extends State<TripConsoleDot> {
   }
 
   void openPopup(myContext) {
+    List<UserProfile> profiles = Provider.of<List<UserProfile>>(myContext, listen: false);
     showDialog(
       context: myContext,
       builder: (BuildContext context) {
@@ -94,7 +97,7 @@ class _TripConsoleDotState extends State<TripConsoleDot> {
             child: Stack(children: [
               Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: popupPage(widget.type),
+                child: popupPage(widget.type, profiles),
               ),
               const Positioned(
                 top: 10.0,
