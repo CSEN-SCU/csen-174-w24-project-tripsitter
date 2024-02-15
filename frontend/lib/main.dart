@@ -9,7 +9,6 @@ import 'package:tripsitter/pages/profile_page.dart';
 import 'package:tripsitter/pages/update_Profile.dart';
 import 'package:tripsitter/pages/view_trip.dart';
 import 'package:tripsitter/pages/view_flights.dart';
-import 'package:tripsitter/pages/home.dart';
 import 'package:tripsitter/pages/login.dart';
 import 'package:url_strategy/url_strategy.dart';
 import 'firebase_options.dart';
@@ -17,7 +16,6 @@ import 'package:fluro/fluro.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:tripsitter/no_animation_page_route.dart';
-import 'package:tripsitter/pages/create_Profile.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -30,7 +28,7 @@ void main() async {
   );
   Handler homeHandler = Handler(
       handlerFunc: (BuildContext? context, Map<String, dynamic> params) {
-    return const HomePage();
+    return const ProfilePage();
   });
   Handler newTripHandler = Handler(
       handlerFunc: (BuildContext? context, Map<String, dynamic> params) {
@@ -53,7 +51,7 @@ void main() async {
     },
   );
 
-  router.define("/updateProfile", handler: updateProfileHandler);
+  router.define("/profile", handler: updateProfileHandler);
   router.define("/", handler: homeHandler, transitionType: TransitionType.none);
   router.define("/trip/:id/flights",
       handler: viewFlights, transitionType: TransitionType.none);
@@ -62,7 +60,7 @@ void main() async {
   router.define("/new", handler: newTripHandler, transitionType: TransitionType.none);
   router.notFoundHandler = Handler(
       handlerFunc: (BuildContext? context, Map<String, dynamic> params) {
-    return HomePage();
+    return ProfilePage();
   });
 
   runApp(const MyApp());
@@ -97,7 +95,7 @@ class MyApp extends StatelessWidget {
           return MultiProvider(
             providers: [
               StreamProvider<UserProfile?>.value(
-                initialData: UserProfile(id: "", name: "", email: "", hometown: "", numberTrips: 0, joinDate: DateTime.now()),
+                initialData: null,
                 value: UserProfile.getProfile(user.uid),
               )
             ],

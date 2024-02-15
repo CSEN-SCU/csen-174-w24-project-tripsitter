@@ -1,12 +1,15 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:tripsitter/classes/profile.dart';
 import 'package:tripsitter/classes/trip.dart';
 import 'package:tripsitter/components/new_trip_popup.dart';
 import 'package:tripsitter/components/payment.dart';
 import 'package:tripsitter/pages/login.dart';
+import 'package:tripsitter/pages/update_profile.dart';
 //TODO: pull and populate user info. have fallbacks for photo
 //pull the trip info from the DB and dynamically build the trip list
 //make the page not look like shit
@@ -81,9 +84,13 @@ class ProfilePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     UserProfile? profile = Provider.of<UserProfile?>(context);
+    if(profile == null){
+      return UpdateProfile();
+    }
+    FirebaseFirestore.instance.collection('trips').where('uids', arrayContains: profile.id).get().then((s) => s.docs.map(((doc) => Trip.fromFirestore(doc))));
     return MultiProvider(
       providers: [
-        StreamProvider.value(value: Trip.getTripsByProfile(profile!.getId()), initialData: List<Trip>.empty(),)
+        StreamProvider.value(value: Trip.getTripsByProfile(profile.id), initialData: List<Trip>.empty())
       ],
       child: Scaffold(
         appBar: AppBar(
@@ -108,13 +115,12 @@ class ProfilePage extends StatelessWidget {
                         children: [
                           Container(
                            //width: MediaQuery.of(context).size.width*.45 ,
-      
                               child: Column(
                                 //the icon and change button
                                 children: [
                                   Icon(Icons.account_circle_rounded),
                                   ElevatedButton(onPressed: (){
-                                     Navigator.pushNamed(context, "/updateProfile");
+                                     Navigator.pushNamed(context, "/profile");
                                   }, child: Text("Edit Profile"))
                                 ],
                               ),
@@ -124,9 +130,9 @@ class ProfilePage extends StatelessWidget {
                             //width: MediaQuery.of(context).size.width*.55 ,
                             child: Column(
                                 children: [
-                                  Text(profile!.getName()),
-                                  Text("Tripping since "+profile!.getDate().toString()),
-                                  Text("Number of trips:" + profile.getNumberTrips().toString()),
+                                  Text(profile.name),
+                                  Text("Tripping since ${DateFormat.yMMM().format(profile.joinDate)}"),
+                                  Text("Number of trips:${profile.numberTrips}"),
                                   
                                   
                                 ],

@@ -1,10 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:tripsitter/classes/city.dart';
 
 class UserProfile {
   final String _id;
   String _name;
   String _email;
-  String _hometown;
+  City? _hometown;
   int _numberTrips;
   final DateTime _joinDate;
   String? _photoUrl;
@@ -31,13 +32,14 @@ class UserProfile {
 
   factory UserProfile.fromFirestore(DocumentSnapshot doc) {
     Map data = doc.data() as Map;
+    print(data);
     return UserProfile(
       id: doc.id,
       name: data['name'],
-      email: data['email'] ?? "",
-      hometown: data['hometown'] ?? "",
-      numberTrips: data['numberTrips'] ?? 0,
-      joinDate: data['joinDate']?.toDate() ?? DateTime.now(),
+      email: data['email'],
+      hometown: data['hometown'] == null ? null : City.fromJson(data['hometown']),
+      numberTrips: data['numberTrips'],
+      joinDate: data['joinDate']?.toDate(),
       photoUrl: data['photoUrl'],
       stripeId: data['stripeId'],
     );
@@ -51,73 +53,51 @@ class UserProfile {
       .map((doc) => doc.exists ? UserProfile.fromFirestore(doc) : null);
   }
 
-   Future<void> save() async {
-    await _save();
-  }
-
-  Future<void> _save() async {
-    await FirebaseFirestore.instance.collection("users").doc(_id).set({
-      "uids": _id,
+  Map<String,dynamic> toJson() {
+    return {
       "name": _name,
-      "hometown": _hometown,
       "email": _email,
+      "hometown": _hometown?.toJson(),
       "numberTrips": _numberTrips,
       "joinDate": _joinDate,
       "photoUrl": _photoUrl,
       "stripeId": _stripeId,
-      
-    });
+    };
   }
-String getId(){
-    return _id;
+
+  Future<void> save() async {
+    await FirebaseFirestore.instance.collection("users").doc(_id).set(toJson());
   }
-  DateTime getDate(){
-    return _joinDate;
-  }
+  String get id => _id;
+  String get name => _name;
+  String get email => _email;
+  City? get hometown => _hometown;
+  int get numberTrips => _numberTrips;
+  DateTime get joinDate => _joinDate;
+  String? get photoUrl => _photoUrl;
+  String? get stripeId => _stripeId;
+
   Future<void> updateName(String name) async{
       _name=name;
-      await _save();
   }
-   String getName(){
-    return _name;
-  }
-  Future<void> updateHometown(String hometown) async{
+  Future<void> updateHometown(City hometown) async{
       _hometown=hometown;
-      await _save();
-  }
-  String getHometown(){
-    return _hometown;
   }
   Future<void> updateEmail(String email) async{
       _email=email;
-      await _save();
   }
-  String getEmail(){
-    return _email;
-  }
-  Future<void> updateNumberTrips() async{
+  Future<void> addTrip() async{
       _numberTrips++;
-      await _save();
-  }
-  int getNumberTrips(){
-    return _numberTrips;
   }
   Future<void> updatePhotoUrl(String url) async{
       _photoUrl=url;
-      await _save();
-  }
-  String? getPhotoUrl(){
-    return _photoUrl;
   }
   Future<void> updateStripeId(String id) async{
       _stripeId=id;
-      await _save();
-  }
-  String? getStripe(){
-    return _stripeId;
   }
 
   static Future<UserProfile> getProfileByUid(String uid) async {
+    print("Getting $uid");
     DocumentSnapshot doc = await FirebaseFirestore.instance.collection('users').doc(uid).get();
     return UserProfile.fromFirestore(doc);
   }
