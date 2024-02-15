@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:tripsitter/classes/city.dart';
+import 'package:tripsitter/classes/profile.dart';
 import 'package:tripsitter/classes/trip.dart';
 import 'package:tripsitter/components/navbar.dart';
 import 'package:tripsitter/pages/login.dart';
@@ -41,7 +42,6 @@ class _CreateTripState extends State<CreateTrip> {
     setState(() {
       cities = list.map((e) => City.fromArray(e)).toList();
     });
-    print("Loaded ${cities.length} cities");
   }
 
   Future<void> createTrip(String uid) async {
@@ -86,7 +86,9 @@ class _CreateTripState extends State<CreateTrip> {
       activities: []
     );
     await newTrip.save();
-    newTrip.addUser(uid);
+    UserProfile? profile = Provider.of<UserProfile?>(context, listen: false); 
+    profile?.addTrip();
+    await profile?.save();
     Navigator.pushNamed(context, "/trip/${newTrip.id}");
   }
 

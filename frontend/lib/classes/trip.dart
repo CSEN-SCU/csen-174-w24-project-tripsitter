@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:tripsitter/classes/city.dart';
 import 'package:tripsitter/classes/flights.dart';
 import 'package:tripsitter/classes/hotels.dart';
+import 'dart:async';
 
 class Trip {
   final String _id;
@@ -65,8 +66,8 @@ class Trip {
     await _save();
   }
 
-  Future<void> _save() async {
-    await FirebaseFirestore.instance.collection("trips").doc(_id).set({
+  Map<String,dynamic> toJson() {
+    return {
       "uids": _uids,
       "prices": _prices,
       "totalPrice": _totalPrice,
@@ -79,6 +80,16 @@ class Trip {
       "hotels": _hotels.map((hotel) => hotel.toJson()).toList(),
       "rentalCars": _rentalCars.map((rentalCar) => rentalCar.toJson()).toList(),
       "activities": _activities.map((activity) => activity.toJson()).toList(),
+    };
+  }
+
+  Future<void> _save() async {
+    print(toJson());
+    await FirebaseFirestore.instance.collection("trips").doc(_id).set(toJson());
+  }
+  static Stream<List<Trip>> getTripsByProfile(String uid) {
+    return FirebaseFirestore.instance.collection('trips').where('uids', arrayContains: uid).snapshots().map((QuerySnapshot querySnapshot) {
+      return querySnapshot.docs.map((doc) => Trip.fromFirestore(doc)).toList();
     });
   }
 

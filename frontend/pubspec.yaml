@@ -57,6 +57,7 @@ dependencies:
   hexcolor: ^3.0.1
   google_fonts: ^6.1.0
   google_sign_in: ^6.2.1
+  image_picker: ^1.0.7
   csv: ^5.1.1
   collection: ^1.18.0
 

@@ -16,9 +16,30 @@ export async function addUserToTrip(req: Request, res: Response) {
     const user = await auth.getUserByEmail(email);
     const userId = user.uid;
     const tripRef = db.collection("trips").doc(tripId);
-    await tripRef.update({
-        uids: FieldValue.arrayUnion(userId)
-    });
+    // check if the user is already in the trip
+    const trip = await tripRef.get();
+    const data = trip.data();
+    if(data) {
+        if(data.uids.includes(userId)) {
+            res.send("User already in trip");
+            return;
+        }
+        
+        await tripRef.update({
+            uids: FieldValue.arrayUnion(userId)
+        });
+
+        // increment the numberTrips field on the user object
+        const userRef = db.collection("users").doc(userId);
+        const user = await userRef.get();
+        const userData = user.data();
+        if(userData) {
+            const newNumberTrips = userData.numberTrips + 1;
+            await userRef.update({
+                numberTrips: newNumberTrips
+            });
+        }
+    }
     res.send("User added to trip");
 }
 
@@ -29,5 +50,15 @@ export async function removeUserFromTrip(req: Request, res: Response) {
     await tripRef.update({
         uids: FieldValue.arrayRemove(uid)
     });
+    // decrement the numberTrips field on the user object
+    const userRef = db.collection("users").doc(uid);
+    const user = await userRef.get();
+    const data = user.data();
+    if(data) {
+        const newNumberTrips = data.numberTrips - 1;
+        await userRef.update({
+            numberTrips: newNumberTrips
+        });
+    }
     res.send("User removed from trip");
 }
