@@ -34,10 +34,10 @@ class UserProfile {
     return UserProfile(
       id: doc.id,
       name: data['name'],
-      email: data['email'],
-      hometown: data['hometown'],
-      numberTrips: data['numberTrips'],
-      joinDate: data['joinDate'].toDate(),
+      email: data['email'] ?? "",
+      hometown: data['hometown'] ?? "",
+      numberTrips: data['numberTrips'] ?? 0,
+      joinDate: data['joinDate']?.toDate() ?? DateTime.now(),
       photoUrl: data['photoUrl'],
       stripeId: data['stripeId'],
     );
@@ -117,7 +117,8 @@ String getId(){
     return _stripeId;
   }
 
-
-
-  
+  static Future<UserProfile> getProfileByUid(String uid) async {
+    DocumentSnapshot doc = await FirebaseFirestore.instance.collection('users').doc(uid).get();
+    return UserProfile.fromFirestore(doc);
+  }
 }
