@@ -113,6 +113,7 @@ class TripDashBoard extends StatelessWidget {
                 ),
                 Expanded(
                     child: TripCenterConsole(
+                      trip,
                   constraints.maxWidth,
                   constraints.maxHeight * 0.9,
                 )),

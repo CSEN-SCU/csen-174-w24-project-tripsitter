@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:tripsitter/classes/city.dart';
 import 'package:tripsitter/classes/flights.dart';
 import 'package:tripsitter/classes/hotels.dart';
+import 'package:tripsitter/classes/ticketmaster.dart';
 import 'dart:async';
 
 class Trip {
@@ -18,7 +19,7 @@ class Trip {
   List<FlightGroup> _flights;
   List<HotelGroup> _hotels;
   List<RentalCarGroup> _rentalCars;
-  List<ActivitySelection> _activities;
+  List<Activity> _activities;
 
   Trip({
     required String id,
@@ -33,7 +34,7 @@ class Trip {
     required List<FlightGroup> flights,
     required List<HotelGroup> hotels,
     required List<RentalCarGroup> rentalCars,
-    required List<ActivitySelection> activities,
+    required List<Activity> activities,
   }) : _id = id,
        _uids = uids,
        _prices = prices,
@@ -60,7 +61,7 @@ class Trip {
   List<FlightGroup> get flights => _flights;
   List<HotelGroup> get hotels => _hotels;
   List<RentalCarGroup> get rentalCars => _rentalCars;
-  List<ActivitySelection> get activities => _activities;
+  List<Activity> get activities => _activities;
 
   Future<void> save() async {
     await _save();
@@ -84,7 +85,6 @@ class Trip {
   }
 
   Future<void> _save() async {
-    print(toJson());
     await FirebaseFirestore.instance.collection("trips").doc(_id).set(toJson());
   }
   static Stream<List<Trip>> getTripsByProfile(String uid) {
@@ -118,7 +118,7 @@ class Trip {
     t._flights = (data['flights'] as List).map((flight) => FlightGroup.fromJson(flight, t._save)).toList();
     t._hotels = (data['hotels'] as List).map((hotel) => HotelGroup.fromJson(hotel, t._save)).toList();
     t._rentalCars = (data['rentalCars'] as List).map((rentalCar) => RentalCarGroup.fromJson(rentalCar, t._save)).toList();
-    t._activities = (data['activities'] as List).map((activity) => ActivitySelection.fromJson(activity)).toList();
+    t._activities = (data['activities'] as List).map((activity) => Activity.fromJson(activity, t._save)).toList();
 
     return t;
   }
@@ -153,12 +153,16 @@ class Trip {
     await _save();
   }
 
-  Future<void> addActivity(ActivitySelection activity) async {
-    _activities.add(activity);
+  Future<void> addActivity(TicketmasterEvent event, List<String> uids) async {
+    _activities.add(Activity(
+      event: event,
+      participants: uids,
+      save: _save,
+    ));
     await _save();
   }
 
-  Future<void> removeActivity(ActivitySelection activity) async {
+  Future<void> removeActivity(Activity activity) async {
     _activities.remove(activity);
     await _save();
   }
@@ -404,37 +408,44 @@ class RentalCarOffer {
   }
 }
 
-class ActivitySelection {
-  double _price;
-  String _id;
-  String _name;
+class Activity {
+  final TicketmasterEvent _event;
+  final List<String> _participants;
+  Future<void> Function() _save;
 
-  ActivitySelection({
-    required price,
-    required id,
-    required name,
-  }) : 
-    _price = price,
-    _id = id,
-    _name = name;
-
-  factory ActivitySelection.fromJson(Map<String, dynamic> json) {
-    return ActivitySelection(
-      price: json['price'],
-      id: json['id'],
-      name: json['name'],
-    );
-  }
+  Activity({
+    required TicketmasterEvent event,
+    required List<String> participants,
+    required Future<void> Function() save,
+  }) : _event = event,
+       _participants = participants,
+       _save = save;
 
   Map<String, dynamic> toJson() {
     return {
-      "price": _price,
-      "id": _id,
-      "name": _name,
+      "event": _event.toJson(),
+      "participants": _participants,
     };
   }
 
-  double get price => _price;
-  String get id => _id;
-  String get name => _name;
+  TicketmasterEvent get event => _event;
+  List<String> get participants => _participants;
+
+  Future<void> addParticipant(String uid) async {
+    _participants.add(uid);
+    await _save();
+  }
+
+  Future<void> removeParticipant(String uid) async {
+    _participants.remove(uid);
+    await _save();
+  }
+
+  factory Activity.fromJson(Map<String, dynamic> json, Future<void> Function() save){
+    return Activity(
+      event: TicketmasterEvent.fromJson(json['event']),
+      participants: (json['participants'] as List).map((item) => item as String).toList(),
+      save: save
+    );
+  } 
 }
