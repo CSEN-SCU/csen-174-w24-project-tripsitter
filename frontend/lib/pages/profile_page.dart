@@ -8,6 +8,7 @@ import 'package:tripsitter/classes/profile.dart';
 import 'package:tripsitter/classes/trip.dart';
 import 'package:tripsitter/components/new_trip_popup.dart';
 import 'package:tripsitter/components/payment.dart';
+import 'package:tripsitter/helpers/locators.dart';
 import 'package:tripsitter/pages/login.dart';
 import 'package:tripsitter/pages/update_profile.dart';
 //TODO: pull and populate user info. have fallbacks for photo

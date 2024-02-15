@@ -123,8 +123,15 @@ class Trip {
     return t;
   }
 
-  Future<void> addFlightGroup(FlightGroup flight) async {
-    _flights.add(flight);
+  Future<void> addFlightGroup(String departureAirport, String arrivalAirport, List<String> members) async {
+    _flights.add(FlightGroup(
+      members: members,
+      departureAirport: departureAirport,
+      arrivalAirport: arrivalAirport,
+      options: [],
+      selected: null,
+      save: _save,
+    ));
     await _save();
   }
 
