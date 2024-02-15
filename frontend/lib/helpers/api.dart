@@ -17,6 +17,8 @@ class TripsitterApi {
   static const String airlineLogoUrl = "$baseApiUrl/airline-logo";
   static const String eventsSearchUrl = "$baseApiUrl/search/events";
 
+  static const String addUserUrl = '$baseApiUrl/trip/user';
+
   static Image getAirlineImage(String iata) {
     return Image.network('http://$baseUrl$airlineLogoUrl?iata=$iata', width: 50, height: 50);
   }
@@ -80,6 +82,22 @@ class TripsitterApi {
       return offers;
     } else {
       throw Exception('Failed to load hotels');
+    }
+  }
+
+  static Future<void> addUser(String email, String tripId) async {
+    Uri uri = Uri.http(baseUrl, addUserUrl);
+    http.Response response = await http.post(uri, body: jsonEncode({'email': email, 'tripId': tripId}), headers: {'Content-Type': 'application/json'});
+    if (response.statusCode != 200) {
+      throw Exception('Failed to add user');
+    }
+  }
+
+  static Future<void> removeUser(String uid, String tripId) async {
+    Uri uri = Uri.http(baseUrl, addUserUrl);
+    http.Response response = await http.delete(uri, body: jsonEncode({'uid': uid, 'tripId': tripId}), headers: {'Content-Type': 'application/json'});
+    if (response.statusCode != 200) {
+      throw Exception('Failed to remove user');
     }
   }
 }

@@ -129,6 +129,30 @@ class TicketmasterEvent {
     );
   }
 
+  Map<String,dynamic> toJson() {
+    return {
+      'ageRestrictions': ageRestrictions,
+      'id': id,
+      'name': name,
+      'ticketLimit': ticketLimit,
+      'classifications': classifications.map((e) => e.toJson()).toList(),
+      'startTime': startTime.toJson(),
+      'doorsTime': doorsTime?.toJson(),
+      'images': images.map((e) => e.toJson()).toList(),
+      'locale': locale,
+      'info': info.toJson(),
+      'promoters': promoters.map((e) => e.toJson()).toList(),
+      'prices': prices.map((e) => e.toJson()).toList(),
+      'seatmapUrl': seatmapUrl,
+      'sales': sales?.toJson(),
+      'type': type,
+      'distance': distance,
+      'distanceUnits': distanceUnits,
+      'url': url,
+      'venues': venues.map((e) => e.toJson()).toList(),
+      'attractions': attractions.map((e) => e.toJson()).toList(),
+    };
+  }
 }
 
 class TicketmasterClassification {
@@ -161,6 +185,18 @@ class TicketmasterClassification {
       subType: json['subType'] != null ? TicketmasterGenre.fromJson(json['subType']) : null,
     );
   }
+
+  Map<String,dynamic> toJson() {
+    return {
+      'primary': primary,
+      'family': family,
+      'genre': genre?.toJson(),
+      'subGenre': subGenre?.toJson(),
+      'segment': segment?.toJson(),
+      'type': type?.toJson(),
+      'subType': subType?.toJson(),
+    };
+  }
 }
 
 class TicketmasterGenre {
@@ -177,6 +213,13 @@ class TicketmasterGenre {
       id: json['id'],
       name: json['name'],
     );
+  }
+
+  Map<String,dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+    };
   }
 }
 
@@ -210,6 +253,18 @@ class TicketmasterDateTime {
       noSpecificTime: json['noSpecificTime'],
     );
   }
+
+  Map<String,dynamic> toJson() {
+    return {
+      'localDate': localDate,
+      'localTime': localTime,
+      'dateTimeUtc': dateTimeUtc?.toIso8601String(),
+      'dateTBD': dateTBD,
+      'dateTBA': dateTBA,
+      'timeTBA': timeTBA,
+      'noSpecificTime': noSpecificTime,
+    };
+  }
 }
 
 class TicketmasterImage {
@@ -226,6 +281,13 @@ class TicketmasterImage {
       fallback: json['fallback'],
       url: json['url'],
     );
+  }
+
+  Map<String,dynamic> toJson() {
+    return {
+      'fallback': fallback,
+      'url': url,
+    };
   }
 }
 
@@ -247,6 +309,14 @@ class TicketmasterEventInfo {
       ticketLimit: json['ticketLimit'],
     );
   }
+
+  Map<String,dynamic> toJson() {
+    return {
+      'infoStr': infoStr,
+      'pleaseNote': pleaseNote,
+      'ticketLimit': ticketLimit,
+    };
+  }
 }
 
 class TicketmasterPromoter {
@@ -266,6 +336,14 @@ class TicketmasterPromoter {
       name: json['name'],
       description: json['description'],
     );
+  }
+
+  Map<String,dynamic> toJson() {
+    return {
+      "id": id,
+      "name": name,
+      "description": description,
+    };
   }
 }
 
@@ -290,6 +368,15 @@ class TicketmasterPrice {
       max: json['max'],
     );
   }
+
+  Map<String,dynamic> toJson() {
+    return {
+      "type": type,
+      "currency": currency,
+      "min": min,
+      "max": max,
+    };
+  }
 }
 
 class TicketmasterSales {
@@ -311,6 +398,13 @@ class TicketmasterSales {
       public: TicketmasterSale.fromJson(json['public']),
       presales: presales,
     );
+  }
+
+  Map<String,dynamic> toJson() {
+    return {
+      "public": public.toJson(),
+      "presales": presales.map((e) => e.toJson()).toList(),
+    };
   }
 }
 
@@ -338,6 +432,16 @@ class TicketmasterSale {
       startTBD: json['startTBD'],
     );
   }
+
+  Map<String,dynamic> toJson() {
+    return {
+      "startDateTime": startDateTime,
+      "endDateTime": endDateTime,
+      "name": name,
+      "startTBA": startTBA,
+      "startTBD": startTBD,
+    };
+  }
 }
 
 class TicketmasterVenue {
@@ -351,13 +455,13 @@ class TicketmasterVenue {
   final String? stateCode;
   final String? country;
   final String? countryCode;
-  final double distance;
+  final double? distance;
   final String? distanceUnits;
   final String timezone;
   final String? postalCode;
   final List<TicketmasterImage> images;
-  final double latitude;
-  final double longitude;
+  final double? latitude;
+  final double? longitude;
   final String? url;
 
   TicketmasterVenue({
@@ -403,10 +507,33 @@ class TicketmasterVenue {
       timezone: json['timezone'],
       postalCode: json['postalCode'],
       images: images,
-      latitude: double.parse(json['latitude']),
-      longitude: double.parse(json['longitude']),
+      latitude: json['latitude'] == null ? null : double.parse(json['latitude'].toString()),
+      longitude: json['longitude'] == null ? null : double.parse(json['longitude'].toString()),
       url: json['url'],
     );
+  }
+
+  Map<String,dynamic> toJson() {
+    return {
+      "id": id,
+      "name": name,
+      "addressLine1": addressLine1,
+      "addressLine2": addressLine2,
+      "addressLine3": addressLine3,
+      "city": city,
+      "state": state,
+      "stateCode": stateCode,
+      "country": country,
+      "countryCode": countryCode,
+      "distance": distance,
+      "distanceUnits": distanceUnits,
+      "timezone": timezone,
+      "postalCode": postalCode,
+      "images": images.map((e) => e.toJson()).toList(),
+      "latitude": latitude,
+      "longitude": longitude,
+      "url": url,
+    };
   }
 }
 
@@ -450,6 +577,18 @@ class TicketmasterAttraction {
       url: json['url'],
     );
   }
+
+  Map<String,dynamic> toJson() {
+    return {
+      "classifications": classifications.map((e) => e.toJson()).toList(),
+      "id": id,
+      "images": images.map((e) => e.toJson()).toList(),
+      "externalLinks": externalLinks?.toJson(),
+      "locale": locale,
+      "name": name,
+      "url": url,
+    };
+  }
 }
 
 class TicketmasterLinks {
@@ -475,5 +614,15 @@ class TicketmasterLinks {
       wiki: json['wiki'].isNotEmpty ? json['wiki'][0]?.url : null,
       homepage: json['homepage'].isNotEmpty ? json['homepage'][0]?.url : null,
     );
+  }
+
+  Map<String,dynamic> toJson() {
+    return {
+      "facebook": facebook,
+      "twitter": twitter,
+      "instagram": instagram,
+      "wiki": wiki,
+      "homepage": homepage,
+    };
   }
 }
