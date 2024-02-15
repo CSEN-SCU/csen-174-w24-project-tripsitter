@@ -36,22 +36,20 @@ class TripConsoleDot extends StatefulWidget {
   late Function updateDotX;
   late Function updateDotY;
 
-  TripConsoleDot(
-    {
-      required this.type,
-      required this.positions,
-      required this.iconAnimationControllers,
-      required this.iconAnimations,
-      required this.onEnter,
-      required this.onExit,
-    }
-  );
+  TripConsoleDot({
+    required this.type,
+    required this.positions,
+    required this.iconAnimationControllers,
+    required this.iconAnimations,
+    required this.onEnter,
+    required this.onExit,
+  });
 
   @override
   _TripConsoleDotState createState() => _TripConsoleDotState();
 }
 
-class PageType { 
+class PageType {
   static const String Hotel = "Hotel";
   static const String Flights = "Flights";
   static const String RentalCar = "Rental Car";
@@ -130,10 +128,8 @@ class _TripConsoleDotState extends State<TripConsoleDot> {
     return AnimatedPositioned(
       duration: const Duration(milliseconds: 200),
       curve: Curves.linear,
-      left: widget.positions[type]!.x -
-          (0.5 * widget.positions[type]!.size),
-      top: widget.positions[type]!.y -
-          (0.5 * widget.positions[type]!.size),
+      left: widget.positions[type]!.x - (0.5 * widget.positions[type]!.size),
+      top: widget.positions[type]!.y - (0.5 * widget.positions[type]!.size),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         width: widget.positions[type]!.size,

@@ -20,8 +20,8 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   setPathUrlStrategy();
   print("STRIPE KEY: ${const String.fromEnvironment('STRIPE_PK_TEST')}");
-  Stripe.publishableKey = const String.fromEnvironment('STRIPE_PK_TEST');
-  await Stripe.instance.applySettings();
+  // Stripe.publishableKey = const String.fromEnvironment('STRIPE_PK_TEST');
+  // await Stripe.instance.applySettings();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
@@ -51,7 +51,8 @@ void main() async {
       handler: viewFlights, transitionType: TransitionType.none);
   router.define("/trip/:id",
       handler: viewTrip, transitionType: TransitionType.none);
-  router.define("/new", handler: newTripHandler, transitionType: TransitionType.none);
+  router.define("/new",
+      handler: newTripHandler, transitionType: TransitionType.none);
   router.notFoundHandler = Handler(
       handlerFunc: (BuildContext? context, Map<String, dynamic> params) {
     return HomePage();
@@ -72,38 +73,38 @@ class MyApp extends StatelessWidget {
         StreamProvider<User?>.value(
             value: FirebaseAuth.instance.authStateChanges(), initialData: null),
       ],
-      child: Builder(
-        builder: (context) {
-          User? user = Provider.of<User?>(context);
-          if (user == null) {
-            return MaterialApp(
-              onGenerateRoute: router.generator,
-              title: 'TripSitter',
-              theme: ThemeData(
-                colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple, brightness: Brightness.light),
-                useMaterial3: true,
-              ),
-              home: const LoginPage(),
-            );
-          }
-          return MultiProvider(
-            providers: [
-              StreamProvider<UserProfile?>.value(
-                initialData: null,
-                value: UserProfile.getProfile(user.uid),
-              )
-            ],
-            child: MaterialApp(
-              onGenerateRoute: router.generator,
-              title: 'TripSitter',
-              theme: ThemeData(
-                colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple, brightness: Brightness.light),
-                useMaterial3: true,
-              ),
+      child: Builder(builder: (context) {
+        User? user = Provider.of<User?>(context);
+        if (user == null) {
+          return MaterialApp(
+            onGenerateRoute: router.generator,
+            title: 'TripSitter',
+            theme: ThemeData(
+              colorScheme: ColorScheme.fromSeed(
+                  seedColor: Colors.deepPurple, brightness: Brightness.light),
+              useMaterial3: true,
             ),
+            home: const LoginPage(),
           );
         }
-      ),
+        return MultiProvider(
+          providers: [
+            StreamProvider<UserProfile?>.value(
+              initialData: null,
+              value: UserProfile.getProfile(user.uid),
+            )
+          ],
+          child: MaterialApp(
+            onGenerateRoute: router.generator,
+            title: 'TripSitter',
+            theme: ThemeData(
+              colorScheme: ColorScheme.fromSeed(
+                  seedColor: Colors.deepPurple, brightness: Brightness.light),
+              useMaterial3: true,
+            ),
+          ),
+        );
+      }),
     );
   }
 }
