@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:tripsitter/classes/car.dart';
 import 'package:tripsitter/classes/city.dart';
 import 'package:tripsitter/classes/flights.dart';
 import 'package:tripsitter/classes/hotels.dart';
@@ -393,18 +394,6 @@ class RentalCarGroup {
   Future<void> removeMember(String member) async {
     _members.remove(member);
     await _save();
-  }
-}
-
-class RentalCarOffer {
-  RentalCarOffer();
-
-  factory RentalCarOffer.fromJson(Map<String, dynamic> json) {
-    return RentalCarOffer();
-  }
-
-  Map<String, dynamic> toJson() {
-    return {};
   }
 }
 
