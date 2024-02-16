@@ -7,6 +7,84 @@ extension DurationFormat on Duration {
   }
 }
 
+extension SIPPFormat on String {
+  String fromSipp() {
+    Map<String,String> sizes = {
+      "C": "Compact",
+      "D": "Compact Elite",
+      "E": "Economy",
+      "F": "Fullsize",
+      "G": "Fullsize Elite",
+      "H": "Economy Elite",
+      "I": "Intermediate",
+      "J": "Intermediate Elite",
+      "L": "Luxury",
+      "M": "Mini",
+      "N": "Mini Elite",
+      "O": "Oversize",
+      "P": "Premium",
+      "R": "Standard Elite",
+      "S": "Standard",
+      "U": "Premium Elite",
+      "W": "Luxury Elite",
+      "X": "Special",
+    };
+    Map<String,String> doors = {
+      "B": "2/3 Door",
+      "C": "2/4 Door",
+      "D": "4/5 Door",
+      "E": "Coupe",
+      "F": "SUV",
+      "G": "Crossover",
+      "H": "Motorhome",
+      "J": "Open-Air All Terrain",
+      "K": "Commercial Van / Truck",
+      "L": "Limousine / Sedan",
+      "M": "Monospace",
+      "N": "Roadster",
+      "P": "Pickup (2 door)",
+      "Q": "Pickup (4 door)",
+      "R": "Recreational Vehicle",
+      "S": "Sport",
+      "T": "Convertible",
+      "V": "Passenger Van",
+      "W": "Wagon / Estate",
+      "X": "Special",
+      "Y": "Two-Wheel Drive",
+      "Z": "Special Offer Car",
+    };
+    Map<String,String> transmission = {
+      "M": "Manual",
+      "N": "Manual 4WD",
+      "C": "Manual AWD",
+      "A": "Automatic",
+      "B": "Automatic 4WD",
+      "D": "Automatic AWD",
+    };
+    Map<String, String> fuel = {
+      "N": "",
+      "R": "A/C",
+      "V": "Petrol, A/C",
+      "Z": "Petrol",
+      "D": "Diesel, A/C",
+      "Q": "Diesel",
+      "E": "Electric (Distance < 250mi/400km), A/C",
+      "C": "ElectricPlus (Distance ≥ 250mi/400km), A/C",
+      "H": "Hybrid, A/C",
+      "I": "Hybrid Plug-in, A/C",
+      "L": "LPG/Compressed Gas, A/C",
+      "S": "LPG/Compressed Gas",
+      "M": "Multi Fuel/Power, A/C",
+      "F": "Multi Fuel/Power",
+      "A": "Hydrogen, A/C",
+      "B": "Hydrogen",
+      "U": "Ethanol, A/C",
+      "X": "Ethanol",
+    };
+    return "${sizes[this[0]] ?? ""} ${doors[this[1]] ?? ""}, ${transmission[this[2]] ?? ""}, ${fuel[this[3]] ?? ""}";
+  }
+}
+
 extension PlaneString on String {
   String toPlaneName() {
     Map<String,String> list = {

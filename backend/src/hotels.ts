@@ -6,18 +6,25 @@ var hotelData = require('./hotelData.json');
 
 export async function getHotels(req: Request, res: Response){
     const cityCode = req.query.cityCode;
+    const latitude = req.query.latitude;
+    const longitude = req.query.longitude;
     const checkInDate = req.query.checkInDate;
     const checkOutDate = req.query.checkOutDate;
     const adults = req.query.adults;
-    if (!cityCode || !checkInDate || !checkOutDate || !adults) {
+    // needs one of citycode or lat and lon
+    if ((!cityCode && (!latitude || !longitude)) || !checkInDate || !checkOutDate || !adults) {
       res.status(400).send('Missing required query parameters');
       return;
     }
     res.send(hotelData); return;
     // Docs: https://developers.amadeus.com/self-service/category/hotel/api-doc/hotel-search
-    let hotels = await amadeus.referenceData.locations.hotels.byCity.get({
-      cityCode: cityCode,
-    });
+    let hotels = cityCode ? (await amadeus.referenceData.locations.hotels.byCity.get({
+      cityCode,
+    })) : ( await amadeus.referenceData.locations.hotels.byGeocode.get({
+        latitude,
+        longitude,
+        radius: 10
+    }));
     const hotelIds = hotels.data.map((hotel: any) => hotel.hotelId);
 
     let results: any[] = [];

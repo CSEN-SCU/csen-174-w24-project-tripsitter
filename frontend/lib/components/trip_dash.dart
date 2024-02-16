@@ -2,6 +2,9 @@
 
 import 'package:flutter/material.dart';
 import 'package:hexcolor/hexcolor.dart';
+import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
+import 'package:tripsitter/classes/trip.dart';
 import 'package:tripsitter/components/trip_center_console.dart';
 
 class TripDashBoard extends StatelessWidget {
@@ -10,6 +13,12 @@ class TripDashBoard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Color accentColor = Color.fromRGBO(138, 138, 138, 1);
+    Trip? trip = Provider.of<Trip?>(context);
+    if(trip == null) {
+      return const Center(
+        child: CircularProgressIndicator(),
+      );
+    }
     return Container(
         color: Color.fromARGB(255, 255, 255, 255),
         width: 75.0,
@@ -25,7 +34,7 @@ class TripDashBoard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        "[TRIP NAME HERE]",
+                        trip.name,
                         style: TextStyle(
                           color: Colors.black,
                           fontWeight: FontWeight.w800,
@@ -44,7 +53,7 @@ class TripDashBoard extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        "DESTINATION, USA",
+                        "${trip.destination.name}, ${trip.destination.country}",
                         style: TextStyle(
                           fontSize: 24,
                           fontStyle: FontStyle.italic,
@@ -65,7 +74,7 @@ class TripDashBoard extends StatelessWidget {
                                 ),
                                 padding: EdgeInsets.all(8.0),
                                 child: Row(
-                                  children: const [
+                                  children: [
                                     Icon(
                                       Icons.calendar_month_outlined,
                                       color: Colors.black,
@@ -75,7 +84,7 @@ class TripDashBoard extends StatelessWidget {
                                       padding: EdgeInsets.only(
                                           left: 20.0, right: 20.0),
                                       child: Text(
-                                        "Feb 9th",
+                                        DateFormat('MMM d').format(trip.startDate),
                                         style: TextStyle(
                                             color: Colors.black, fontSize: 20),
                                       ),
@@ -89,7 +98,7 @@ class TripDashBoard extends StatelessWidget {
                                       padding: EdgeInsets.only(
                                           left: 20.0, right: 20.0),
                                       child: Text(
-                                        "Feb 12th",
+                                        DateFormat('MMM d').format(trip.endDate),
                                         style: TextStyle(
                                             color: Colors.black, fontSize: 20),
                                       ),
@@ -104,6 +113,7 @@ class TripDashBoard extends StatelessWidget {
                 ),
                 Expanded(
                     child: TripCenterConsole(
+                      trip,
                   constraints.maxWidth,
                   constraints.maxHeight * 0.9,
                 )),

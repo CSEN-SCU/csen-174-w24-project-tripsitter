@@ -4,3 +4,5 @@ firebase-debug.log
 frontend/config.json
 config.json
 *.log
+backend/lib/admin.json
+backend/src/admin.json

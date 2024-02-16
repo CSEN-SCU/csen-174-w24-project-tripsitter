@@ -1,23 +1,37 @@
 import "dart:math";
 
 import "package:flutter/material.dart";
+import "package:flutter/services.dart";
+import "package:provider/provider.dart";
+import "package:tripsitter/classes/profile.dart";
+import "package:tripsitter/classes/trip.dart";
+import 'package:tripsitter/components/cars/select_cars.dart';
+import 'package:tripsitter/components/events/select_events.dart';
+import "package:tripsitter/components/select_flight.dart";
+import "package:tripsitter/components/select_hotel.dart";
 import "package:tripsitter/components/trip_center_console.dart";
 
+class PageType { 
+  static const String Hotel = "Hotels";
+  static const String Flights = "Flights";
+  static const String RentalCar = "Rental Cars";
+  static const String Activities = "Activities";
+  static const String Cities = "Cities";
+}
 class TripConsoleDot extends StatefulWidget {
-  final String name;
+  final String type;
+  final Trip trip;
 
-  late Map<String, XYPairSized> positions;
-  late Map<String, AnimationController> _iconAnimationControllers;
-  late Map<String, Animation<double>> _iconAnimations;
-  late Map<String, double> defaultAngles;
+  final Map<String, XYPairSized> positions;
+  final Map<String, AnimationController> iconAnimationControllers;
+  final Map<String, Animation<double>> iconAnimations;
 
-  late double centerY;
-  late double centerX;
-  late double radius;
+  final Function(PointerEnterEvent) onEnter;
+  final Function(PointerExitEvent) onExit;
 
   // Configurations go Here
   // The initial gap in degrees between the four dots
-  final double angleGap = 25.0;
+  final double angleGap = 30.0;
   // The fraction of the angleGap that the angle is changed by
   final double gapExpansionFactor = 0.4;
   // Multiplier on maxHeight to determine the radius of the circular path
@@ -35,18 +49,15 @@ class TripConsoleDot extends StatefulWidget {
   late Function updateDotY;
 
   TripConsoleDot(
-    this.name,
-    this.positions,
-    this._iconAnimationControllers,
-    this._iconAnimations,
-    this.defaultAngles,
-    this.radius,
-    this.centerX,
-    this.centerY,
-    this.setElementAngleDegrees,
-    this.updateDotSize,
-    this.updateDotX,
-    this.updateDotY,
+    {
+      required this.trip,
+      required this.type,
+      required this.positions,
+      required this.iconAnimationControllers,
+      required this.iconAnimations,
+      required this.onEnter,
+      required this.onExit,
+    }
   );
 
   @override
@@ -54,69 +65,150 @@ class TripConsoleDot extends StatefulWidget {
 }
 
 class _TripConsoleDotState extends State<TripConsoleDot> {
+  Widget popupPage(String page, List<UserProfile> profiles) {
+    switch (page) {
+      case PageType.Hotel:
+        return const SelectHotel();
+      case PageType.Flights:
+        return const SelectFlight();
+      case PageType.RentalCar:
+        return SelectCars(widget.trip, profiles);
+      case PageType.Activities:
+        return SelectEvents(widget.trip, profiles);
+      case PageType.Cities:
+        return const Text("Change city");
+    }
+    return Container();
+  }
+
+  void openPopup(myContext) {
+    List<UserProfile> profiles = Provider.of<List<UserProfile>>(myContext, listen: false);
+    showDialog(
+      context: myContext,
+      builder: (BuildContext context) {
+        return Dialog(
+          child: Container(
+            width: MediaQuery.of(context).size.width * 0.95,
+            height: MediaQuery.of(context).size.height * 0.9,
+            decoration: const BoxDecoration(
+              borderRadius: BorderRadius.all(Radius.circular(25.0)),
+              color: Colors.white,
+            ),
+            child: Stack(children: [
+              popupPage(widget.type, profiles),
+              const Positioned(
+                top: 10.0,
+                right: 10.0,
+                child: CloseButton(),
+              ),
+            ]),
+          ),
+        );
+      },
+    );
+  }
+
+  IconData get icon {
+    switch (widget.type) {
+      case PageType.Hotel:
+        return Icons.hotel;
+      case PageType.Flights:
+        return Icons.flight_takeoff_rounded;
+      case PageType.RentalCar:
+        return Icons.directions_car;
+      case PageType.Activities:
+        return Icons.stadium;
+      case PageType.Cities:
+        return Icons.location_city;
+    }
+    return Icons.error;
+  }
+
+  String get type {
+    return widget.type;
+  }
+
   @override
   Widget build(BuildContext context) {
     return AnimatedPositioned(
       duration: const Duration(milliseconds: 200),
       curve: Curves.linear,
-      left: widget.positions["Hotel"]!.x -
-          (0.5 * widget.positions["Hotel"]!.size),
-      top: widget.positions["Hotel"]!.y -
-          (0.5 * widget.positions["Hotel"]!.size),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        width: widget.positions["Hotel"]!.size,
-        height: widget.positions["Hotel"]!.size,
-        decoration: const BoxDecoration(
-          shape: BoxShape.circle,
-          color: Color.fromARGB(255, 0, 0, 0),
-        ),
-        child: MouseRegion(
-          onEnter: (_) {
-            widget.setElementAngleDegrees(
-                widget.defaultAngles["Hotel"]!, "Hotel");
-            widget.updateDotSize(
-                widget.defaultDotSize * widget.expandDotFactor, "Hotel");
-            widget.setElementAngleDegrees(
-                widget.defaultAngles["Flights"]! +
-                    widget.angleGap * widget.gapExpansionFactor,
-                "Flights");
-            widget.setElementAngleDegrees(
-                widget.defaultAngles["Rental Car"]! +
-                    widget.angleGap * widget.gapExpansionFactor,
-                "Rental Car");
-            widget.setElementAngleDegrees(
-                widget.defaultAngles["Activities"]! -
-                    widget.angleGap * widget.gapExpansionFactor,
-                "Activities");
-
-            // Start the animation
-            widget._iconAnimationControllers["Hotel"]?.forward();
-          },
-          onExit: (_) {
-            widget.setElementAngleDegrees(
-                widget.defaultAngles["Hotel"]!, "Hotel");
-            widget.updateDotSize(widget.defaultDotSize, "Hotel");
-            widget.setElementAngleDegrees(
-                widget.defaultAngles["Flights"]!, "Flights");
-            widget.setElementAngleDegrees(
-                widget.defaultAngles["Rental Car"]!, "Rental Car");
-            widget.setElementAngleDegrees(
-                widget.defaultAngles["Activities"]!, "Activities");
-            widget._iconAnimationControllers["Hotel"]?.reverse();
-          },
-          child: AnimatedBuilder(
-            animation: widget._iconAnimationControllers["Hotel"]!,
-            builder: (context, child) {
-              return Icon(
-                Icons.hotel,
-                color: Colors.white,
-                size: widget._iconAnimations["Hotel"]!.value *
-                    widget.defaultDotSize *
-                    widget.iconSizeFactor,
-              );
-            },
+      left: widget.positions[type]!.x -
+          (0.5 * widget.positions[type]!.size),
+      top: widget.positions[type]!.y -
+          (0.5 * widget.positions[type]!.size),
+      child: Column(
+        children: [
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            width: widget.positions[type]!.size,
+            height: widget.positions[type]!.size,
+            child: MouseRegion(
+              onEnter: widget.onEnter,
+              onExit: widget.onExit,
+              child: GestureDetector(
+                onTap: () {
+                  openPopup(context);
+                },
+                child: AnimatedBuilder(
+                  animation: widget.iconAnimationControllers[type]!,
+                  builder: (context, child) {
+                    return Container(
+                      decoration: const BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Color.fromARGB(255, 0, 0, 0),
+                      ),
+                      child: Icon(
+                        icon,
+                        color: Colors.white,
+                        size: widget.iconAnimations[type]!.value *
+                            widget.defaultDotSize *
+                            widget.iconSizeFactor,
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ),
           ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text(type, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+          )
+        ],
+      ),
+    );
+  }
+}
+
+class CloseButton extends StatelessWidget {
+  const CloseButton({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 50,
+      height: 50,
+      child: ElevatedButton(
+        onPressed: () {
+          Navigator.of(context).pop();
+        },
+        style: const ButtonStyle(
+          iconColor:
+              MaterialStatePropertyAll<Color>(Color.fromARGB(255, 95, 95, 95)),
+          backgroundColor:
+              MaterialStatePropertyAll<Color>(Color.fromARGB(0, 0, 0, 0)),
+          shadowColor: MaterialStatePropertyAll(
+            Color.fromARGB(0, 1, 1, 1),
+          ),
+          alignment: Alignment.center,
+          padding: MaterialStatePropertyAll<EdgeInsetsGeometry>(
+            EdgeInsets.zero,
+          ),
+        ),
+        child: const Icon(
+          Icons.close,
+          size: 50,
         ),
       ),
     );

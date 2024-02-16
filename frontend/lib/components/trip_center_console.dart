@@ -1,11 +1,14 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+import 'package:tripsitter/classes/trip.dart';
 import 'package:tripsitter/components/trip_console_dot.dart';
 
 class TripCenterConsole extends StatefulWidget {
+  final Trip trip;
   final double maxHeight, maxWidth;
-  const TripCenterConsole(this.maxWidth, this.maxHeight, {super.key});
+  const TripCenterConsole(this.trip, this.maxWidth, this.maxHeight, {super.key});
 
   @override
   // ignore: library_private_types_in_public_api
@@ -21,7 +24,7 @@ class _MyStatefulWidgetState extends State<TripCenterConsole>
 
   // Configurations go Here
   // The initial gap in degrees between the four dots
-  final double angleGap = 25.0;
+  final double angleGap = 30.0;
   // The fraction of the angleGap that the angle is changed by
   final double gapExpansionFactor = 0.4;
   // Multiplier on maxHeight to determine the radius of the circular path
@@ -34,21 +37,27 @@ class _MyStatefulWidgetState extends State<TripCenterConsole>
   final double iconSizeFactor = 0.6;
   late Map<String, double> defaultAngles;
 
-  late double radius;
-  late double centerX;
-  late double centerY;
+  double get radius => widget.maxHeight * radiusMultiplier;
+  double get centerX => widget.maxWidth * 0.5;
+  double get centerY => widget.maxHeight * 0.1;
+
+  double prevMaxWidth = 0;
+  double prevMaxHeight = 0;
+
+  String currentPopupState = "None";
+  // will only ever have values of "Hotels","Rental Cars","Flights","Activities","City"
 
   @override
   void initState() {
     super.initState();
+    setup();
+  }
 
-    radius = widget.maxHeight * radiusMultiplier;
-    centerX = widget.maxWidth * 0.5;
-    centerY = widget.maxHeight * 0.1;
-
+  void setup() {
+    print("SETUP");
     positions = {
-      "Hotel": XYPairSized(0.0, 0.0 * 0.1, defaultDotSize),
-      "Rental Car": XYPairSized(0.0, 0.0, defaultDotSize),
+      "Hotels": XYPairSized(0.0, 0.0 * 0.1, defaultDotSize),
+      "Rental Cars": XYPairSized(0.0, 0.0, defaultDotSize),
       "Flights": XYPairSized(0.0, 0.0, defaultDotSize),
       "Activities": XYPairSized(0.0, 0.0, defaultDotSize),
       "City": XYPairSized(
@@ -57,17 +66,17 @@ class _MyStatefulWidgetState extends State<TripCenterConsole>
 
     defaultAngles = {
       "Activities": 90 - (1.5 * angleGap),
-      "Hotel": 90 - (0.5 * angleGap),
+      "Hotels": 90 - (0.5 * angleGap),
       "Flights": 90 + (0.5 * angleGap),
-      "Rental Car": 90 + (1.5 * angleGap),
+      "Rental Cars": 90 + (1.5 * angleGap),
     };
 
     _iconAnimationControllers = {
-      "Hotel": AnimationController(
+      "Hotels": AnimationController(
         vsync: this,
         duration: const Duration(milliseconds: 200),
       ),
-      "Rental Car": AnimationController(
+      "Rental Cars": AnimationController(
         vsync: this,
         duration: const Duration(milliseconds: 200),
       ),
@@ -82,15 +91,15 @@ class _MyStatefulWidgetState extends State<TripCenterConsole>
     };
     // You can use different Curves for different animation effects
     _iconAnimations = {
-      "Hotel": Tween<double>(begin: 1.0, end: 1.5).animate(
+      "Hotels": Tween<double>(begin: 1.0, end: 1.5).animate(
         CurvedAnimation(
-          parent: _iconAnimationControllers["Hotel"]!,
+          parent: _iconAnimationControllers["Hotels"]!,
           curve: Curves.linear,
         ),
       ),
-      "Rental Car": Tween<double>(begin: 1.0, end: 1.5).animate(
+      "Rental Cars": Tween<double>(begin: 1.0, end: 1.5).animate(
         CurvedAnimation(
-          parent: _iconAnimationControllers["Rental Car"]!,
+          parent: _iconAnimationControllers["Rental Cars"]!,
           curve: Curves.linear,
         ),
       ),
@@ -108,11 +117,13 @@ class _MyStatefulWidgetState extends State<TripCenterConsole>
       ),
     };
 
-    // Optionally, you can add listeners or other configurations her
     setElementAngleDegrees(defaultAngles["Activities"]!, "Activities");
-    setElementAngleDegrees(defaultAngles["Hotel"]!, "Hotel");
+    setElementAngleDegrees(defaultAngles["Hotels"]!, "Hotels");
     setElementAngleDegrees(defaultAngles["Flights"]!, "Flights");
-    setElementAngleDegrees(defaultAngles["Rental Car"]!, "Rental Car");
+    setElementAngleDegrees(defaultAngles["Rental Cars"]!, "Rental Cars");
+
+    prevMaxHeight = widget.maxHeight;
+    prevMaxWidth = widget.maxWidth;
   }
 
   void updateDotX(double newX, String dotName) {
@@ -121,7 +132,7 @@ class _MyStatefulWidgetState extends State<TripCenterConsole>
     });
   }
 
-  // Method to update the Y coordinate of the "Hotel" position
+  // Method to update the Y coordinate of the "Hotels" position
   void updateDotY(double newY, String dotName) {
     setState(() {
       positions[dotName]!.setY(newY);
@@ -143,227 +154,136 @@ class _MyStatefulWidgetState extends State<TripCenterConsole>
 
   @override
   Widget build(BuildContext context) {
+    if (prevMaxHeight != widget.maxHeight || prevMaxWidth != widget.maxWidth) {
+      setup();
+    }
     return Stack(
       children: [
         TripConsoleDot(
-          "Hotel",
-          positions,
-          _iconAnimationControllers,
-          _iconAnimations,
-          defaultAngles,
-          radius,
-          centerX,
-          centerY,
-          setElementAngleDegrees,
-          updateDotSize,
-          updateDotX,
-          updateDotY,
-        ),
-        // Hotel
-        // AnimatedPositioned(
-        //   duration: const Duration(milliseconds: 200),
-        //   curve: Curves.linear,
-        //   left: positions["Hotel"]!.x - (0.5 * positions["Hotel"]!.size),
-        //   top: positions["Hotel"]!.y - (0.5 * positions["Hotel"]!.size),
-        //   child: AnimatedContainer(
-        //     duration: const Duration(milliseconds: 200),
-        //     width: positions["Hotel"]!.size,
-        //     height: positions["Hotel"]!.size,
-        //     decoration: const BoxDecoration(
-        //       shape: BoxShape.circle,
-        //       color: Color.fromARGB(255, 0, 0, 0),
-        //     ),
-        //     child: MouseRegion(
-        //       onEnter: (_) {
-        //         setElementAngleDegrees(defaultAngles["Hotel"]!, "Hotel");
-        //         updateDotSize(defaultDotSize * expandDotFactor, "Hotel");
-        //         setElementAngleDegrees(
-        //             defaultAngles["Flights"]! + angleGap * gapExpansionFactor,
-        //             "Flights");
-        //         setElementAngleDegrees(
-        //             defaultAngles["Rental Car"]! +
-        //                 angleGap * gapExpansionFactor,
-        //             "Rental Car");
-        //         setElementAngleDegrees(
-        //             defaultAngles["Activities"]! -
-        //                 angleGap * gapExpansionFactor,
-        //             "Activities");
+            trip: widget.trip,
+            type: PageType.Hotel,
+            positions: positions,
+            iconAnimationControllers: _iconAnimationControllers,
+            iconAnimations: _iconAnimations,
+            onEnter: (_) {
+              setElementAngleDegrees(defaultAngles["Hotels"]!, "Hotels");
+              updateDotSize(defaultDotSize * expandDotFactor, "Hotels");
+              setElementAngleDegrees(
+                  defaultAngles["Flights"]! + angleGap * gapExpansionFactor,
+                  "Flights");
+              setElementAngleDegrees(
+                  defaultAngles["Rental Cars"]! +
+                      angleGap * gapExpansionFactor,
+                  "Rental Cars");
+              setElementAngleDegrees(
+                  defaultAngles["Activities"]! -
+                      angleGap * gapExpansionFactor,
+                  "Activities");
 
-        //         // Start the animation
-        //         _iconAnimationControllers["Hotel"]?.forward();
-        //       },
-        //       onExit: (_) {
-        //         setElementAngleDegrees(defaultAngles["Hotel"]!, "Hotel");
-        //         updateDotSize(defaultDotSize, "Hotel");
-        //         setElementAngleDegrees(defaultAngles["Flights"]!, "Flights");
-        //         setElementAngleDegrees(
-        //             defaultAngles["Rental Car"]!, "Rental Car");
-        //         setElementAngleDegrees(
-        //             defaultAngles["Activities"]!, "Activities");
-        //         _iconAnimationControllers["Hotel"]?.reverse();
-        //       },
-        //       child: AnimatedBuilder(
-        //         animation: _iconAnimationControllers["Hotel"]!,
-        //         builder: (context, child) {
-        //           return Icon(
-        //             Icons.hotel,
-        //             color: Colors.white,
-        //             size: _iconAnimations["Hotel"]!.value *
-        //                 defaultDotSize *
-        //                 iconSizeFactor,
-        //           );
-        //         },
-        //       ),
-        //     ),
-        //   ),
-        // ),
-        // Rental Car
-        AnimatedPositioned(
-          duration: const Duration(milliseconds: 200),
-          curve: Curves.linear,
-          left: positions["Rental Car"]!.x -
-              (0.5 * positions["Rental Car"]!.size),
-          top: positions["Rental Car"]!.y -
-              (0.5 * positions["Rental Car"]!.size),
-          child: AnimatedContainer(
-            alignment: Alignment.center,
-            duration: const Duration(milliseconds: 200),
-            width: positions["Rental Car"]!.size,
-            height: positions["Rental Car"]!.size,
-            decoration: const BoxDecoration(
-              shape: BoxShape.circle,
-              color: Color.fromARGB(255, 0, 0, 0),
-            ),
-            child: MouseRegion(
-              onEnter: (_) {
+              // Start the animation
+              _iconAnimationControllers["Hotels"]?.forward();
+            },
+            onExit: (_) {
+              setElementAngleDegrees(defaultAngles["Hotels"]!, "Hotels");
+              updateDotSize(defaultDotSize, "Hotels");
+              setElementAngleDegrees(defaultAngles["Flights"]!, "Flights");
+              setElementAngleDegrees(
+                  defaultAngles["Rental Cars"]!, "Rental Cars");
+              setElementAngleDegrees(
+                  defaultAngles["Activities"]!, "Activities");
+              _iconAnimationControllers["Hotels"]?.reverse();
+            },
+        ),
+        // Rental Cars
+        TripConsoleDot(
+            trip: widget.trip,
+          type: PageType.RentalCar, 
+          positions: positions, 
+          iconAnimationControllers: _iconAnimationControllers, 
+          iconAnimations: _iconAnimations, 
+          onEnter: (_) {
                 setElementAngleDegrees(
-                    defaultAngles["Hotel"]! - angleGap * gapExpansionFactor,
-                    "Hotel");
-                updateDotSize(defaultDotSize * expandDotFactor, "Rental Car");
+                    defaultAngles["Hotels"]! - angleGap * gapExpansionFactor,
+                    "Hotels");
+                updateDotSize(defaultDotSize * expandDotFactor, "Rental Cars");
                 setElementAngleDegrees(
                     defaultAngles["Flights"]! - angleGap * gapExpansionFactor,
                     "Flights");
                 setElementAngleDegrees(
-                    defaultAngles["Rental Car"]!, "Rental Car");
+                    defaultAngles["Rental Cars"]!, "Rental Cars");
                 setElementAngleDegrees(
                     defaultAngles["Activities"]! -
                         angleGap * gapExpansionFactor,
                     "Activities");
                 // Start the animation
-                _iconAnimationControllers["Rental Car"]?.forward();
+                _iconAnimationControllers["Rental Cars"]?.forward();
               },
               onExit: (_) {
-                setElementAngleDegrees(defaultAngles["Hotel"]!, "Hotel");
-                updateDotSize(defaultDotSize, "Rental Car");
+                setElementAngleDegrees(defaultAngles["Hotels"]!, "Hotels");
+                updateDotSize(defaultDotSize, "Rental Cars");
                 setElementAngleDegrees(defaultAngles["Flights"]!, "Flights");
                 setElementAngleDegrees(
-                    defaultAngles["Rental Car"]!, "Rental Car");
+                    defaultAngles["Rental Cars"]!, "Rental Cars");
                 setElementAngleDegrees(
                     defaultAngles["Activities"]!, "Activities");
 
-                _iconAnimationControllers["Rental Car"]?.reverse();
+                _iconAnimationControllers["Rental Cars"]?.reverse();
               },
-              child: AnimatedBuilder(
-                animation: _iconAnimationControllers["Rental Car"]!,
-                builder: (context, child) {
-                  return Icon(
-                    Icons.car_rental_outlined,
-                    color: Colors.white,
-                    size: _iconAnimations["Rental Car"]!.value *
-                        defaultDotSize *
-                        iconSizeFactor,
-                  );
-                },
-              ),
-            ),
-          ),
         ),
         // Flights
-        AnimatedPositioned(
-          duration: const Duration(milliseconds: 200),
-          curve: Curves.linear,
-          left: positions["Flights"]!.x - (0.5 * positions["Flights"]!.size),
-          top: positions["Flights"]!.y - (0.5 * positions["Flights"]!.size),
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 200),
-            width: positions["Flights"]!.size,
-            height: positions["Flights"]!.size,
-            decoration: const BoxDecoration(
-              shape: BoxShape.circle,
-              color: Color.fromARGB(255, 0, 0, 0),
-            ),
-            child: MouseRegion(
-              onEnter: (_) {
-                setElementAngleDegrees(
-                    defaultAngles["Hotel"]! - angleGap * gapExpansionFactor,
-                    "Hotel");
-                updateDotSize(defaultDotSize * expandDotFactor, "Flights");
-                setElementAngleDegrees(defaultAngles["Flights"]!, "Flights");
-                setElementAngleDegrees(
-                    defaultAngles["Rental Car"]! +
-                        angleGap * gapExpansionFactor,
-                    "Rental Car");
-                setElementAngleDegrees(
-                    defaultAngles["Activities"]! -
-                        angleGap * gapExpansionFactor,
-                    "Activities");
-                // Start the animation
-                _iconAnimationControllers["Flights"]!.forward();
-              },
-              onExit: (_) {
-                setElementAngleDegrees(defaultAngles["Hotel"]!, "Hotel");
-                updateDotSize(defaultDotSize, "Flights");
-                setElementAngleDegrees(defaultAngles["Flights"]!, "Flights");
-                setElementAngleDegrees(
-                    defaultAngles["Rental Car"]!, "Rental Car");
-                setElementAngleDegrees(
-                    defaultAngles["Activities"]!, "Activities");
-                _iconAnimationControllers["Flights"]!.reverse();
-              },
-              child: AnimatedBuilder(
-                animation: _iconAnimationControllers["Flights"]!,
-                builder: (context, child) {
-                  return Icon(
-                    Icons.flight_takeoff_rounded,
-                    color: Colors.white,
-                    size: _iconAnimations["Flights"]!.value *
-                        defaultDotSize *
-                        iconSizeFactor,
-                  );
-                },
-              ),
-            ),
-          ),
+        TripConsoleDot(
+            trip: widget.trip,
+          type: PageType.Flights, 
+          positions: positions, 
+          iconAnimationControllers: _iconAnimationControllers, 
+          iconAnimations: _iconAnimations, 
+          onEnter: (_) {
+            setElementAngleDegrees(
+                defaultAngles["Hotels"]! - angleGap * gapExpansionFactor,
+                "Hotels");
+            updateDotSize(defaultDotSize * expandDotFactor, "Flights");
+            setElementAngleDegrees(defaultAngles["Flights"]!, "Flights");
+            setElementAngleDegrees(
+                defaultAngles["Rental Cars"]! +
+                    angleGap * gapExpansionFactor,
+                "Rental Cars");
+            setElementAngleDegrees(
+                defaultAngles["Activities"]! -
+                    angleGap * gapExpansionFactor,
+                "Activities");
+            // Start the animation
+            _iconAnimationControllers["Flights"]!.forward();
+          },
+          onExit: (_) {
+            setElementAngleDegrees(defaultAngles["Hotels"]!, "Hotels");
+            updateDotSize(defaultDotSize, "Flights");
+            setElementAngleDegrees(defaultAngles["Flights"]!, "Flights");
+            setElementAngleDegrees(
+                defaultAngles["Rental Cars"]!, "Rental Cars");
+            setElementAngleDegrees(
+                defaultAngles["Activities"]!, "Activities");
+            _iconAnimationControllers["Flights"]!.reverse();
+          },
         ),
         // Activities
-        AnimatedPositioned(
-          duration: const Duration(milliseconds: 200),
-          curve: Curves.linear,
-          left: positions["Activities"]!.x -
-              (0.5 * positions["Activities"]!.size),
-          top: positions["Activities"]!.y -
-              (0.5 * positions["Activities"]!.size),
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 200),
-            width: positions["Activities"]!.size,
-            height: positions["Activities"]!.size,
-            decoration: const BoxDecoration(
-              shape: BoxShape.circle,
-              color: Color.fromARGB(255, 0, 0, 0),
-            ),
-            child: MouseRegion(
-              onEnter: (_) {
+        TripConsoleDot(
+          trip: widget.trip,
+          type: PageType.Activities, 
+          positions: positions, 
+          iconAnimationControllers: _iconAnimationControllers, 
+          iconAnimations: _iconAnimations, 
+          onEnter: (_) {
                 setElementAngleDegrees(
-                    defaultAngles["Hotel"]! + angleGap * gapExpansionFactor,
-                    "Hotel");
+                    defaultAngles["Hotels"]! + angleGap * gapExpansionFactor,
+                    "Hotels");
                 updateDotSize(defaultDotSize * expandDotFactor, "Activities");
                 setElementAngleDegrees(
                     defaultAngles["Flights"]! + angleGap * gapExpansionFactor,
                     "Flights");
                 setElementAngleDegrees(
-                    defaultAngles["Rental Car"]! +
+                    defaultAngles["Rental Cars"]! +
                         angleGap * gapExpansionFactor,
-                    "Rental Car");
+                    "Rental Cars");
                 setElementAngleDegrees(
                     defaultAngles["Activities"]!, "Activities");
 
@@ -371,29 +291,15 @@ class _MyStatefulWidgetState extends State<TripCenterConsole>
                 _iconAnimationControllers["Activities"]!.forward();
               },
               onExit: (_) {
-                setElementAngleDegrees(defaultAngles["Hotel"]!, "Hotel");
+                setElementAngleDegrees(defaultAngles["Hotels"]!, "Hotels");
                 updateDotSize(defaultDotSize, "Activities");
                 setElementAngleDegrees(defaultAngles["Flights"]!, "Flights");
                 setElementAngleDegrees(
-                    defaultAngles["Rental Car"]!, "Rental Car");
+                    defaultAngles["Rental Cars"]!, "Rental Cars");
                 setElementAngleDegrees(
                     defaultAngles["Activities"]!, "Activities");
                 _iconAnimationControllers["Activities"]!.reverse();
               },
-              child: AnimatedBuilder(
-                animation: _iconAnimationControllers["Activities"]!,
-                builder: (context, child) {
-                  return Icon(
-                    Icons.stadium,
-                    color: Colors.white,
-                    size: _iconAnimations["Activities"]!.value *
-                        defaultDotSize *
-                        iconSizeFactor,
-                  );
-                },
-              ),
-            ),
-          ),
         ),
         // City
         AnimatedPositioned(
