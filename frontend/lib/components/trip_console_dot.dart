@@ -12,7 +12,7 @@ import "package:tripsitter/components/select_hotel.dart";
 import "package:tripsitter/components/trip_center_console.dart";
 
 class PageType { 
-  static const String Hotel = "Hotel";
+  static const String Hotel = "Hotels";
   static const String Flights = "Flights";
   static const String RentalCar = "Rental Cars";
   static const String Activities = "Activities";
