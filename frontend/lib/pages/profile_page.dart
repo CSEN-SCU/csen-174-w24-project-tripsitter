@@ -91,7 +91,7 @@ class ProfilePage extends StatelessWidget {
     FirebaseFirestore.instance.collection('trips').where('uids', arrayContains: profile.id).get().then((s) => s.docs.map(((doc) => Trip.fromFirestore(doc))));
     return MultiProvider(
       providers: [
-        StreamProvider.value(value: Trip.getTripsByProfile(profile.id), initialData: List<Trip>.empty())
+        StreamProvider.value(value: Trip.getTripsByProfile(profile.id), initialData: List<Trip>.empty(growable: true))
       ],
       child: Scaffold(
         appBar: AppBar(

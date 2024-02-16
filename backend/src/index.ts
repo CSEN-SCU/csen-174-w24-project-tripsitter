@@ -7,6 +7,7 @@ import { searchFlights, searchAirlines, getAirlineLogo } from "./flights";
 import { getHotels } from "./hotels";
 import { searchAirports } from "./autofill";
 import { addUserToTrip, removeUserFromTrip } from "./firebase";
+import { getRentalCars } from "./cars";
 const app = express();
 const cors = require('cors')({origin: true});
 app.use(cors);
@@ -20,6 +21,7 @@ app.get('/search/airlines', searchAirlines);
 app.get('/search/flights', searchFlights);
 app.get('/search/hotels', getHotels);
 app.get('/search/events', searchEvents);
+app.get('/search/cars', getRentalCars);
 
 app.get('/airline-logo', getAirlineLogo);
 
