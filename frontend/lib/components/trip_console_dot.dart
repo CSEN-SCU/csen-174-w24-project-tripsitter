@@ -11,6 +11,13 @@ import "package:tripsitter/components/select_flight.dart";
 import "package:tripsitter/components/select_hotel.dart";
 import "package:tripsitter/components/trip_center_console.dart";
 
+class PageType { 
+  static const String Hotel = "Hotels";
+  static const String Flights = "Flights";
+  static const String RentalCar = "Rental Cars";
+  static const String Activities = "Activities";
+  static const String Cities = "Cities";
+}
 class TripConsoleDot extends StatefulWidget {
   final String type;
   final Trip trip;
@@ -24,7 +31,7 @@ class TripConsoleDot extends StatefulWidget {
 
   // Configurations go Here
   // The initial gap in degrees between the four dots
-  final double angleGap = 25.0;
+  final double angleGap = 30.0;
   // The fraction of the angleGap that the angle is changed by
   final double gapExpansionFactor = 0.4;
   // Multiplier on maxHeight to determine the radius of the circular path
@@ -55,14 +62,6 @@ class TripConsoleDot extends StatefulWidget {
 
   @override
   _TripConsoleDotState createState() => _TripConsoleDotState();
-}
-
-class PageType { 
-  static const String Hotel = "Hotel";
-  static const String Flights = "Flights";
-  static const String RentalCar = "Rental Car";
-  static const String Activities = "Activities";
-  static const String Cities = "Cities";
 }
 
 class _TripConsoleDotState extends State<TripConsoleDot> {
@@ -96,10 +95,7 @@ class _TripConsoleDotState extends State<TripConsoleDot> {
               color: Colors.white,
             ),
             child: Stack(children: [
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: popupPage(widget.type, profiles),
-              ),
+              popupPage(widget.type, profiles),
               const Positioned(
                 top: 10.0,
                 right: 10.0,
@@ -141,35 +137,45 @@ class _TripConsoleDotState extends State<TripConsoleDot> {
           (0.5 * widget.positions[type]!.size),
       top: widget.positions[type]!.y -
           (0.5 * widget.positions[type]!.size),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        width: widget.positions[type]!.size,
-        height: widget.positions[type]!.size,
-        decoration: const BoxDecoration(
-          shape: BoxShape.circle,
-          color: Color.fromARGB(255, 0, 0, 0),
-        ),
-        child: MouseRegion(
-          onEnter: widget.onEnter,
-          onExit: widget.onExit,
-          child: GestureDetector(
-            onTap: () {
-              openPopup(context);
-            },
-            child: AnimatedBuilder(
-              animation: widget.iconAnimationControllers[type]!,
-              builder: (context, child) {
-                return Icon(
-                  icon,
-                  color: Colors.white,
-                  size: widget.iconAnimations[type]!.value *
-                      widget.defaultDotSize *
-                      widget.iconSizeFactor,
-                );
-              },
+      child: Column(
+        children: [
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            width: widget.positions[type]!.size,
+            height: widget.positions[type]!.size,
+            child: MouseRegion(
+              onEnter: widget.onEnter,
+              onExit: widget.onExit,
+              child: GestureDetector(
+                onTap: () {
+                  openPopup(context);
+                },
+                child: AnimatedBuilder(
+                  animation: widget.iconAnimationControllers[type]!,
+                  builder: (context, child) {
+                    return Container(
+                      decoration: const BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Color.fromARGB(255, 0, 0, 0),
+                      ),
+                      child: Icon(
+                        icon,
+                        color: Colors.white,
+                        size: widget.iconAnimations[type]!.value *
+                            widget.defaultDotSize *
+                            widget.iconSizeFactor,
+                      ),
+                    );
+                  },
+                ),
+              ),
             ),
           ),
-        ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text(type, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+          )
+        ],
       ),
     );
   }

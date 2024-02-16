@@ -36,6 +36,9 @@ class _UpdateProfileState extends State<UpdateProfile> {
 
   void loadCities() async {
     cities = await getCities(context);
+    if(!mounted) {
+      return;
+    }
     setState(() {});
   }
 

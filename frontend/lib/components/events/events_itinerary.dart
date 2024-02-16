@@ -9,7 +9,8 @@ import 'package:tripsitter/components/mobile_wrapper.dart';
 class EventsItinerary extends StatefulWidget {
   final Trip trip;
   final List<UserProfile> profiles;
-  const EventsItinerary({required this.trip, required this.profiles, super.key});
+  final Function? setState;
+  const EventsItinerary({required this.trip, required this.profiles, this.setState, super.key});
 
   @override
   State<EventsItinerary> createState() => _EventsItineraryState();
@@ -19,8 +20,7 @@ class _EventsItineraryState extends State<EventsItinerary> {
   @override
   Widget build(BuildContext context) {
     bool isMobile = Provider.of<bool>(context);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+    return ListView(
       children: [
         Text('Itinerary', style: Theme.of(context).textTheme.displayMedium?.copyWith(decoration: TextDecoration.underline, fontWeight: FontWeight.bold)),
         ...widget.trip.activities.map((activity) => Builder(
@@ -52,6 +52,9 @@ class _EventsItineraryState extends State<EventsItinerary> {
                             onPressed: () async {
                               await widget.trip.removeActivity(activity);
                               setState(() {});
+                              if(widget.setState != null) {
+                                widget.setState!();
+                              }
                             },
                             child: const Text('Remove'),
                           ),
@@ -121,7 +124,12 @@ class _EventsItineraryState extends State<EventsItinerary> {
         )).toList(),
         if(isMobile)
           ElevatedButton(
-            onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => MobileWrapper(title: "Add Event", child: EventsOptions(trip: widget.trip, profiles: widget.profiles, setState: () {setState(() {});})))),
+            onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => MobileWrapper(title: "Add Event", child: EventsOptions(trip: widget.trip, profiles: widget.profiles, setState: () {
+              setState(() {});
+              if(widget.setState != null) {
+                widget.setState!();
+              }
+            })))),
             child: const Text('Add Event'),
           )
       ]

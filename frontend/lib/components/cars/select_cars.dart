@@ -42,8 +42,11 @@ class _SelectCarsState extends State<SelectCars> {
         return Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(
-              color: Color.fromARGB(255, 200, 200, 200),
+              Container(
+                decoration: const BoxDecoration(
+                  borderRadius: BorderRadius.only(topLeft: Radius.circular(25.0), bottomLeft: Radius.circular(25.0)),
+                  color: Color.fromARGB(255, 200, 200, 200),
+                ),
               width: constraints.maxWidth * 0.35,
               child: Padding(
                 padding: const EdgeInsets.all(8.0),
