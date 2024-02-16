@@ -134,9 +134,11 @@ class Trip {
     await _save();
   }
 
-  Future<void> addHotelGroup(HotelGroup hotel) async {
+  Future<HotelGroup> createHotelGroup(String name, List<String> members) async {
+    HotelGroup hotel = HotelGroup(name: name, members: members, options: [], save: save);
     _hotels.add(hotel);
     await _save();
+    return hotel;
   }
 
   Future<void> removeHotelGroup(HotelGroup hotel) async {
@@ -144,9 +146,11 @@ class Trip {
     await _save();
   }
 
-  Future<void> addRentalCarGroup(RentalCarGroup rentalCar) async {
+  Future<RentalCarGroup> createRentalCarGroup(String name, List<String> members) async {
+    RentalCarGroup rentalCar = RentalCarGroup(name: name, members: members, options: List<RentalCarOffer>.empty(growable: true), save: save);
     _rentalCars.add(rentalCar);
     await _save();
+    return rentalCar;
   }
 
   Future<void> removeRentalCarGroup(RentalCarGroup rentalCar) async {
@@ -288,10 +292,12 @@ class FlightGroup {
 class HotelGroup {
   List<String> _members;
   List<HotelOffer> _options;
+  String _name;
   HotelOffer? _selected;
   Future<void> Function() _save;
 
   HotelGroup({
+    required name,
     required members,
     required options,
     selected,
@@ -299,21 +305,29 @@ class HotelGroup {
   }) : 
     _save = save,
     _members = members,
+    _name = name,
     _options = options,
     _selected = selected;
 
   factory HotelGroup.fromJson(Map<String, dynamic> json, Future<void> Function() save) {
     return HotelGroup(
       members: json['members'],
+      name: json['name'],
       options: (json['options'] as List).map((option) => HotelOffer.fromJson(option)).toList(),
       selected: json['selected'] != null ? HotelOffer.fromJson(json['selected']) : null,
       save: save
     );
   }
 
+  String get name => _name;
+  List<String> get members => _members;
+  List<HotelOffer> get options => _options;
+  HotelOffer? get selected => _selected;
+
   Map<String, dynamic> toJson() {
     return {
       "members": _members,
+      "name": _name,
       "options": _options.map((option) => option.toJson()).toList(),
       "selected": _selected?.toJson(),
     };
@@ -339,28 +353,36 @@ class HotelGroup {
     _members.remove(member);
     await _save();
   }
+  Future<void> setName(String name) async {
+    _name = name;
+    await _save();
+  }
 }
 
 class RentalCarGroup {
   List<String> _members;
   List<RentalCarOffer> _options;
+  String _name;
   RentalCarOffer? _selected;
   Future<void> Function() _save;
 
   RentalCarGroup({
     required members,
     required options,
+    required name,
     selected,
     required Future<void> Function() save,
   }) : 
     _save = save,
+    _name = name,
     _members = members,
     _options = options,
     _selected = selected;
 
   factory RentalCarGroup.fromJson(Map<String, dynamic> json, Future<void> Function() save) {
     return RentalCarGroup(
-      members: json['members'],
+      members: (json['members'] as List).map((item) => item as String).toList(),
+      name: json['name'],
       options: (json['options'] as List).map((option) => RentalCarOffer.fromJson(option)).toList(),
       selected: json['selected'] != null ? RentalCarOffer.fromJson(json['selected']) : null,
       save: save
@@ -370,10 +392,16 @@ class RentalCarGroup {
   Map<String, dynamic> toJson() {
     return {
       "members": _members,
+      "name": _name,
       "options": _options.map((option) => option.toJson()).toList(),
       "selected": _selected?.toJson(),
     };
   }
+
+  String get name => _name;
+  List<String> get members => _members;
+  List<RentalCarOffer> get options => _options;
+  RentalCarOffer? get selected => _selected;
 
   Future<void> selectOption(RentalCarOffer option) async {
     _selected = option;
@@ -387,12 +415,20 @@ class RentalCarGroup {
     _options.remove(option);
     await _save();
   }
+  Future<void> removeOptionById(String id) async {
+    _options.removeWhere((element) => element.guid == id);
+    await _save();
+  }
   Future<void> addMember(String member) async {
     _members.add(member);
     await _save();
   }
   Future<void> removeMember(String member) async {
     _members.remove(member);
+    await _save();
+  }
+  Future<void> setName(String name) async {
+    _name = name;
     await _save();
   }
 }

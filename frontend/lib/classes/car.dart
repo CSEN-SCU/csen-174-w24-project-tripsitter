@@ -47,7 +47,7 @@ class RentalCarOffer {
   final String prvId;
   final String carName;
   final String originalCarName;
-  final RentalCarGroup? group;
+  final RentalCarGroupInfo group;
   final String dplnk;
   final int doRnId;
   final String pickupMethod;
@@ -73,7 +73,7 @@ class RentalCarOffer {
     required this.prvId,
     required this.carName,
     required this.originalCarName,
-    this.group,
+    required this.group,
     required this.dplnk,
     required this.doRnId,
     required this.pickupMethod,
@@ -100,7 +100,7 @@ class RentalCarOffer {
         prvId: json["prv_id"],
         carName: json["car_name"],
         originalCarName: json["original_car_name"],
-        group: json["group"] == null ? null : RentalCarGroup.fromJson(json["group"]),
+        group: RentalCarGroupInfo.fromJson(json["group"]),
         dplnk: json["dplnk"],
         doRnId: json["do_rn_id"],
         pickupMethod: json["pickup_method"],
@@ -127,7 +127,7 @@ class RentalCarOffer {
         "prv_id": prvId,
         "car_name": carName,
         "original_car_name": originalCarName,
-        "group": group?.toJson(),
+        "group": group.toJson(),
         "dplnk": dplnk,
         "do_rn_id": doRnId,
         "pickup_method": pickupMethod,
@@ -154,7 +154,7 @@ class RentalCarAdds {
       };
 }
 
-class RentalCarGroup {
+class RentalCarGroupInfo {
   final String sippCode;
   final String carName;
   final bool ac;
@@ -172,7 +172,7 @@ class RentalCarGroup {
   final String pickupMethod;
   final String searchResultsOptionGuid;
 
-  RentalCarGroup({
+  RentalCarGroupInfo({
     required this.sippCode,
     required this.carName,
     required this.ac,
@@ -191,9 +191,8 @@ class RentalCarGroup {
     required this.searchResultsOptionGuid,
   });
 
-  factory RentalCarGroup.fromJson(Map<String, dynamic> json) {
-    print(json);
-    return RentalCarGroup(
+  factory RentalCarGroupInfo.fromJson(Map<String, dynamic> json) {
+    return RentalCarGroupInfo(
       sippCode: json["sippCode"],
       carName: json["car_name"],
       ac: json["ac"],
