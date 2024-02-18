@@ -11,5 +11,6 @@
   "compileOnSave": true,
   "include": [
     "src"
-  ]
+  ],
+  "STRIPE_PK_TEST": "HI"
 }

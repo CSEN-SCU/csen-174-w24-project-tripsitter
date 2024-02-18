@@ -48,17 +48,15 @@ class TripConsoleDot extends StatefulWidget {
   late Function updateDotX;
   late Function updateDotY;
 
-  TripConsoleDot(
-    {
-      required this.trip,
-      required this.type,
-      required this.positions,
-      required this.iconAnimationControllers,
-      required this.iconAnimations,
-      required this.onEnter,
-      required this.onExit,
-    }
-  );
+  TripConsoleDot({
+    required this.trip,
+    required this.type,
+    required this.positions,
+    required this.iconAnimationControllers,
+    required this.iconAnimations,
+    required this.onEnter,
+    required this.onExit,
+  });
 
   @override
   _TripConsoleDotState createState() => _TripConsoleDotState();
@@ -82,7 +80,8 @@ class _TripConsoleDotState extends State<TripConsoleDot> {
   }
 
   void openPopup(myContext) {
-    List<UserProfile> profiles = Provider.of<List<UserProfile>>(myContext, listen: false);
+    List<UserProfile> profiles =
+        Provider.of<List<UserProfile>>(myContext, listen: false);
     showDialog(
       context: myContext,
       builder: (BuildContext context) {

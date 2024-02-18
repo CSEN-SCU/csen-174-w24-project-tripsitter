@@ -25,13 +25,13 @@ class FlightsQuery {
   });
 
   Map<String, dynamic> toJson() {
-    Map<String,dynamic> json = {
+    Map<String, dynamic> json = {
       'origin': origin,
       'destination': destination,
       'departureDate': departureDate.toIso8601String().split('T')[0],
       'adults': adults.toString(),
     };
-    if(returnDate != null) {
+    if (returnDate != null) {
       json['returnDate'] = returnDate!.toIso8601String().split('T')[0];
     }
     if (children != null) {
@@ -41,7 +41,7 @@ class FlightsQuery {
       json['currency'] = currency;
     }
     if (travelClass != null) {
-      switch(travelClass) {
+      switch (travelClass) {
         case TravelClass.economy:
           json['travelClass'] = 'ECONOMY';
           break;
@@ -102,7 +102,8 @@ class FlightItineraryRecursive {
     required this.flightNumbers,
   });
 
-  static List<FlightItineraryRecursive> fromOffersList(List<FlightOffer> offers) {
+  static List<FlightItineraryRecursive> fromOffersList(
+      List<FlightOffer> offers) {
     List<FlightItineraryRecursive> itineraries = [];
     List<FlightItineraryRecursive> currentObj = itineraries;
     int depth = 0;
@@ -111,20 +112,44 @@ class FlightItineraryRecursive {
       depth = 0;
       for (FlightItinerary i in offer.itineraries) {
         FlightItineraryRecursive? iRec = itineraries.firstWhereOrNull((ir) {
-          if(ir.id == i.id) {return true;}
-          if(ir.offers.first.itineraries.first.segments.length != i.segments.length) {return false;}
-          for(int j = 0; j < i.segments.length; j++) {
-            if(ir.offers.first.itineraries[depth].segments[j].departure.iataCode != i.segments[j].departure.iataCode) {return false;}
-            if(ir.offers.first.itineraries[depth].segments[j].arrival.iataCode != i.segments[j].arrival.iataCode) {return false;}
-            if(ir.offers.first.itineraries[depth].segments[j].departure.at != i.segments[j].departure.at) {return false;}
-            if(ir.offers.first.itineraries[depth].segments[j].arrival.at != i.segments[j].arrival.at) {return false;}
-            String thisOperator = i.segments[j].operating?.carrierCode ?? i.segments[j].carrierCode;
-            String thatOperator = ir.offers.first.itineraries[depth].segments[j].operating?.carrierCode ?? ir.offers.first.itineraries[depth].segments[j].carrierCode;
-            if(thisOperator != thatOperator) {return false;}
+          if (ir.id == i.id) {
+            return true;
+          }
+          if (ir.offers.first.itineraries.first.segments.length !=
+              i.segments.length) {
+            return false;
+          }
+          for (int j = 0; j < i.segments.length; j++) {
+            if (ir.offers.first.itineraries[depth].segments[j].departure
+                    .iataCode !=
+                i.segments[j].departure.iataCode) {
+              return false;
+            }
+            if (ir.offers.first.itineraries[depth].segments[j].arrival
+                    .iataCode !=
+                i.segments[j].arrival.iataCode) {
+              return false;
+            }
+            if (ir.offers.first.itineraries[depth].segments[j].departure.at !=
+                i.segments[j].departure.at) {
+              return false;
+            }
+            if (ir.offers.first.itineraries[depth].segments[j].arrival.at !=
+                i.segments[j].arrival.at) {
+              return false;
+            }
+            String thisOperator = i.segments[j].operating?.carrierCode ??
+                i.segments[j].carrierCode;
+            String thatOperator = ir.offers.first.itineraries[depth].segments[j]
+                    .operating?.carrierCode ??
+                ir.offers.first.itineraries[depth].segments[j].carrierCode;
+            if (thisOperator != thatOperator) {
+              return false;
+            }
           }
           return true;
         });
-        if(iRec == null) {
+        if (iRec == null) {
           iRec = FlightItineraryRecursive(
             depth: depth,
             id: i.id,
@@ -143,14 +168,17 @@ class FlightItineraryRecursive {
         iRec.offers.add(offer);
         iRec.offerIds.add(offer.id);
         iRec.offeredBy.add(offer.validatingAirlineCodes.first);
-        for(int j = 0; j < i.segments.length; j++) {
-          if(iRec.flightNumbers.length <= j) {
+        for (int j = 0; j < i.segments.length; j++) {
+          if (iRec.flightNumbers.length <= j) {
             iRec.flightNumbers.add({});
           }
-          iRec.flightNumbers[j].add(i.segments[j].carrierCode + i.segments[j].number);
+          iRec.flightNumbers[j]
+              .add(i.segments[j].carrierCode + i.segments[j].number);
         }
 
-        if(iRec.minPrice == null || double.parse(offer.price.total) < double.parse(iRec.minPrice!.total)) {
+        if (iRec.minPrice == null ||
+            double.parse(offer.price.total) <
+                double.parse(iRec.minPrice!.total)) {
           iRec.minPrice = offer.price;
         }
 
@@ -160,7 +188,6 @@ class FlightItineraryRecursive {
     }
     return itineraries;
   }
-
 }
 
 class FlightOffer {
@@ -207,14 +234,13 @@ class FlightOffer {
       lastTicketingDate: json['lastTicketingDate'],
       lastTicketingDateTime: json['lastTicketingDateTime'],
       numberOfBookableSeats: json['numberOfBookableSeats'],
-      itineraries: List<FlightItinerary>.from(
-          json['itineraries'].map((itinerary) => FlightItinerary.fromJson(itinerary))),
+      itineraries: List<FlightItinerary>.from(json['itineraries']
+          .map((itinerary) => FlightItinerary.fromJson(itinerary))),
       price: FlightPrice.fromJson(json['price']),
       pricingOptions: FlightPricingOptions.fromJson(json['pricingOptions']),
-      validatingAirlineCodes:
-          List<String>.from(json['validatingAirlineCodes']),
-      travelerPricings: List<FlightTravelerPricing>.from(json['travelerPricings']
-          .map((travelerPricing) =>
+      validatingAirlineCodes: List<String>.from(json['validatingAirlineCodes']),
+      travelerPricings: List<FlightTravelerPricing>.from(
+          json['travelerPricings'].map((travelerPricing) =>
               FlightTravelerPricing.fromJson(travelerPricing))),
     );
   }
@@ -230,11 +256,14 @@ class FlightOffer {
       'lastTicketingDate': lastTicketingDate,
       'lastTicketingDateTime': lastTicketingDateTime,
       'numberOfBookableSeats': numberOfBookableSeats,
-      'itineraries': itineraries.map((itinerary) => itinerary.toJson()).toList(),
+      'itineraries':
+          itineraries.map((itinerary) => itinerary.toJson()).toList(),
       'price': price.toJson(),
       'pricingOptions': pricingOptions.toJson(),
       'validatingAirlineCodes': validatingAirlineCodes,
-      'travelerPricings': travelerPricings.map((travelerPricing) => travelerPricing.toJson()).toList(),
+      'travelerPricings': travelerPricings
+          .map((travelerPricing) => travelerPricing.toJson())
+          .toList(),
     };
   }
 }
@@ -244,7 +273,8 @@ class FlightItinerary {
   final List<FlightSegment> segments;
   final String id;
 
-  FlightItinerary({required this.duration, required this.segments}) : id = segments.map((segment) => segment.id).join('-');
+  FlightItinerary({required this.duration, required this.segments})
+      : id = segments.map((segment) => segment.id).join('-');
 
   factory FlightItinerary.fromJson(Map<String, dynamic> json) {
     return FlightItinerary(
@@ -298,7 +328,9 @@ class FlightSegment {
       carrierCode: json['carrierCode'],
       number: json['number'],
       aircraft: FlightAircraft.fromJson(json['aircraft']),
-      operating: json['operating'] != null ? FlightOperating.fromJson(json['operating']) : null,
+      operating: json['operating'] != null
+          ? FlightOperating.fromJson(json['operating'])
+          : null,
       duration: json['duration'],
       id: json['id'],
       numberOfStops: json['numberOfStops'],
@@ -307,7 +339,7 @@ class FlightSegment {
   }
 
   Map<String, dynamic> toJson() {
-    Map<String,dynamic> map = {
+    Map<String, dynamic> map = {
       'departure': departure.toJson(),
       'arrival': arrival.toJson(),
       'carrierCode': carrierCode,
@@ -318,7 +350,7 @@ class FlightSegment {
       'numberOfStops': numberOfStops,
       'blacklistedInEU': blacklistedInEU,
     };
-    if(operating != null) {
+    if (operating != null) {
       map['operating'] = operating!.toJson();
     }
     return map;
@@ -330,7 +362,8 @@ class FlightDepartureArrival {
   final String? terminal;
   final DateTime at;
 
-  const FlightDepartureArrival({required this.iataCode, this.terminal, required this.at});
+  const FlightDepartureArrival(
+      {required this.iataCode, this.terminal, required this.at});
 
   factory FlightDepartureArrival.fromJson(Map<String, dynamic> json) {
     return FlightDepartureArrival(
@@ -341,11 +374,11 @@ class FlightDepartureArrival {
   }
 
   Map<String, dynamic> toJson() {
-    Map<String,dynamic> map = {
+    Map<String, dynamic> map = {
       'iataCode': iataCode,
       'at': at.toIso8601String(),
     };
-    if(terminal != null) {
+    if (terminal != null) {
       map['terminal'] = terminal;
     }
     return map;
@@ -408,19 +441,20 @@ class FlightPrice {
       currency: json['currency'],
       total: json['total'],
       base: json['base'],
-      fees: List<FlightFee>.from((json['fees'] ?? []).map((fee) => FlightFee.fromJson(fee))),
+      fees: List<FlightFee>.from(
+          (json['fees'] ?? []).map((fee) => FlightFee.fromJson(fee))),
       grandTotal: json['grandTotal'],
     );
   }
 
   Map<String, dynamic> toJson() {
-    Map<String,dynamic> map = {
+    Map<String, dynamic> map = {
       'currency': currency,
       'total': total,
       'base': base,
       'fees': fees.map((fee) => fee.toJson()).toList(),
     };
-    if(grandTotal != null) {
+    if (grandTotal != null) {
       map['grandTotal'] = grandTotal;
     }
     return map;
@@ -494,8 +528,8 @@ class FlightTravelerPricing {
       travelerType: json['travelerType'],
       price: FlightPrice.fromJson(json['price']),
       fareDetailsBySegment: List<FlightFareDetailsBySegment>.from(
-          json['fareDetailsBySegment']
-              .map((fareDetails) => FlightFareDetailsBySegment.fromJson(fareDetails))),
+          json['fareDetailsBySegment'].map((fareDetails) =>
+              FlightFareDetailsBySegment.fromJson(fareDetails))),
     );
   }
 
@@ -505,7 +539,9 @@ class FlightTravelerPricing {
       'fareOption': fareOption,
       'travelerType': travelerType,
       'price': price.toJson(),
-      'fareDetailsBySegment': fareDetailsBySegment.map((fareDetails) => fareDetails.toJson()).toList(),
+      'fareDetailsBySegment': fareDetailsBySegment
+          .map((fareDetails) => fareDetails.toJson())
+          .toList(),
     };
   }
 }
@@ -687,13 +723,15 @@ class AirlineInfo {
 }
 
 class Airline {
-
-  static Map<String,Airline> _airlineCache = {};
+  static Map<String, Airline> _airlineCache = {};
 
   static Future<void> cacheAirlines(BuildContext context) async {
-    if(_airlineCache.isNotEmpty) return;
-    String data = await DefaultAssetBundle.of(context).loadString("airlines.json");
-    List<Airline> airlines = jsonDecode(data).map<Airline>((a) => Airline.fromJson(a)).toList(); //latest Dart
+    if (_airlineCache.isNotEmpty) return;
+    String data =
+        await DefaultAssetBundle.of(context).loadString("airlines.json");
+    List<Airline> airlines = jsonDecode(data)
+        .map<Airline>((a) => Airline.fromJson(a))
+        .toList(); //latest Dart
     for (Airline airline in airlines) {
       _airlineCache[airline.code] = airline;
     }
@@ -753,5 +791,4 @@ extension StringToDuration on String {
     final timeString = timeMatch.group(0);
     return int.parse(timeString!.substring(0, timeString.length - 1));
   }
-
 }
