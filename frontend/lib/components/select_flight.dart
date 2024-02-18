@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:tripsitter/classes/checkbox_popup.dart';
-import 'package:tripsitter/classes/counter_popup.dart';
+import 'package:tripsitter/popups/checkbox_popup.dart';
+import 'package:tripsitter/popups/counter_popup.dart';
 import 'package:tripsitter/classes/filterbutton.dart';
 import 'package:tripsitter/classes/flights.dart';
-import 'package:tripsitter/classes/select_popup.dart';
+import 'package:tripsitter/popups/select_popup.dart';
 import 'package:tripsitter/helpers/api.dart';
 import 'package:tripsitter/helpers/formatters.dart';
 
@@ -65,6 +65,20 @@ class _SelectFlightState extends State<SelectFlight> {
         TextEditingController(text: query.children?.toString() ?? "");
     TripsitterApi.getFlights(query).then((flights) {
       print("GOT FLIGHTS ${flights.length}");
+      final Set<String> airlineCodes = {};
+      for (var flight in flights) {
+        for (var segment in flight.segments) {
+          airlineCodes.add(segment.airlineOperating);
+        }
+      }
+      final airlines = airlineCodes
+          .map((code) => Airline.fromCode(code)?.name ?? code)
+          .toList();
+      airlines.sort((a, b) => a.compareTo(b));
+      for (String airline in airlines) {
+        _selectedAirlines.add(airline);
+        print('airline: $airline');
+      }
       setState(() {
         // flights.sort((a,b) => a.duration.toDuration().compareTo(b.duration));
         this.flights = flights;
@@ -415,30 +429,22 @@ class _SelectFlightState extends State<SelectFlight> {
     });
   }
 
-  void _showAirlinesPopup() {
+  void _showAirlinesPopup() async {
     setState(() {
       _isAirlinesPopupOpen = true;
     });
 
-    final airlines = [
-      'Select All',
-      'Deselect All',
-      'Alaska',
-      'American',
-      'Breeze',
-      'China Eastern',
-      'Condor',
-      'Delta',
-      'Emirates',
-      'Frontier',
-      'JetBlue',
-      'Qatar Airways',
-      'Scandinavian Airlines',
-      'Southern Airways Express',
-      'Southwest',
-      'Spirit',
-      'United'
-    ];
+    final Set<String> airlineCodes = {};
+    for (var flight in flights) {
+      for (var segment in flight.segments) {
+        airlineCodes.add(segment.airlineOperating);
+      }
+    }
+
+    final airlines = airlineCodes
+        .map((code) => Airline.fromCode(code)?.name ?? code)
+        .toList();
+    airlines.sort((a, b) => a.compareTo(b));
 
     final popup = CheckboxPopup(
       options: airlines,
