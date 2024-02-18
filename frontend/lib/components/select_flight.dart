@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:tripsitter/classes/counter.dart';
 import 'package:tripsitter/popups/checkbox_popup.dart';
 import 'package:tripsitter/popups/counter_popup.dart';
 import 'package:tripsitter/classes/filterbutton.dart';
@@ -463,33 +464,33 @@ class _SelectFlightState extends State<SelectFlight> {
     });
   }
 
-  void _showBagsPopup() {
+  void _showBagsPopup() async {
     setState(() {
       _isBagsPopupOpen = true;
     });
 
-    final options = [
-      'Any number of stops',
-      'Nonstop only',
-      '1 stop or fewer',
-      '2 stops or fewer'
+    // Initialize your counter variables with the current state
+    List<CounterVariable> variables = [
+      CounterVariable(name: "Carry On Bags", value: numCarryOnBags),
+      CounterVariable(name: "Checked Bags", value: numCheckedBags),
     ];
 
-    final popup = SelectOnePopup(
-      options: options,
-      selected: _selectedStops,
-      onSelected: (String value) {
-        setState(() {
-          _selectedStops = value;
-          _isBagsPopupOpen = false;
-        });
-      },
+    // Show the popup and await the modified variables
+    final List<CounterVariable> updatedVariables = await showCounterPopup(
+      context: context,
+      key: _bagsPopupKey,
+      variables: variables,
     );
 
-    popup.showPopup(context, _bagsPopupKey).then((_) {
-      setState(() {
-        _isBagsPopupOpen = false;
-      });
+    // Update your state based on the returned values
+    setState(() {
+      numCarryOnBags = updatedVariables
+          .firstWhere((variable) => variable.name == "Carry On Bags")
+          .value;
+      numCheckedBags = updatedVariables
+          .firstWhere((variable) => variable.name == "Checked Bags")
+          .value;
+      _isBagsPopupOpen = false;
     });
   }
 }

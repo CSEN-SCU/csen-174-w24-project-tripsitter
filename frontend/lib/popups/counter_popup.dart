@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:tripsitter/classes/counter.dart';
 
-Future<void> showCounterPopup({
+Future<List<CounterVariable>> showCounterPopup({
   required BuildContext context,
   required GlobalKey key,
-  required int initialCarryOnCount,
-  required int initialCheckedCount,
-  required Function(int, int) onCountsChanged,
+  required List<CounterVariable> variables,
 }) async {
-  int newCarryOnCount = initialCarryOnCount;
-  int newCheckedCount = initialCheckedCount;
+  List<CounterVariable> tempVariables = variables
+      .map((variable) =>
+          CounterVariable(name: variable.name, value: variable.value))
+      .toList();
 
   final RenderBox button = key.currentContext!.findRenderObject() as RenderBox;
   final RenderBox overlay =
@@ -30,52 +31,38 @@ Future<void> showCounterPopup({
         enabled: false, // This item is not selectable
         child: StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
-            return Column(
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text('# Carry On Bags'),
-                    IconButton(
-                      icon: Icon(Icons.remove),
-                      onPressed: () {
-                        if (newCarryOnCount > 0) {
-                          setState(() => newCarryOnCount--);
-                        }
-                      },
-                    ),
-                    Text('$newCarryOnCount'),
-                    IconButton(
-                      icon: Icon(Icons.add),
-                      onPressed: () => setState(() => newCarryOnCount++),
-                    ),
-                  ],
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text('# Checked Bags'),
-                    IconButton(
-                      icon: Icon(Icons.remove),
-                      onPressed: () {
-                        if (newCheckedCount > 0) {
-                          setState(() => newCheckedCount--);
-                        }
-                      },
-                    ),
-                    Text('$newCheckedCount'),
-                    IconButton(
-                      icon: Icon(Icons.add),
-                      onPressed: () => setState(() => newCheckedCount++),
-                    ),
-                  ],
-                ),
-              ],
+            return DefaultTextStyle(
+              style: TextStyle(color: Colors.black),
+              child: Column(
+                children: tempVariables.map((variable) {
+                  return Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(variable.name),
+                      IconButton(
+                        icon: Icon(Icons.remove, color: Colors.black),
+                        onPressed: () {
+                          if (variable.value > 0) {
+                            setState(() => variable.value--);
+                          }
+                        },
+                      ),
+                      Text('${variable.value}'),
+                      IconButton(
+                        icon: Icon(Icons.add, color: Colors.black),
+                        onPressed: () => setState(() => variable.value++),
+                      ),
+                    ],
+                  );
+                }).toList(),
+              ),
             );
           },
         ),
       ),
     ],
     elevation: 8.0,
-  ).then((_) => onCountsChanged(newCarryOnCount, newCheckedCount));
+  );
+
+  return tempVariables; // Return the updated variables
 }
