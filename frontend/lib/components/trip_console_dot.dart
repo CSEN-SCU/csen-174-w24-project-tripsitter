@@ -5,11 +5,19 @@ import "package:flutter/services.dart";
 import "package:provider/provider.dart";
 import "package:tripsitter/classes/profile.dart";
 import "package:tripsitter/classes/trip.dart";
-import "package:tripsitter/components/select_events.dart";
+import 'package:tripsitter/components/cars/select_cars.dart';
+import 'package:tripsitter/components/events/select_events.dart';
 import "package:tripsitter/components/select_flight.dart";
 import "package:tripsitter/components/select_hotel.dart";
 import "package:tripsitter/components/trip_center_console.dart";
 
+class PageType { 
+  static const String Hotel = "Hotels";
+  static const String Flights = "Flights";
+  static const String RentalCar = "Rental Cars";
+  static const String Activities = "Activities";
+  static const String Cities = "Cities";
+}
 class TripConsoleDot extends StatefulWidget {
   final String type;
   final Trip trip;
@@ -23,7 +31,7 @@ class TripConsoleDot extends StatefulWidget {
 
   // Configurations go Here
   // The initial gap in degrees between the four dots
-  final double angleGap = 25.0;
+  final double angleGap = 30.0;
   // The fraction of the angleGap that the angle is changed by
   final double gapExpansionFactor = 0.4;
   // Multiplier on maxHeight to determine the radius of the circular path
@@ -54,14 +62,6 @@ class TripConsoleDot extends StatefulWidget {
   _TripConsoleDotState createState() => _TripConsoleDotState();
 }
 
-class PageType {
-  static const String Hotel = "Hotel";
-  static const String Flights = "Flights";
-  static const String RentalCar = "Rental Car";
-  static const String Activities = "Activities";
-  static const String Cities = "Cities";
-}
-
 class _TripConsoleDotState extends State<TripConsoleDot> {
   Widget popupPage(String page, List<UserProfile> profiles) {
     switch (page) {
@@ -70,7 +70,7 @@ class _TripConsoleDotState extends State<TripConsoleDot> {
       case PageType.Flights:
         return const SelectFlight();
       case PageType.RentalCar:
-        return const Text("Rental cars");
+        return SelectCars(widget.trip, profiles);
       case PageType.Activities:
         return SelectEvents(widget.trip, profiles);
       case PageType.Cities:
@@ -94,10 +94,7 @@ class _TripConsoleDotState extends State<TripConsoleDot> {
               color: Colors.white,
             ),
             child: Stack(children: [
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: popupPage(widget.type, profiles),
-              ),
+              popupPage(widget.type, profiles),
               const Positioned(
                 top: 10.0,
                 right: 10.0,
@@ -135,37 +132,49 @@ class _TripConsoleDotState extends State<TripConsoleDot> {
     return AnimatedPositioned(
       duration: const Duration(milliseconds: 200),
       curve: Curves.linear,
-      left: widget.positions[type]!.x - (0.5 * widget.positions[type]!.size),
-      top: widget.positions[type]!.y - (0.5 * widget.positions[type]!.size),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        width: widget.positions[type]!.size,
-        height: widget.positions[type]!.size,
-        decoration: const BoxDecoration(
-          shape: BoxShape.circle,
-          color: Color.fromARGB(255, 0, 0, 0),
-        ),
-        child: MouseRegion(
-          onEnter: widget.onEnter,
-          onExit: widget.onExit,
-          child: GestureDetector(
-            onTap: () {
-              openPopup(context);
-            },
-            child: AnimatedBuilder(
-              animation: widget.iconAnimationControllers[type]!,
-              builder: (context, child) {
-                return Icon(
-                  icon,
-                  color: Colors.white,
-                  size: widget.iconAnimations[type]!.value *
-                      widget.defaultDotSize *
-                      widget.iconSizeFactor,
-                );
-              },
+      left: widget.positions[type]!.x -
+          (0.5 * widget.positions[type]!.size),
+      top: widget.positions[type]!.y -
+          (0.5 * widget.positions[type]!.size),
+      child: Column(
+        children: [
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            width: widget.positions[type]!.size,
+            height: widget.positions[type]!.size,
+            child: MouseRegion(
+              onEnter: widget.onEnter,
+              onExit: widget.onExit,
+              child: GestureDetector(
+                onTap: () {
+                  openPopup(context);
+                },
+                child: AnimatedBuilder(
+                  animation: widget.iconAnimationControllers[type]!,
+                  builder: (context, child) {
+                    return Container(
+                      decoration: const BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Color.fromARGB(255, 0, 0, 0),
+                      ),
+                      child: Icon(
+                        icon,
+                        color: Colors.white,
+                        size: widget.iconAnimations[type]!.value *
+                            widget.defaultDotSize *
+                            widget.iconSizeFactor,
+                      ),
+                    );
+                  },
+                ),
+              ),
             ),
           ),
-        ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text(type, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+          )
+        ],
       ),
     );
   }

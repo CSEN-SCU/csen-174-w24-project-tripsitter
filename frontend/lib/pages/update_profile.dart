@@ -9,6 +9,7 @@ import 'package:tripsitter/classes/city.dart';
 import 'package:tripsitter/classes/profile.dart';
 import 'package:tripsitter/components/new_trip_popup.dart';
 import 'package:tripsitter/components/payment.dart';
+import 'package:tripsitter/helpers/data.dart';
 import 'package:tripsitter/pages/login.dart';
 import 'package:tripsitter/pages/profile_page.dart';
 
@@ -34,17 +35,11 @@ class _UpdateProfileState extends State<UpdateProfile> {
   List<City> cities = [];
 
   void loadCities() async {
-    var result = await DefaultAssetBundle.of(context).loadString(
-    "assets/worldcities.csv",
-    );
-    List<List<dynamic>> list = CsvToListConverter().convert(result, eol: "\n");
-    list.removeAt(0);
+    cities = await getCities(context);
     if(!mounted) {
       return;
     }
-    setState(() {
-      cities = list.map((e) => City.fromArray(e)).toList();
-    });
+    setState(() {});
   }
 
   UserProfile? profile;

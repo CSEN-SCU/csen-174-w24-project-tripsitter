@@ -74,43 +74,52 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Airline.cacheAirlines(context);
-    return MultiProvider(
-      providers: [
-        StreamProvider<User?>.value(
-            value: FirebaseAuth.instance.authStateChanges(), initialData: null),
-      ],
-      child: Builder(builder: (context) {
-        User? user = Provider.of<User?>(context);
-        if (user == null) {
-          return MaterialApp(
-            onGenerateRoute: router.generator,
-            title: 'TripSitter',
-            theme: ThemeData(
-              colorScheme: ColorScheme.fromSeed(
-                  seedColor: Colors.deepPurple, brightness: Brightness.light),
-              useMaterial3: true,
-            ),
-            home: const LoginPage(),
-          );
-        }
+    return LayoutBuilder(
+      builder: (BuildContext context, BoxConstraints constraints) {
+        bool isMobile = constraints.maxWidth < 750;
         return MultiProvider(
           providers: [
-            StreamProvider<UserProfile?>.value(
-              initialData: null,
-              value: UserProfile.getProfile(user.uid),
-            )
-          ],
-          child: MaterialApp(
-            onGenerateRoute: router.generator,
-            title: 'TripSitter',
-            theme: ThemeData(
-              colorScheme: ColorScheme.fromSeed(
-                  seedColor: Colors.deepPurple, brightness: Brightness.light),
-              useMaterial3: true,
+            StreamProvider<User?>.value(
+              value: FirebaseAuth.instance.authStateChanges(), initialData: null
             ),
+            Provider<bool>.value(
+              value: isMobile,
+            ),
+          ],
+          child: Builder(
+            builder: (context) {
+              User? user = Provider.of<User?>(context);
+              if (user == null) {
+                return MaterialApp(
+                  onGenerateRoute: router.generator,
+                  title: 'TripSitter',
+                  theme: ThemeData(
+                    colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple, brightness: Brightness.light),
+                    useMaterial3: true,
+                  ),
+                  home: const LoginPage(),
+                );
+              }
+              return MultiProvider(
+                providers: [
+                  StreamProvider<UserProfile?>.value(
+                    initialData: null,
+                    value: UserProfile.getProfile(user.uid),
+                  )
+                ],
+                child: MaterialApp(
+                  onGenerateRoute: router.generator,
+                  title: 'TripSitter',
+                  theme: ThemeData(
+                    colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple, brightness: Brightness.light),
+                    useMaterial3: true,
+                  ),
+                ),
+              );
+            }
           ),
         );
-      }),
+      }
     );
   }
 }

@@ -5,18 +5,18 @@ import 'package:tripsitter/classes/trip.dart';
 import 'package:tripsitter/helpers/api.dart';
 
 class TripSideColumn extends StatelessWidget {
-  const TripSideColumn({super.key});
+  final Trip? trip;
+  const TripSideColumn(this.trip, {super.key});
 
   @override
   Widget build(BuildContext context) {
-    Trip? trip = Provider.of<Trip?>(context);
     if(trip == null) {
       return Container();
     }
     List<UserProfile> profiles = Provider.of<List<UserProfile>>(context);
     return Column(
       children: [
-        Text("Members: ${trip.uids.length}", style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+        Text("Members: ${trip!.uids.length}", style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
         ...profiles.map((UserProfile profile) => ListTile(
           leading: CircleAvatar(
             backgroundImage: profile.photoUrl != null ? NetworkImage(profile.photoUrl!) : null,
@@ -27,7 +27,7 @@ class TripSideColumn extends StatelessWidget {
           trailing: IconButton(
             icon: const Icon(Icons.remove),
             onPressed: () async {
-              await TripsitterApi.removeUser(profile.id, trip.id);
+              await TripsitterApi.removeUser(profile.id, trip!.id);
             },
           )
         )).toList(),
@@ -40,7 +40,7 @@ class TripSideColumn extends StatelessWidget {
               }
             );
             if(email != null) {
-              await TripsitterApi.addUser(email, trip.id);
+              await TripsitterApi.addUser(email, trip!.id);
             }
           }, 
           icon: Icon(Icons.add),
