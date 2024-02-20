@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:tripsitter/components/flights_dash.dart';
-import 'package:tripsitter/components/select_flight.dart';
+import 'package:tripsitter/components/flights/select_flight.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:provider/provider.dart';
