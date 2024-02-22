@@ -100,7 +100,6 @@ class Trip {
 
   factory Trip.fromFirestore(DocumentSnapshot doc) {
     Map data = doc.data() as Map;
-    print("Parsing $data");
     Trip t = Trip(
       id: doc.id,
       uids: (data['uids'] as List).map((item) => item as String).toList(),
@@ -364,8 +363,9 @@ class HotelGroup {
     await _save();
   }
   Future<void> removeOption(int i) async {
-    _offers.remove(i);
-    _infos.remove(i);
+    if(i < 0 || i > _offers.length) return;
+    _offers.removeAt(i);
+    _infos.removeAt(i);
     await _save();
   }
   Future<void> addMember(String member) async {

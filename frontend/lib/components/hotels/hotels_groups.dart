@@ -109,7 +109,7 @@ class _HotelGroupsState extends State<HotelGroups> {
                   for(int i = 0; i < group.infos.length; i++)
                     ListTile(
                       title: Text("${group.infos[i].name} (\$${group.offers[i].price.total})"),
-                      subtitle: Text("${group.offers[i].room.description.text}"),
+                      subtitle: Text("${group.offers[i].room?.description?.text ?? 'No description available'}"),
                       trailing: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [

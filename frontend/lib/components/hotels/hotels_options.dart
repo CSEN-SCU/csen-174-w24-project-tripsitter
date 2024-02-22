@@ -1,6 +1,8 @@
 import 'dart:math';
 
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:tripsitter/classes/hotels.dart';
 import 'package:tripsitter/classes/trip.dart';
 import 'package:tripsitter/components/hotels/hotel_info_dialog.dart';
@@ -29,15 +31,23 @@ class _HotelOptionsState extends State<HotelOptions> {
 
   void getHotels() async {
     HotelQuery query = HotelQuery(
-      cityCode: "SFO",
-      latitude: 37.7749,
-      longitude: -122.4194,
-      checkInDate: "2024-04-01",
-      checkOutDate: "2024-04-03",
+      latitude: widget.trip.destination.lat,
+      longitude: widget.trip.destination.lon,
+      checkInDate: DateFormat("yyyy-MM-dd").format(widget.trip.startDate),
+      checkOutDate: DateFormat("yyyy-MM-dd").format(widget.trip.endDate),
       adults: 1,
     );
     hotels = await TripsitterApi.getHotels(query);
+    // for(HotelOption hotel in hotels) {
+      // print(hotel.offers.first.toJson());
+    // }
+    if(!mounted) return;
     setState(() {});
+  }
+
+  String? minPrice(List<HotelOffer> offers) {
+    List<String> prices = offers.map((o) => o.price.total).whereNotNull().toList();
+    return prices.isEmpty ? null : prices.map((p) => double.parse(p)).reduce(min).toString();
   }
   
   @override
@@ -70,23 +80,26 @@ class _HotelOptionsState extends State<HotelOptions> {
                     ),
                   ]
                 ),
-                subtitle: Text("From \$${hotels[i].offers.map((e) => double.parse(e.price.total)).reduce(min)}"),
+                subtitle: Text(minPrice(hotels[i].offers) != null ? "From \$${minPrice(hotels[i].offers)}" : "No price available"),
               ),
-              children: hotels[i].offers.map((HotelOffer o) => ListTile(
-                subtitle: Text(o.room.description.text),
-                title: Text("\$${o.price.total}"),
-                trailing: ElevatedButton(
-                  onPressed: () async {
-                    if(widget.currentGroup!.infos.map((c) => c.hotelId).contains(hotels[i].hotel.hotelId)) {
-                      await widget.currentGroup!.removeOption(i);
-                    } else {
-                      await widget.currentGroup!.addOption(hotels[i].hotel, o);
-                    }
-                    widget.setState();
-                  },
-                  child: Text("Select${widget.currentGroup!.infos.map((c) => c.hotelId).contains(hotels[i].hotel.hotelId) ? "ed" : ""}"),
-                ),
-              )).toList(),
+              children: hotels[i].offers.map((HotelOffer o) {
+                return ListTile(
+                  subtitle: Text(o.room?.description?.text ?? "No description available"),
+                  title: o.price.total == null ? null : Text("\$${o.price.total}"),
+                  trailing: ElevatedButton(
+                    onPressed: () async {
+                      if(widget.currentGroup!.infos.isNotEmpty && widget.currentGroup!.infos.map((c) => c.hotelId).contains(hotels[i].hotel.hotelId)) {
+                        await widget.currentGroup!.removeOption(widget.currentGroup!.infos.indexWhere((element) => element.hotelId == hotels[i].hotel.hotelId));
+                      } else {
+                        await widget.currentGroup!.addOption(hotels[i].hotel, o);
+                      }
+                      setState(() {});
+                      widget.setState();
+                    },
+                    child: Text("Select${(widget.currentGroup!.infos.isNotEmpty && widget.currentGroup!.infos.map((c) => c.hotelId).contains(hotels[i].hotel.hotelId)) ? "ed" : ""}"),
+                  ),
+                );
+              }).toList(),
             ),
         ],
       ),

@@ -65,7 +65,11 @@ class _SelectHotelsState extends State<SelectHotels> {
             ),
             Container(
               width: constraints.maxWidth * 0.65,
-              child: HotelOptions(currentGroup: currentGroup, trip: widget.trip, setState: () => setState((){}))
+              child: HotelOptions(
+                currentGroup: currentGroup, 
+                trip: widget.trip, 
+                setState: () => setState((){})
+              )
             ),
           ]
         );

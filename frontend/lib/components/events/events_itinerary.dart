@@ -93,9 +93,7 @@ class _EventsItineraryState extends State<EventsItinerary> {
                           )
                         ),
                         onSelected: (UserProfile profile) async {
-                          print("Selected $profile");
                           if(profile.id == "id") {
-                            print("ADD/REMOVE ALL");
                             for(UserProfile profile in widget.profiles) {
                               if(!remove && !activity.participants.contains(profile.id)) {
                                 await activity.addParticipant(profile.id);
@@ -106,7 +104,6 @@ class _EventsItineraryState extends State<EventsItinerary> {
                             }
                           }
                           else {
-                            print("Adding ${profile.name}");
                             if(activity.participants.contains(profile.id)) {
                               await activity.removeParticipant(profile.id);
                             } else {

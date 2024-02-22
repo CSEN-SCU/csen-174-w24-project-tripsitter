@@ -116,10 +116,10 @@ class HotelOffer {
   final String checkOutDate;
   final String rateCode;
   final HotelRateFamily? rateFamilyEstimated;
-  final HotelRoom room;
+  final HotelRoom? room;
   final HotelGuests guests;
   final HotelPrice price;
-  final HotelPolicies policies;
+  final HotelPolicies? policies;
   final String self;
 
   const HotelOffer({
@@ -142,10 +142,10 @@ class HotelOffer {
       checkOutDate: json['checkOutDate'],
       rateCode: json['rateCode'],
       rateFamilyEstimated: json['rateFamilyEstimated'] != null ? HotelRateFamily.fromJson(json['rateFamilyEstimated']) : null,
-      room: HotelRoom.fromJson(json['room']),
+      room: json['room'] == null ? null : HotelRoom.fromJson(json['room']),
       guests: HotelGuests.fromJson(json['guests']),
       price: HotelPrice.fromJson(json['price']),
-      policies: HotelPolicies.fromJson(json['policies']),
+      policies: json['policies'] == null ? null : HotelPolicies.fromJson(json['policies']),
       self: json['self'],
     );
   }
@@ -156,12 +156,16 @@ class HotelOffer {
       'checkInDate': checkInDate,
       'checkOutDate': checkOutDate,
       'rateCode': rateCode,
-      'room': room.toJson(),
       'guests': guests.toJson(),
       'price': price.toJson(),
-      'policies': policies.toJson(),
       'self': self,
     };
+    if (room != null) {
+      json['room'] = room!.toJson();
+    }
+    if (policies != null) {
+      json['policies'] = policies!.toJson();
+    }
     if (rateFamilyEstimated != null) {
       json['rateFamilyEstimated'] = rateFamilyEstimated!.toJson();
     }
@@ -192,25 +196,30 @@ class HotelRateFamily {
 
 class HotelRoom {
   final String type;
-  final HotelType typeEstimated;
-  final HotelDescription description;
+  final HotelType? typeEstimated;
+  final HotelDescription? description;
 
   const HotelRoom({required this.type, required this.typeEstimated, required this.description});
 
   factory HotelRoom.fromJson(Map<String, dynamic> json) {
     return HotelRoom(
       type: json['type'],
-      typeEstimated: HotelType.fromJson(json['typeEstimated']),
-      description: HotelDescription.fromJson(json['description']),
+      typeEstimated: json['typeEstimated'] == null ? null : HotelType.fromJson(json['typeEstimated']),
+      description: json['description'] == null ? null : HotelDescription.fromJson(json['description']),
     );
   }
 
   Map<String, dynamic> toJson() {
-    return {
+    Map<String, dynamic> json = {
       'type': type,
-      'typeEstimated': typeEstimated.toJson(),
-      'description': description.toJson(),
     };
+    if (typeEstimated != null) {
+      json['typeEstimated'] = typeEstimated!.toJson();
+    }
+    if (description != null) {
+      json['description'] = description!.toJson();
+    }
+    return json;
   }
 }
 
@@ -284,9 +293,9 @@ class HotelGuests {
 }
 
 class HotelPrice {
-  final String currency;
-  final String base;
-  final String total;
+  final String? currency;
+  final String? base;
+  final String? total;
   final HotelPriceVariations? variations;
 
   const HotelPrice({required this.currency, required this.base, required this.total, required this.variations});
@@ -314,23 +323,26 @@ class HotelPrice {
 }
 
 class HotelPriceVariations {
-  final HotelPriceAverage average;
+  final HotelPriceAverage? average;
   final List<HotelPriceChanges> changes;
 
   const HotelPriceVariations({required this.average, required this.changes});
 
   factory HotelPriceVariations.fromJson(Map<String, dynamic> json) {
     return HotelPriceVariations(
-      average: HotelPriceAverage.fromJson(json['average']),
-      changes: (json['changes'] as List).map((change) => HotelPriceChanges.fromJson(change)).toList(),
+      average: json['average'] == null ? null : HotelPriceAverage.fromJson(json['average']),
+      changes: ((json['changes'] ?? []) as List).map((change) => HotelPriceChanges.fromJson(change)).toList(),
     );
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'average': average.toJson(),
+    Map<String,dynamic> json = {
       'changes': changes.map((change) => change.toJson()).toList(),
     };
+    if (average != null) {
+      json['average'] = average!.toJson();
+    }
+    return json;
   }
 }
 
@@ -353,9 +365,9 @@ class HotelPriceAverage {
 }
 
 class HotelPriceChanges {
-  final String startDate;
-  final String endDate;
-  final String base;
+  final String? startDate;
+  final String? endDate;
+  final String? base;
 
   const HotelPriceChanges({required this.startDate, required this.endDate, required this.base});
 
@@ -378,13 +390,13 @@ class HotelPriceChanges {
 
 class HotelPolicies {
   final List<HotelCancellations> cancellations;
-  final String paymentType;
+  final String? paymentType;
 
   const HotelPolicies({required this.cancellations, required this.paymentType});
 
   factory HotelPolicies.fromJson(Map<String, dynamic> json) {
     return HotelPolicies(
-      cancellations: (json['cancellations'] as List).map((cancellation) => HotelCancellations.fromJson(cancellation)).toList(),
+      cancellations: ((json['cancellations'] ?? []) as List).map((cancellation) => HotelCancellations.fromJson(cancellation)).toList(),
       paymentType: json['paymentType'],
     );
   }

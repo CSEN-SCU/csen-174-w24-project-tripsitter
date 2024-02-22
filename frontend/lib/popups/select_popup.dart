@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
-class SelectOnePopup extends StatelessWidget {
-  final List<String> options;
-  final String selected;
-  final Function(String) onSelected;
+class SelectOnePopup<T> extends StatelessWidget {
+  final List<T> options;
+  final T selected;
+  final Function(T) onSelected;
 
   const SelectOnePopup({
     Key? key,
@@ -27,13 +27,13 @@ class SelectOnePopup extends StatelessWidget {
       Offset.zero & overlay.size,
     );
 
-    final String? selectedValue = await showMenu<String>(
+    final T? selectedValue = await showMenu<T>(
       context: context,
       position: position,
-      items: options.map((String value) {
-        return PopupMenuItem<String>(
+      items: options.map((T value) {
+        return PopupMenuItem<T>(
           value: value,
-          child: Text(value),
+          child: Text(value.toString(), style: TextStyle(fontWeight: value == selected ? FontWeight.bold : FontWeight.normal)),
         );
       }).toList(),
     );
