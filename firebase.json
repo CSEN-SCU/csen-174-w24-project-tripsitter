@@ -19,6 +19,7 @@
     }
   ],
   "hosting": {
+    "site": "tripsitter-travel",
     "public": "frontend/build/web",
     "ignore": [
       "firebase.json",

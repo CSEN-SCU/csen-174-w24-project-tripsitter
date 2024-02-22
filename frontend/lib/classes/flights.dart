@@ -66,7 +66,24 @@ enum TravelClass {
   economy,
   premiumEconomy,
   business,
-  first,
+  first;
+
+  @override
+  String toString() {
+    switch (this) {
+      case TravelClass.economy:
+        return 'Economy';
+      case TravelClass.premiumEconomy:
+        return 'Premium Economy';
+      case TravelClass.business:
+        return 'Business';
+      case TravelClass.first:
+        return 'First';
+      default:
+        return '';
+    }
+  
+  }
 }
 
 class FlightItineraryRecursive {
@@ -265,6 +282,55 @@ class FlightOffer {
           .map((travelerPricing) => travelerPricing.toJson())
           .toList(),
     };
+  }
+
+  @override
+  bool operator == (covariant FlightOffer that) {
+    print("COMPARING");
+    print(id);
+    print(that.id);
+    // if(id == that.id) {
+    //   return true;
+    // }
+    if(oneWay != that.oneWay) {
+      return false;
+    }
+    if(itineraries.length != that.itineraries.length) {
+      return false;
+    }
+    // bool itinerariesEqual = true;
+    // for(int i = 0; i < itineraries.length; i++) {
+    //   if(itineraries[i].id == that.itineraries[i].id) {
+    //     itinerariesEqual = false;
+    //   }
+    // }
+    // if(itinerariesEqual) {return true;}
+    for(int i = 0; i < itineraries.length; i++) {
+      if(itineraries[i].segments.length != that.itineraries[i].segments.length) {
+        return false;
+      }
+      for(int j = 0; j < itineraries[i].segments.length; j++) {
+        FlightSegment s1 = itineraries[i].segments[j];
+        FlightSegment s2 = that.itineraries[i].segments[j];
+        print("COMPARING");
+        print(this.itineraries[i].segments[j].toJson());
+        print(that.itineraries[i].segments[j].toJson());
+        if(
+          s1.departure.iataCode != s2.departure.iataCode ||
+          s1.arrival.iataCode != s2.arrival.iataCode ||
+          s1.departure.at != s2.departure.at ||
+          s1.arrival.at != s2.arrival.at ||
+          s1.carrierCode != s2.carrierCode ||
+          s1.number != s2.number ||
+          s1.aircraft.code != s2.aircraft.code ||
+          s1.operating?.carrierCode != s2.operating?.carrierCode ||
+          s1.duration != s2.duration
+        ) {
+          return false;
+        }
+      }
+    }
+    return true;
   }
 }
 
@@ -549,9 +615,9 @@ class FlightTravelerPricing {
 class FlightFareDetailsBySegment {
   final String segmentId;
   final String cabin;
-  final String fareBasis;
-  final String brandedFare;
-  final String brandedFareLabel;
+  final String? fareBasis;
+  final String? brandedFare;
+  final String? brandedFareLabel;
   final String classType;
   final FlightIncludedCheckedBags includedCheckedBags;
   final List<FlightAmenity> amenities;
@@ -577,7 +643,7 @@ class FlightFareDetailsBySegment {
       classType: json['class'],
       includedCheckedBags:
           FlightIncludedCheckedBags.fromJson(json['includedCheckedBags']),
-      amenities: List<FlightAmenity>.from(
+      amenities: json['amenities'] == null ? [] : List<FlightAmenity>.from(
           json['amenities'].map((amenity) => FlightAmenity.fromJson(amenity))),
     );
   }

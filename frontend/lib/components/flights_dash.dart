@@ -103,7 +103,7 @@ class _FlightsDashBoardState extends State<FlightsDashBoard> {
                   },
                   child: Text('Select return trip'),
                   style: TextButton.styleFrom(
-                    primary: Colors.black, // Ensures the text color for buttons
+                    foregroundColor: Colors.black, // Ensures the text color for buttons
                   ),
                 ),
                 SizedBox(height: 16.0),

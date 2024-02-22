@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 
 class CheckboxPopup extends StatelessWidget {
   final List<String> options;
+  final Function(String) format;
   final List<String> selected;
   final Function(List<String>) onSelected;
 
   const CheckboxPopup({
     Key? key,
+    required this.format,
     required this.options,
     required this.selected,
     required this.onSelected,
@@ -55,7 +57,7 @@ class CheckboxPopup extends StatelessWidget {
               builder: (BuildContext context, StateSetter setState) {
                 final bool isChecked = tempSelected.contains(option);
                 return CheckboxListTile(
-                  title: Text(option),
+                  title: Text(format(option)),
                   value: isChecked,
                   onChanged: (bool? value) {
                     if (value == true) {
