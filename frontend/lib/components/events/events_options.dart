@@ -1,19 +1,32 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:tripsitter/classes/profile.dart';
 import 'package:tripsitter/classes/ticketmaster.dart';
 import 'package:tripsitter/classes/trip.dart';
 import 'package:tripsitter/components/events/event_info_dialog.dart';
 import 'package:tripsitter/components/events/select_events.dart';
 import 'package:tripsitter/helpers/api.dart';
+import 'package:tripsitter/popups/checkbox_popup.dart';
 
 class EventsOptions extends StatefulWidget {
   final Trip trip;
   final List<UserProfile> profiles;
+  final Map<String, GlobalKey> participantsPopupKeys;
+  final Map<String, List<String>> selectedParticipantsMap;
+  final Map<String, bool> participantsPopupOpenState;
   final Function? setState;
-  const EventsOptions(
-      {required this.trip, required this.profiles, this.setState, super.key});
+
+  const EventsOptions({
+    required this.trip,
+    required this.profiles,
+    required this.participantsPopupKeys,
+    required this.selectedParticipantsMap,
+    required this.participantsPopupOpenState,
+    this.setState,
+    super.key,
+  });
 
   @override
   State<EventsOptions> createState() => _EventsOptionsState();
@@ -21,7 +34,6 @@ class EventsOptions extends StatefulWidget {
 
 class _EventsOptionsState extends State<EventsOptions> {
   List<TicketmasterEvent> events = [];
-
   Trip get trip => widget.trip;
 
   @override
@@ -41,6 +53,7 @@ class _EventsOptionsState extends State<EventsOptions> {
       endDateTime: trip.endDate,
     ));
 
+    // After fetching events, initialize GlobalKeys for each
     setState(() {
       events = call;
     });
@@ -54,9 +67,10 @@ class _EventsOptionsState extends State<EventsOptions> {
     return ListView(
       children: [
         Text("Choose Activities",
-            style: Theme.of(context).textTheme.displayMedium?.copyWith(
-                decoration: TextDecoration.underline,
-                fontWeight: FontWeight.bold)),
+            style: Theme.of(context)
+                .textTheme
+                .displayMedium
+                ?.copyWith(fontWeight: FontWeight.bold)),
         if (events.isNotEmpty)
           Table(
               columnWidths: const <int, TableColumnWidth>{
@@ -117,11 +131,13 @@ class _EventsOptionsState extends State<EventsOptions> {
                         ),
                       ),
                       TableCell(
-                          child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Text(
-                            '${event.venues.firstOrNull?.name}\nStarts ${event.startTime.localDate} ${event.startTime.localTime}'),
-                      )),
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Text(
+                            '${event.venues.firstOrNull?.name ?? "Venue TBA"}\n${event.startTime.getFormattedDate()}\nStarts ${event.startTime.getFormattedTime()}',
+                          ),
+                        ),
+                      ),
                       TableCell(
                           child: Padding(
                         padding: const EdgeInsets.all(8.0),
@@ -146,9 +162,19 @@ class _EventsOptionsState extends State<EventsOptions> {
                             return ElevatedButton(
                               onPressed: selected
                                   ? () async {
-                                      await trip.removeActivity(trip.activities
+                                      var activityToRemove = trip.activities
                                           .firstWhere(
-                                              (a) => a.event.id == event.id));
+                                              (a) => a.event.id == event.id);
+                                      await trip
+                                          .removeActivity(activityToRemove);
+                                      String eventId =
+                                          activityToRemove.event.id;
+                                      widget.participantsPopupKeys
+                                          .remove(eventId);
+                                      widget.selectedParticipantsMap
+                                          .remove(eventId);
+                                      widget.participantsPopupOpenState
+                                          .remove(eventId);
                                       setState(() {});
                                       if (widget.setState != null) {
                                         widget.setState!();
@@ -156,10 +182,21 @@ class _EventsOptionsState extends State<EventsOptions> {
                                     }
                                   : () async {
                                       await trip.addActivity(
-                                          event,
+                                        event,
+                                        widget.profiles
+                                            .map((e) => e.id)
+                                            .toList(),
+                                      );
+
+                                      String eventId = event.id;
+                                      widget.participantsPopupKeys[eventId] =
+                                          GlobalKey();
+                                      widget.selectedParticipantsMap[eventId] =
                                           widget.profiles
                                               .map((e) => e.id)
-                                              .toList());
+                                              .toList();
+                                      widget.participantsPopupOpenState[
+                                          eventId] = false;
                                       setState(() {});
                                       if (widget.setState != null) {
                                         widget.setState!();
