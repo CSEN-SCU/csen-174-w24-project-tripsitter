@@ -22,6 +22,8 @@ class _CheckoutPageState extends State<CheckoutPage> {
   Trip get trip => widget.trip;
   CardFieldInputDetails? cardDetails;
 
+  bool loading = false;
+
   @override
   Widget build(BuildContext context) {
     User? user = FirebaseAuth.instance.currentUser;
@@ -32,99 +34,160 @@ class _CheckoutPageState extends State<CheckoutPage> {
     }
     return Scaffold(
       appBar: const TripSitterNavbar(),
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(
-              maxWidth: 600,
-            ),
-            child: ListView(
-              children: [
-                Text("Checkout Page"),
-                Text("Trip: ${widget.trip.name}"),
-                if(trip.flights.isNotEmpty)
-                  ...[
-                    Text("Flights: \$${trip.flightsPrice} total"),
-                    for(var flight in trip.flights)
-                      ...[
-                        Text("${flight.departureAirport} -> ${flight.arrivalAirport} (${flight.price == null ? "Unknown price" : "\$${flight.price} total"})"),
-                        Text(flight.members.map((e) => widget.profiles.firstWhere((profile) => profile.id == e).name).join(", ")),
-                      ],
-                      Container(height: 10)
-                  ],
-                if(trip.hotels.isNotEmpty)
-                  ...[
-                    Text("Hotels: \$${trip.hotelsPrice} total"),
-                    for(var hotel in trip.hotels)
-                      ...[
-                        Text("${hotel.name} (${hotel.price == null ? "Unknown price" : "\$${hotel.price} total"})"),
-                        Text(hotel.members.map((e) => widget.profiles.firstWhere((profile) => profile.id == e).name).join(", ")),
-                      ],
-                      Container(height: 10)
-                  ],
-                if(trip.rentalCars.isNotEmpty)
-                  ...[
-                    Text("Rental Cars: \$${trip.rentalCarsPrice} total"),
-                    for(var car in trip.rentalCars)
-                      ...[
-                        Text("${car.name} (\$${car.price} total)"),
-                        Text(car.members.map((e) => widget.profiles.firstWhere((profile) => profile.id == e).name).join(", ")),
-                      ],
-                      Container(height: 10)
-                  ],
-                if(trip.activities.isNotEmpty)
-                  ...[
-                    Text("Activities: \$${trip.activitiesPrice} total"),
-                    for(var activity in trip.activities)
-                      ...[
-                        Text("${activity.event.name} (${activity.price == null ? "Unknown price" : "\$${activity.price} total"})"),
-                        Text(activity.participants.map((e) => widget.profiles.firstWhere((profile) => profile.id == e).name).join(", ")),
-                      ],
-                      Container(height: 10)
-                  ],
-                Text("Total price: \$${trip.totalPrice}"),
-                ConstrainedBox(
-                  constraints: const BoxConstraints(
-                    maxHeight: 100,
+      body: AbsorbPointer(
+        absorbing: loading,
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(
+                maxWidth: 600,
+              ),
+              child: ListView(
+                children: [
+                  Text("Checkout Page"),
+                  Text("Trip: ${widget.trip.name}"),
+                  if(trip.flights.isNotEmpty)
+                    ...[
+                      Text("Flights: \$${trip.flightsPrice} total"),
+                      for(var flight in trip.flights)
+                        ...[
+                          Text("${flight.departureAirport} -> ${flight.arrivalAirport} (${flight.price == null ? "Unknown price" : "\$${flight.price} total"})"),
+                          Text(flight.members.map((e) => widget.profiles.firstWhere((profile) => profile.id == e).name).join(", ")),
+                        ],
+                        Container(height: 10)
+                    ],
+                  if(trip.hotels.isNotEmpty)
+                    ...[
+                      Text("Hotels: \$${trip.hotelsPrice} total"),
+                      for(var hotel in trip.hotels)
+                        ...[
+                          Text("${hotel.name} (${hotel.price == null ? "Unknown price" : "\$${hotel.price} total"})"),
+                          Text(hotel.members.map((e) => widget.profiles.firstWhere((profile) => profile.id == e).name).join(", ")),
+                        ],
+                        Container(height: 10)
+                    ],
+                  if(trip.rentalCars.isNotEmpty)
+                    ...[
+                      Text("Rental Cars: \$${trip.rentalCarsPrice} total"),
+                      for(var car in trip.rentalCars)
+                        ...[
+                          Text("${car.name} (\$${car.price} total)"),
+                          Text(car.members.map((e) => widget.profiles.firstWhere((profile) => profile.id == e).name).join(", ")),
+                        ],
+                        Container(height: 10)
+                    ],
+                  if(trip.activities.isNotEmpty)
+                    ...[
+                      Text("Activities: \$${trip.activitiesPrice} total"),
+                      for(var activity in trip.activities)
+                        ...[
+                          Text("${activity.event.name} (${activity.price == null ? "Unknown price" : "\$${activity.price} total"})"),
+                          Text(activity.participants.map((e) => widget.profiles.firstWhere((profile) => profile.id == e).name).join(", ")),
+                        ],
+                        Container(height: 10)
+                    ],
+                  Text("Total price: \$${trip.totalPrice}"),
+                  ConstrainedBox(
+                    constraints: const BoxConstraints(
+                      maxHeight: 100,
+                    ),
+                    child: CardField(
+                      key: Key("payment-${trip.id}"),
+                      onCardChanged: (CardFieldInputDetails? card) {
+                        if(card != null) {
+                          setState(() {
+                            cardDetails = card;
+                          });
+                        }
+                      },    
+                    ),
                   ),
-                  child: CardField(
-                    key: Key("payment-${trip.id}"),
-                    onCardChanged: (CardFieldInputDetails? card) {
-                      if(card != null) {
+                  if(cardDetails?.complete ?? false)
+                    ElevatedButton(
+                      onPressed: () async {
                         setState(() {
-                          cardDetails = card;
+                          loading = true;
                         });
-                      }
-                    },    
-                  ),
-                ),
-                if(cardDetails?.complete ?? false)
-                  ElevatedButton(
-                    onPressed: () async {
-                      PaymentIntentData data = await TripsitterApi.createPaymentIntent(user.uid, trip);
-                      print("Payment intent data created ${data.clientSecret}");
-                      PaymentIntent intent = await Stripe.instance.confirmPayment(
-                        paymentIntentClientSecret: data.clientSecret,
-                        data: PaymentMethodParams.card(paymentMethodData: PaymentMethodData(
-                          billingDetails: BillingDetails(
-                            name: user.displayName,
-                            email: user.email,
-                          ),
-                        )),
-                      );
-                      print("Intent processed");
-                      print(intent.amount);
-                      print(intent.receiptEmail);
-                      print(intent.status);
-
-                      if(intent.status == PaymentIntentsStatus.Succeeded) {
-                        print("PAYMENT COMPLETE!");
-                      }
-                    },
-                    child: const Text("Purchase Trip!"),
-                  ),
-              ],
+                        PaymentIntentData data = await TripsitterApi.createPaymentIntent(user.uid, trip);
+                        print("Payment intent data created ${data.clientSecret}");
+                        try {
+                          PaymentIntent intent = await Stripe.instance.confirmPayment(
+                            paymentIntentClientSecret: data.clientSecret,
+                            data: PaymentMethodParams.card(paymentMethodData: PaymentMethodData(
+                              billingDetails: BillingDetails(
+                                name: user.displayName,
+                                email: user.email,
+                              ),
+                            )),
+                          );
+                          print("Intent processed");
+                          print(intent.amount);
+                          print(intent.receiptEmail);
+                          print(intent.status);
+          
+                          if(intent.status == PaymentIntentsStatus.Succeeded) {
+                            print("PAYMENT COMPLETE!");
+                            if(mounted) {
+                              setState(() {
+                                loading = false;
+                              });
+                            
+                            }
+                          }
+                          else if(mounted){
+                            await showDialog(
+                              context: context, 
+                              builder: (context) => AlertDialog(
+                                title: const Text("Payment failed"),
+                                content: const Text("Payment failed, please try again"),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () {
+                                      Navigator.of(context).pop();
+                                    }, 
+                                    child: const Text("OK")
+                                  ),
+                                ],
+                              )
+                            );
+                            if(mounted) {
+                              setState(() {
+                                loading = false;
+                              });
+                            
+                            }
+                          }
+                        } catch (e) {
+                          print("Error creating payment intent");
+                          print(e);
+                          await showDialog(
+                            context: context, 
+                            builder: (context) => AlertDialog(
+                              title: const Text("Payment failed"),
+                              content: const Text("Payment failed, please try again"),
+                              actions: [
+                                TextButton(
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
+                                  }, 
+                                  child: const Text("OK")
+                                ),
+                              ],
+                            )
+                          );
+                          if(mounted) {
+                            setState(() {
+                              loading = false;
+                            });
+                          }
+                        }
+                        
+                      },
+                      child: loading ? const CircularProgressIndicator() : const Text("Purchase Trip!"),
+                    ),
+                ],
+              ),
             ),
           ),
         ),
