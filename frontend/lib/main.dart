@@ -8,7 +8,6 @@ import 'package:tripsitter/pages/create_trip.dart';
 import 'package:tripsitter/pages/profile_page.dart';
 import 'package:tripsitter/pages/update_Profile.dart';
 import 'package:tripsitter/pages/view_trip.dart';
-import 'package:tripsitter/pages/view_flights.dart';
 import 'package:tripsitter/pages/login.dart';
 import 'package:url_strategy/url_strategy.dart';
 import 'firebase_options.dart';
@@ -20,9 +19,9 @@ import 'package:tripsitter/no_animation_page_route.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   setPathUrlStrategy();
-  // print("STRIPE KEY: ${const String.fromEnvironment('STRIPE_PK_TEST')}");
-  // Stripe.publishableKey = const String.fromEnvironment('STRIPE_PK_TEST');
-  // await Stripe.instance.applySettings();
+  print("STRIPE KEY: ${const String.fromEnvironment('STRIPE_PK_TEST')}");
+  Stripe.publishableKey = const String.fromEnvironment('STRIPE_PK_TEST');
+  await Stripe.instance.applySettings();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
@@ -44,17 +43,9 @@ void main() async {
       return ViewTrip(params["id"][0]);
     },
   );
-  Handler viewFlights = Handler(
-    handlerFunc: (BuildContext? context, Map<String, dynamic> params) {
-      // if constraints.maxWidth > 600 { go to desktop }
-      return ViewFlights(params["id"][0]);
-    },
-  );
 
   router.define("/profile", handler: updateProfileHandler);
   router.define("/", handler: homeHandler, transitionType: TransitionType.none);
-  router.define("/trip/:id/flights",
-      handler: viewFlights, transitionType: TransitionType.none);
   router.define("/trip/:id",
       handler: viewTrip, transitionType: TransitionType.none);
   router.define("/new",

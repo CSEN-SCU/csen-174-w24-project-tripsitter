@@ -8,6 +8,7 @@ import { getHotels } from "./hotels";
 import { searchAirports } from "./autofill";
 import { addUserToTrip, removeUserFromTrip } from "./firebase";
 import { getRentalCars } from "./cars";
+import { createPaymentIntent } from "./stripe";
 const app = express();
 const cors = require('cors')({origin: true});
 app.use(cors);
@@ -27,5 +28,7 @@ app.get('/airline-logo', getAirlineLogo);
 
 app.post('/trip/user', addUserToTrip);
 app.delete('/trip/user', removeUserFromTrip);
+
+app.post('/checkout/intent', createPaymentIntent);
 
 exports.api = functions.https.onRequest(app);
