@@ -788,7 +788,7 @@ class Airline {
   static Future<void> cacheAirlines(BuildContext context) async {
     if (_airlineCache.isNotEmpty) return;
     String data =
-        await DefaultAssetBundle.of(context).loadString("airlines.json");
+        await DefaultAssetBundle.of(context).loadString("assets/airlines.json");
     List<Airline> airlines = jsonDecode(data)
         .map<Airline>((a) => Airline.fromJson(a))
         .toList(); //latest Dart
