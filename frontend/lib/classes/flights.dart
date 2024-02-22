@@ -286,9 +286,6 @@ class FlightOffer {
 
   @override
   bool operator == (covariant FlightOffer that) {
-    print("COMPARING");
-    print(id);
-    print(that.id);
     // if(id == that.id) {
     //   return true;
     // }
@@ -312,9 +309,6 @@ class FlightOffer {
       for(int j = 0; j < itineraries[i].segments.length; j++) {
         FlightSegment s1 = itineraries[i].segments[j];
         FlightSegment s2 = that.itineraries[i].segments[j];
-        print("COMPARING");
-        print(this.itineraries[i].segments[j].toJson());
-        print(that.itineraries[i].segments[j].toJson());
         if(
           s1.departure.iataCode != s2.departure.iataCode ||
           s1.arrival.iataCode != s2.arrival.iataCode ||

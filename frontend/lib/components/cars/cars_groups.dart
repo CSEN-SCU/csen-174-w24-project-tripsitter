@@ -73,7 +73,6 @@ class _CarGroupsState extends State<CarGroups> {
                           },
                           child: Icon(Icons.add),
                           onSelected: (UserProfile profile) async {
-                            print("Toggling ${profile.name}");
                             if(group.members.contains(profile.id)) {
                               await group.removeMember(profile.id);
                             } else {

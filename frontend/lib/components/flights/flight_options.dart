@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 import 'package:tripsitter/classes/counter.dart';
 import 'package:tripsitter/classes/filterbutton.dart';
 import 'package:tripsitter/classes/flights.dart';
@@ -67,6 +68,10 @@ class _FlightOptionsState extends State<FlightOptions> {
   @override
   void initState() {
     super.initState();
+    bool isMobile = Provider.of<bool>(context, listen: false);
+    if(isMobile) {
+      getFlights();
+    }
   }
 
   @override

@@ -7,7 +7,6 @@ import 'package:tripsitter/classes/flights.dart';
 import 'package:http/http.dart' as http;
 import 'package:tripsitter/classes/ticketmaster.dart';
 import 'package:tripsitter/classes/hotels.dart';
-import 'package:tripsitter/classes/trip.dart';
 
 class TripsitterApi {
   static const String baseUrl = '127.0.0.1:5001';

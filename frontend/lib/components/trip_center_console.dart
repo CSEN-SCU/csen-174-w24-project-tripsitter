@@ -54,7 +54,6 @@ class _MyStatefulWidgetState extends State<TripCenterConsole>
   }
 
   void setup() {
-    print("SETUP");
     positions = {
       "Hotels": XYPairSized(0.0, 0.0 * 0.1, defaultDotSize),
       "Rental Cars": XYPairSized(0.0, 0.0, defaultDotSize),

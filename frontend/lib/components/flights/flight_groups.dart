@@ -1,9 +1,12 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 import 'package:tripsitter/classes/flights.dart';
 import 'package:tripsitter/classes/profile.dart';
 import 'package:tripsitter/classes/trip.dart';
+import 'package:tripsitter/components/flights/flight_options.dart';
+import 'package:tripsitter/components/mobile_wrapper.dart';
 import 'package:tripsitter/helpers/locators.dart';
 
 class FlightGroups extends StatefulWidget {
@@ -63,6 +66,7 @@ class _FlightGroupsState extends State<FlightGroups> {
 
   @override
   Widget build(BuildContext context) {
+    bool isMobile = Provider.of<bool>(context);
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: ListView(
@@ -115,6 +119,23 @@ class _FlightGroupsState extends State<FlightGroups> {
                         //   },
                         // )
                       ),
+                    if(isMobile)
+                      ElevatedButton(
+                        onPressed: (){
+                          Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) {
+                            return MobileWrapper(
+                              title: "Flight Options",
+                              child: FlightOptions(
+                                trip: widget.trip,
+                                profiles: widget.profiles,
+                                currentGroup: group,
+                                setState: () => setState((){}),
+                              ),
+                            );
+                          }));
+                        },
+                        child: Text("Add flight options"),
+                      )
                   ],
                 ),
               );

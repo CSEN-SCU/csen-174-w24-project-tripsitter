@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:tripsitter/classes/profile.dart';
 import 'package:tripsitter/classes/trip.dart';
 import 'package:tripsitter/components/flights/flight_groups.dart';
@@ -23,6 +24,22 @@ class _SelectFlightState extends State<SelectFlight> {
 
   @override
   Widget build(BuildContext context) {
+    bool isMobile = Provider.of<bool>(context);
+    if(isMobile) {
+      return FlightGroups(
+        trip: widget.trip,
+        profiles: widget.profiles,
+        currentGroup: currentGroup,
+        setCurrentGroup: (FlightGroup? group) {
+          setState(() {
+            currentGroup = group;
+          });
+        },
+        setState: () {
+          setState(() {});
+        },
+      );
+    }
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
         return Row(
