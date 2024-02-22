@@ -8,23 +8,6 @@ import 'package:tripsitter/classes/profile.dart';
 import 'package:tripsitter/classes/trip.dart';
 import 'package:tripsitter/helpers/data.dart';
 
-Future<void> createFlightGroups(Trip trip, List<UserProfile> profiles, BuildContext context) async {
-  String destinationAirport = await getNearestAirport(trip.destination, context);
-  for (var profile in profiles) {
-    if (profile.hometown != null) {
-      var nearestAirport = await getNearestAirport(profile.hometown!, context);
-      FlightGroup? existing = trip.flights.firstWhereOrNull(
-        (element) => element.departureAirport == nearestAirport,
-      );
-      if (existing != null) {
-        await existing.addMember(profile.id);
-      } else {
-        await trip.addFlightGroup(nearestAirport, destinationAirport, [profile.id]);
-      }
-    }
-  }
-}
-
 Future<String> getNearestAirport(City city, BuildContext context) async {
   List<Airport> airports = await getAirports(context);
   airports = airports.where((element) => element.scale < 6).toList(); 

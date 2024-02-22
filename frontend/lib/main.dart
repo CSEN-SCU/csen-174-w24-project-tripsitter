@@ -34,7 +34,7 @@ void main() async {
       handlerFunc: (BuildContext? context, Map<String, dynamic> params) {
     return const CreateTrip();
   });
-   Handler updateProfileHandler = Handler(
+  Handler updateProfileHandler = Handler(
       handlerFunc: (BuildContext? context, Map<String, dynamic> params) {
     return UpdateProfile();
   });
@@ -57,7 +57,8 @@ void main() async {
       handler: viewFlights, transitionType: TransitionType.none);
   router.define("/trip/:id",
       handler: viewTrip, transitionType: TransitionType.none);
-  router.define("/new", handler: newTripHandler, transitionType: TransitionType.none);
+  router.define("/new",
+      handler: newTripHandler, transitionType: TransitionType.none);
   router.notFoundHandler = Handler(
       handlerFunc: (BuildContext? context, Map<String, dynamic> params) {
     return ProfilePage();
