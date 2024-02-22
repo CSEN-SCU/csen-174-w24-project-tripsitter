@@ -1,5 +1,3 @@
-
-
 import 'package:flutter/material.dart';
 import 'package:tripsitter/classes/car.dart';
 import 'package:tripsitter/helpers/formatters.dart';
