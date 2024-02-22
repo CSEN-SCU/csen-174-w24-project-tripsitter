@@ -142,7 +142,7 @@ class Trip {
   }
 
   Future<HotelGroup> createHotelGroup(String name, List<String> members) async {
-    HotelGroup hotel = HotelGroup(name: name, members: members, options: [], save: save);
+    HotelGroup hotel = HotelGroup(name: name, members: members, offers: List<HotelOffer>.empty(growable: true), infos: List<HotelInfo>.empty(growable: true), save: save);
     _hotels.add(hotel);
     await _save();
     return hotel;
@@ -298,58 +298,74 @@ class FlightGroup {
 
 class HotelGroup {
   List<String> _members;
-  List<HotelOffer> _options;
+  List<HotelInfo> _infos;
+  List<HotelOffer> _offers;
   String _name;
-  HotelOffer? _selected;
+  HotelOffer? _selectedOffer;
+  HotelInfo? _selectedInfo;
   Future<void> Function() _save;
 
   HotelGroup({
     required name,
     required members,
-    required options,
-    selected,
+    required infos,
+    required offers,
+    selectedOffer,
+    selectedInfo,
     required Future<void> Function() save,
   }) : 
     _save = save,
     _members = members,
     _name = name,
-    _options = options,
-    _selected = selected;
+    _offers = offers,
+    _infos = infos,
+    _selectedOffer = selectedOffer,
+    _selectedInfo = selectedInfo;
 
   factory HotelGroup.fromJson(Map<String, dynamic> json, Future<void> Function() save) {
     return HotelGroup(
-      members: json['members'],
+      members: (json['members'] as List).map((item) => item as String).toList(),
       name: json['name'],
-      options: (json['options'] as List).map((option) => HotelOffer.fromJson(option)).toList(),
-      selected: json['selected'] != null ? HotelOffer.fromJson(json['selected']) : null,
+      infos: (json['infos'] as List).map((option) => HotelInfo.fromJson(option)).toList(),
+      offers: (json['offers'] as List).map((offer) => HotelOffer.fromJson(offer)).toList(),
+      selectedInfo: json['selectedOption'] != null ? HotelOption.fromJson(json['selectedOption']) : null,
+      selectedOffer: json['selectedOffer'] != null ? HotelOffer.fromJson(json['selectedOffer']) : null,
       save: save
     );
   }
 
   String get name => _name;
   List<String> get members => _members;
-  List<HotelOffer> get options => _options;
-  HotelOffer? get selected => _selected;
+  List<HotelInfo> get infos => _infos;
+  List<HotelOffer> get offers => _offers;
+  HotelOffer? get selectedOffer => _selectedOffer;
+  HotelInfo? get selectedInfo => _selectedInfo;
 
   Map<String, dynamic> toJson() {
     return {
       "members": _members,
       "name": _name,
-      "options": _options.map((option) => option.toJson()).toList(),
-      "selected": _selected?.toJson(),
+      "infos": _infos.map((option) => option.toJson()).toList(),
+      "offers": _offers.map((offer) => offer.toJson()).toList(),
+      "selectedOffer": selectedOffer?.toJson(),
+      "selectedInfo": selectedInfo?.toJson(),
     };
   }
 
-  Future<void> selectOption(HotelOffer option) async {
-    _selected = option;
+  Future<void> selectOption(HotelInfo info, HotelOffer offer) async {
+    _selectedInfo = info;
+    _selectedOffer = offer;
     await _save();
   }
-  Future<void> addOption(HotelOffer option) async {
-    _options.add(option);
+  Future<void> addOption(HotelInfo info, HotelOffer offer) async {
+    _offers.add(offer);
+    _infos.add(info);
     await _save();
   }
-  Future<void> removeOption(HotelOffer option) async {
-    _options.remove(option);
+  Future<void> removeOption(int i) async {
+    if(i < 0 || i > _offers.length) return;
+    _offers.removeAt(i);
+    _infos.removeAt(i);
     await _save();
   }
   Future<void> addMember(String member) async {
