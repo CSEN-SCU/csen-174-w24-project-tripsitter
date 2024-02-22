@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:tripsitter/classes/flights.dart';
+import 'package:tripsitter/helpers/api.dart';
 
 FlightsQuery query = FlightsQuery(
     origin: 'LAX',
@@ -49,80 +50,95 @@ class _FlightsDashBoardState extends State<FlightsDashBoard> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        Padding(
-          padding: EdgeInsets.all(16.0),
-          child: Row(
-            children: [
-              IconButton(
-                icon: Icon(Icons.close),
-                onPressed: () {
-                  Navigator.pushNamed(context, "/trip/1234");
-                },
-              ),
-              SizedBox(width: 8),
-              Text(
-                'Select Flights',
-                style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold),
-              ),
-            ],
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Text(
-                'Choose flights from JFK',
-                style: TextStyle(
-                  fontSize: 24.0,
-                  fontWeight: FontWeight.bold,
+    return Theme(
+      data: Theme.of(context).copyWith(
+        textTheme: Theme.of(context).textTheme.apply(
+              bodyColor: Colors.black, // Default text color for body text
+              displayColor: Colors.black, // Default text color for display text
+            ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Padding(
+            padding: EdgeInsets.all(16.0),
+            child: Row(
+              children: [
+                IconButton(
+                  icon: Icon(Icons.close),
+                  onPressed: () {
+                    Navigator.pushNamed(context, "/trip/1234");
+                  },
                 ),
-              ),
-              SizedBox(height: 16.0),
-              Text(
-                _selectedStops,
-                style: TextStyle(
-                  fontSize: 16.0,
+                SizedBox(width: 8),
+                Text(
+                  'Select Flights',
+                  style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold),
                 ),
-              ),
-              TextButton(
-                onPressed: () {
-                  // Handle select return trip
-                },
-                child: Text('Select return trip'),
-              ),
-              SizedBox(height: 16.0),
-              Wrap(
-                spacing: 10,
-                children: <Widget>[
-                  FilterButton(
-                    text: 'Stops',
-                    globalKey: _stopsButtonKey,
-                    onPressed: () =>
-                        _showStopsPopup(_stopsButtonKey.currentContext),
-                  ),
-                  FilterButton(
-                    text: 'Airlines',
-                    globalKey: _airlinesButtonKey,
-                    onPressed: () =>
-                        _showAirlinesPopup(_airlinesButtonKey.currentContext),
-                  ),
-                  FilterButton(
-                    text: 'Bags',
-                    globalKey: _bagsButtonKey,
-                    onPressed: () =>
-                        _showBagsPopup(_bagsButtonKey.currentContext),
-                  ),
-                ],
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
-      ],
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Text(
+                  'Choose flights from JFK',
+                  style: TextStyle(
+                    fontSize: 24.0,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                SizedBox(height: 16.0),
+                Text(
+                  _selectedStops,
+                  style: TextStyle(
+                    fontSize: 16.0,
+                  ),
+                ),
+                TextButton(
+                  onPressed: () {
+                    // Handle select return trip
+                  },
+                  child: Text('Select return trip'),
+                  style: TextButton.styleFrom(
+                    foregroundColor: Colors.black, // Ensures the text color for buttons
+                  ),
+                ),
+                SizedBox(height: 16.0),
+                Wrap(
+                  spacing: 10,
+                  children: <Widget>[
+                    FilterButton(
+                      text: 'Stops',
+                      globalKey: _stopsButtonKey,
+                      onPressed: () =>
+                          _showStopsPopup(_stopsButtonKey.currentContext),
+                    ),
+                    FilterButton(
+                      text: 'Airlines',
+                      globalKey: _airlinesButtonKey,
+                      onPressed: () =>
+                          _showAirlinesPopup(_airlinesButtonKey.currentContext),
+                    ),
+                    FilterButton(
+                      text: 'Bags',
+                      globalKey: _bagsButtonKey,
+                      onPressed: () =>
+                          _showBagsPopup(_bagsButtonKey.currentContext),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 16.0),
+                Text(
+                  _selectedStops,
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 
