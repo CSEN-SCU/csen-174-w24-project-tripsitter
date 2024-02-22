@@ -237,7 +237,7 @@ class FlightGroup {
   factory FlightGroup.fromJson(Map<String, dynamic> json, Future<void> Function() save) {
     return FlightGroup(
       save: save,
-      members: json['members'],
+      members: (json['members'] as List).map((e) => e as String).toList(),
       departureAirport: json['departureAirport'],
       arrivalAirport: json['arrivalAirport'],
       options: (json['options'] as List).map((option) => FlightOffer.fromJson(option)).toList(),

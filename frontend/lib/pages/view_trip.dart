@@ -8,7 +8,7 @@ import 'package:tripsitter/components/hotels/select_hotels.dart';
 import 'package:tripsitter/components/map.dart';
 import 'package:tripsitter/components/mobile_wrapper.dart';
 import 'package:tripsitter/components/events/select_events.dart';
-import 'package:tripsitter/components/select_flight.dart';
+import 'package:tripsitter/components/flights/select_flight.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:provider/provider.dart';
@@ -82,7 +82,7 @@ class ViewTrip extends StatelessWidget {
                             ListTile(
                               leading: const Icon(Icons.flight_takeoff_rounded),
                               title: Text("Flights"),
-                              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => MobileWrapper(trip: trip, profiles: profiles, title: "Select Flights", child: SelectFlight()))),
+                              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => MobileWrapper(trip: trip, profiles: profiles, title: "Select Flights", child: SelectFlight(trip, profiles)))),
                             ),
                             ListTile(
                               leading: const Icon(Icons.hotel),

@@ -8,7 +8,7 @@ import "package:tripsitter/classes/trip.dart";
 import 'package:tripsitter/components/cars/select_cars.dart';
 import 'package:tripsitter/components/events/select_events.dart';
 import "package:tripsitter/components/hotels/select_hotels.dart";
-import "package:tripsitter/components/select_flight.dart";
+import 'package:tripsitter/components/flights/select_flight.dart';
 import "package:tripsitter/components/trip_center_console.dart";
 
 class PageType { 
@@ -68,7 +68,7 @@ class _TripConsoleDotState extends State<TripConsoleDot> {
       case PageType.Hotel:
         return SelectHotels(widget.trip, profiles);
       case PageType.Flights:
-        return const SelectFlight();
+        return SelectFlight(widget.trip, profiles);
       case PageType.RentalCar:
         return SelectCars(widget.trip, profiles);
       case PageType.Activities:
