@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:tripsitter/classes/profile.dart';
 import 'package:tripsitter/classes/trip.dart';
 import 'package:tripsitter/components/cars/select_cars.dart';
+import 'package:tripsitter/components/hotels/select_hotels.dart';
 import 'package:tripsitter/components/map.dart';
 import 'package:tripsitter/components/mobile_wrapper.dart';
 import 'package:tripsitter/components/events/select_events.dart';
@@ -12,7 +13,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:provider/provider.dart';
 import 'package:tripsitter/components/navbar.dart';
-import 'package:tripsitter/components/select_hotel.dart';
 import 'package:tripsitter/components/trip_dash.dart';
 import 'package:tripsitter/components/trip_side_column.dart';
 import 'package:tripsitter/pages/login.dart';
@@ -87,7 +87,7 @@ class ViewTrip extends StatelessWidget {
                             ListTile(
                               leading: const Icon(Icons.hotel),
                               title: Text("Hotels"),
-                              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => MobileWrapper(trip: trip, profiles: profiles, title: "Select Hotels", child: SelectHotel()))),
+                              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => MobileWrapper(trip: trip, profiles: profiles, title: "Select Hotels", child: SelectHotels(trip, profiles)))),
                             ),
                             ListTile(
                               leading: const Icon(Icons.directions_car),

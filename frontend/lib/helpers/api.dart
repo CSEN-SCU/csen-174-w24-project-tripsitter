@@ -76,7 +76,7 @@ class TripsitterApi {
   }
 
   static Future<List<HotelOption>> getHotels(HotelQuery query) async {
-    print( query.toJson());
+    print(query.toJson());
     Uri uri = Uri.http(baseUrl, searchHotelsUrl, query.toJson());
     http.Response response = await http.get(uri);
     if (response.statusCode == 200) {
