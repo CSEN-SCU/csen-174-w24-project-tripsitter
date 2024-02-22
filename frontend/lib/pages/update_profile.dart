@@ -62,7 +62,6 @@ class _UpdateProfileState extends State<UpdateProfile> {
         emailController.text = profile!.email;
       }
       else {
-        print("NEW PROFILE");
         nameController.text = user.displayName!;
         emailController.text = user.email!;
         newProfile = true;

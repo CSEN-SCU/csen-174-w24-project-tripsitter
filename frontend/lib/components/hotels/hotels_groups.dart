@@ -1,27 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:tripsitter/classes/car.dart';
+import 'package:tripsitter/classes/hotels.dart';
 import 'package:tripsitter/classes/profile.dart';
 import 'package:tripsitter/classes/trip.dart';
-import 'package:tripsitter/components/cars/car_info_dialog.dart';
-import 'package:tripsitter/components/cars/cars_options.dart';
+import 'package:tripsitter/components/hotels/hotel_info_dialog.dart';
+import 'package:tripsitter/components/hotels/hotels_options.dart';
 import 'package:tripsitter/components/mobile_wrapper.dart';
 import 'package:tripsitter/helpers/formatters.dart';
 
-class CarGroups extends StatefulWidget {
+class HotelGroups extends StatefulWidget {
   final List<UserProfile> profiles;
   final Trip trip;
-  final RentalCarGroup? currentGroup;
+  final HotelGroup? currentGroup;
   final Function setState;
-  final Function(RentalCarGroup?) setCurrentGroup;
+  final Function(HotelGroup?) setCurrentGroup;
 
-  const CarGroups({required this.setState, required this.profiles, required this.trip, required this.currentGroup, required this.setCurrentGroup, super.key});
+  const HotelGroups({required this.setState, required this.profiles, required this.trip, required this.currentGroup, required this.setCurrentGroup, super.key});
 
   @override
-  State<CarGroups> createState() => _CarGroupsState();
+  State<HotelGroups> createState() => _HotelGroupsState();
 }
 
-class _CarGroupsState extends State<CarGroups> {
+class _HotelGroupsState extends State<HotelGroups> {
   @override
   Widget build(BuildContext context) {
     bool isMobile = Provider.of<bool>(context);
@@ -30,7 +30,7 @@ class _CarGroupsState extends State<CarGroups> {
       child: ListView(
         children: [
           Text('Selections', style: Theme.of(context).textTheme.displayMedium?.copyWith(decoration: TextDecoration.underline, fontWeight: FontWeight.bold)),
-          for (RentalCarGroup group in widget.trip.rentalCars)
+          for (HotelGroup group in widget.trip.hotels)
             Container(
               color: widget.currentGroup == group ? Colors.blue : Colors.transparent,
               child: Column(
@@ -55,7 +55,7 @@ class _CarGroupsState extends State<CarGroups> {
                         PopupMenuButton<UserProfile>(
                           itemBuilder: (BuildContext context) {
                             return widget.profiles.where((profile){
-                              for (RentalCarGroup g in widget.trip.rentalCars) {
+                              for (HotelGroup g in widget.trip.hotels) {
                                 if(g.members.contains(profile.id) && group != g) {
                                   return false;
                                 }
@@ -73,6 +73,7 @@ class _CarGroupsState extends State<CarGroups> {
                           },
                           child: Icon(Icons.add),
                           onSelected: (UserProfile profile) async {
+                            print("Toggling ${profile.name}");
                             if(group.members.contains(profile.id)) {
                               await group.removeMember(profile.id);
                             } else {
@@ -89,11 +90,11 @@ class _CarGroupsState extends State<CarGroups> {
                             });
                             widget.setState();
                           },
-                          icon: Icon(Icons.car_rental)
+                          icon: Icon(Icons.hotel)
                         ),
                         IconButton(
                           onPressed: () async {
-                            await widget.trip.removeRentalCarGroup(group);
+                            await widget.trip.removeHotelGroup(group);
                             if(widget.currentGroup == group) {
                               widget.setCurrentGroup(null);
                             }
@@ -105,39 +106,40 @@ class _CarGroupsState extends State<CarGroups> {
                       ],
                     ),
                   ),
-                  ...group.options.map((RentalCarOffer car) => ListTile(
-                    title: Text("${car.sipp.fromSipp()} (${car.carName} or similar)"),
-                    subtitle: Text("${car.provider.providerName}, \$${car.price.toStringAsFixed(2)}"),
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        IconButton(
-                          icon: Icon(Icons.info),
-                          onPressed: () {
-                            showDialog(
-                              context: context,
-                              builder: (BuildContext context) {
-                                return CarInfoDialog(car);
-                              }
-                            );
-                          },
-                        ),
-                        IconButton(
-                          icon: Icon(Icons.delete),
-                          onPressed: () async {
-                            await group.removeOption(car);
-                            setState(() {});
-                            widget.setState();
-                          },
-                        ),
-                      ],
+                  for(int i = 0; i < group.infos.length; i++)
+                    ListTile(
+                      title: Text("${group.infos[i].name} (\$${group.offers[i].price.total})"),
+                      subtitle: Text("${group.offers[i].room?.description?.text ?? 'No description available'}"),
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          IconButton(
+                            icon: const Icon(Icons.info),
+                            onPressed: () {
+                              showDialog(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return HotelInfoDialog(group.infos[i]);
+                                }
+                              );
+                            },
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.delete),
+                            onPressed: () async {
+                              await group.removeOption(i);
+                              setState(() {});
+                              widget.setState();
+                            },
+                          ),
+                        ],
+                      ),
                     ),
-                  )),
                   if(isMobile)
                     ElevatedButton.icon(
                       icon: Icon(Icons.add),
                       onPressed: () {
-                        Navigator.push(context, MaterialPageRoute(builder: (context) => MobileWrapper(title: "Add Car Options", child: CarOptions(currentGroup: group, setState: () => setState((){}),))));
+                        Navigator.push(context, MaterialPageRoute(builder: (context) => MobileWrapper(title: "Add Hotel Options", child: HotelOptions(currentGroup: group, trip: widget.trip, setState: () => setState((){}),))));
                       },
                       label: Text("Add Options")
                     ),
@@ -146,10 +148,10 @@ class _CarGroupsState extends State<CarGroups> {
               )
             ),
           // check if all profiles are in a group
-          if(!(widget.profiles.length > 0 && widget.trip.rentalCars.length > 0 && widget.profiles.every((profile) => widget.trip.rentalCars.any((group) => group.members.contains(profile.id))) && widget.trip.rentalCars.every((group) => group.members.length > 0)))
+          if(!(widget.profiles.length > 0 && widget.trip.hotels.length > 0 && widget.profiles.every((profile) => widget.trip.hotels.any((group) => group.members.contains(profile.id))) && widget.trip.hotels.every((group) => group.members.length > 0)))
             ElevatedButton(
               onPressed: () async {
-                RentalCarGroup newGroup = await widget.trip.createRentalCarGroup("Group ${widget.trip.rentalCars.length + 1}", List<String>.empty(growable: true));
+                HotelGroup newGroup = await widget.trip.createHotelGroup("Group ${widget.trip.hotels.length + 1}", List<String>.empty(growable: true));
                 if(!isMobile) {
                   widget.setCurrentGroup(newGroup);
                 }
