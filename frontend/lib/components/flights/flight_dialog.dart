@@ -5,17 +5,30 @@ import 'package:tripsitter/helpers/formatters.dart';
 
 class FlightDialog extends StatelessWidget {
   final FlightItineraryRecursive flight;
-  const FlightDialog(this.flight,{super.key});
+  const FlightDialog(this.flight, {super.key});
 
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
       title: Text("Flight Details"),
       content: Column(
-        crossAxisAlignment:
-            CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           for (int j = 0; j < flight.segments.length; j++) ...[
+            //  RichText(
+            //         text: TextSpan(
+            //           style: DefaultTextStyle.of(context).style,
+            //           children: <TextSpan>[
+            //             const TextSpan(
+            //               text: "test",
+            //               style: TextStyle(fontWeight: FontWeight.bold),
+            //             ),
+            //             TextSpan(
+            //               text: "test",
+            //             ),
+            //           ],
+            //         ),
+            //       ),
             Text("Flight ${j + 1}"),
             Text(
                 "${flight.segments[j].departure.iataCode} - ${flight.segments[j].arrival.iataCode}"),
@@ -25,12 +38,10 @@ class FlightDialog extends StatelessWidget {
                 "${DateFormat.yMMMMd().add_jm().format(flight.segments[j].departure.at)} - ${DateFormat.yMMMMd().add_jm().format(flight.segments[j].departure.at)}"),
             Text(
                 "Duration: ${flight.segments[j].duration.toDuration().format()}"),
-            Text(
-                "Aircraft: ${flight.segments[j].aircraft.code.toPlaneName()}"),
+            Text("Aircraft: ${flight.segments[j].aircraft.code.toPlaneName()}"),
             Container(height: 10),
             if (j < flight.segments.length - 1) ...[
-              Text(
-                  "Layover in ${flight.segments[j + 1].departure.iataCode}"),
+              Text("Layover in ${flight.segments[j + 1].departure.iataCode}"),
               Text(
                   "Duration: ${flight.segments[j + 1].departure.at.difference(flight.segments[j].arrival.at).format()}"),
               Container(height: 10),
