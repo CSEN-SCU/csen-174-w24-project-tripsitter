@@ -21,46 +21,60 @@ class SelectEvents extends StatefulWidget {
 }
 
 class _SelectEventsState extends State<SelectEvents> {
+  Map<String, GlobalKey> participantsPopupKeys = {};
+  Map<String, List<String>> selectedParticipantsMap = {};
+  Map<String, bool> participantsPopupOpenState = {};
+
   @override
   Widget build(BuildContext context) {
     bool isMobile = Provider.of<bool>(context);
-    if(isMobile) {
-      return EventsItinerary(trip: widget.trip, profiles: widget.profiles);
+    if (isMobile) {
+      return EventsItinerary(
+        trip: widget.trip,
+        profiles: widget.profiles,
+        participantsPopupKeys: participantsPopupKeys,
+        selectedParticipantsMap: selectedParticipantsMap,
+        participantsPopupOpenState: participantsPopupOpenState,
+      );
     }
     return LayoutBuilder(
-      builder: (BuildContext context, BoxConstraints constraints) {
-        return Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
+        builder: (BuildContext context, BoxConstraints constraints) {
+      return Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
               decoration: const BoxDecoration(
-                borderRadius: BorderRadius.only(topLeft: Radius.circular(25.0), bottomLeft: Radius.circular(25.0)),
+                borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(25.0),
+                    bottomLeft: Radius.circular(25.0)),
                 color: Color.fromARGB(255, 200, 200, 200),
               ),
               width: constraints.maxWidth * 0.35,
               child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: EventsItinerary(
-                  trip: widget.trip,
-                  profiles: widget.profiles,
-                  setState: () => setState((){}),
-                )
-              )
-            ),
-            Container(
+                  padding: const EdgeInsets.all(8.0),
+                  child: EventsItinerary(
+                    trip: widget.trip,
+                    profiles: widget.profiles,
+                    participantsPopupKeys: participantsPopupKeys,
+                    selectedParticipantsMap: selectedParticipantsMap,
+                    participantsPopupOpenState: participantsPopupOpenState,
+                    setState: () => setState(() {}),
+                  ))),
+          Container(
               width: constraints.maxWidth * 0.65,
               child: Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: EventsOptions(
                   trip: widget.trip,
                   profiles: widget.profiles,
-                  setState: () => setState((){}),
+                  participantsPopupKeys: participantsPopupKeys,
+                  selectedParticipantsMap: selectedParticipantsMap,
+                  participantsPopupOpenState: participantsPopupOpenState,
+                  setState: () => setState(() {}),
                 ),
-              )
-            )
-          ],
-        );
-      }
-    );
+              ))
+        ],
+      );
+    });
   }
 }

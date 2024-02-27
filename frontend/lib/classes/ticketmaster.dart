@@ -112,14 +112,18 @@ class TicketmasterEvent {
       ticketLimit: json['ticketLimit'],
       classifications: classifications,
       startTime: TicketmasterDateTime.fromJson(json['startTime']),
-      doorsTime: json['doorsTime'] != null ? TicketmasterDateTime.fromJson(json['doorsTime']) : null,
+      doorsTime: json['doorsTime'] != null
+          ? TicketmasterDateTime.fromJson(json['doorsTime'])
+          : null,
       images: images,
       locale: json['locale'],
       info: TicketmasterEventInfo.fromJson(json['info']),
       promoters: promoters,
       prices: prices,
       seatmapUrl: json['seatmapUrl'],
-      sales: json['sales'] != null ? TicketmasterSales.fromJson(json['sales']) : null,
+      sales: json['sales'] != null
+          ? TicketmasterSales.fromJson(json['sales'])
+          : null,
       type: json['type'],
       distance: json['distance'],
       distanceUnits: json['distanceUnits'],
@@ -129,7 +133,7 @@ class TicketmasterEvent {
     );
   }
 
-  Map<String,dynamic> toJson() {
+  Map<String, dynamic> toJson() {
     return {
       'ageRestrictions': ageRestrictions,
       'id': id,
@@ -178,15 +182,25 @@ class TicketmasterClassification {
     return TicketmasterClassification(
       primary: json['primary'],
       family: json['family'],
-      genre: json['genre'] != null ? TicketmasterGenre.fromJson(json['genre']) : null,
-      subGenre: json['subGenre'] != null ? TicketmasterGenre.fromJson(json['subGenre']) : null,
-      segment: json['segment'] != null ? TicketmasterGenre.fromJson(json['segment']) : null,
-      type: json['type'] != null ? TicketmasterGenre.fromJson(json['type']) : null,
-      subType: json['subType'] != null ? TicketmasterGenre.fromJson(json['subType']) : null,
+      genre: json['genre'] != null
+          ? TicketmasterGenre.fromJson(json['genre'])
+          : null,
+      subGenre: json['subGenre'] != null
+          ? TicketmasterGenre.fromJson(json['subGenre'])
+          : null,
+      segment: json['segment'] != null
+          ? TicketmasterGenre.fromJson(json['segment'])
+          : null,
+      type: json['type'] != null
+          ? TicketmasterGenre.fromJson(json['type'])
+          : null,
+      subType: json['subType'] != null
+          ? TicketmasterGenre.fromJson(json['subType'])
+          : null,
     );
   }
 
-  Map<String,dynamic> toJson() {
+  Map<String, dynamic> toJson() {
     return {
       'primary': primary,
       'family': family,
@@ -215,7 +229,7 @@ class TicketmasterGenre {
     );
   }
 
-  Map<String,dynamic> toJson() {
+  Map<String, dynamic> toJson() {
     return {
       'id': id,
       'name': name,
@@ -254,7 +268,7 @@ class TicketmasterDateTime {
     );
   }
 
-  Map<String,dynamic> toJson() {
+  Map<String, dynamic> toJson() {
     return {
       'localDate': localDate,
       'localTime': localTime,
@@ -264,6 +278,28 @@ class TicketmasterDateTime {
       'timeTBA': timeTBA,
       'noSpecificTime': noSpecificTime,
     };
+  }
+
+  String getFormattedDate() {
+    if (localDate == null) return "Date TBA";
+    DateTime date = DateTime.parse(localDate!);
+    return DateFormat('E, MMMM d, yyyy')
+        .format(date); // "Saturday, September 1, 2024"
+  }
+
+  String getFormattedTime() {
+    if (localTime == null) return "Time TBA";
+    try {
+      List<String> parts = localTime!.split(":");
+      if (parts.length >= 2) {
+        DateTime time =
+            DateTime(0, 0, 0, int.parse(parts[0]), int.parse(parts[1]));
+        return DateFormat('h:mm a').format(time); // "8:00 PM"
+      }
+    } catch (_) {
+      return "Time TBA";
+    }
+    return "Time TBA";
   }
 }
 
@@ -283,7 +319,7 @@ class TicketmasterImage {
     );
   }
 
-  Map<String,dynamic> toJson() {
+  Map<String, dynamic> toJson() {
     return {
       'fallback': fallback,
       'url': url,
@@ -310,7 +346,7 @@ class TicketmasterEventInfo {
     );
   }
 
-  Map<String,dynamic> toJson() {
+  Map<String, dynamic> toJson() {
     return {
       'infoStr': infoStr,
       'pleaseNote': pleaseNote,
@@ -338,7 +374,7 @@ class TicketmasterPromoter {
     );
   }
 
-  Map<String,dynamic> toJson() {
+  Map<String, dynamic> toJson() {
     return {
       "id": id,
       "name": name,
@@ -369,7 +405,7 @@ class TicketmasterPrice {
     );
   }
 
-  Map<String,dynamic> toJson() {
+  Map<String, dynamic> toJson() {
     return {
       "type": type,
       "currency": currency,
@@ -400,7 +436,7 @@ class TicketmasterSales {
     );
   }
 
-  Map<String,dynamic> toJson() {
+  Map<String, dynamic> toJson() {
     return {
       "public": public.toJson(),
       "presales": presales.map((e) => e.toJson()).toList(),
@@ -433,7 +469,7 @@ class TicketmasterSale {
     );
   }
 
-  Map<String,dynamic> toJson() {
+  Map<String, dynamic> toJson() {
     return {
       "startDateTime": startDateTime,
       "endDateTime": endDateTime,
@@ -507,13 +543,17 @@ class TicketmasterVenue {
       timezone: json['timezone'],
       postalCode: json['postalCode'],
       images: images,
-      latitude: json['latitude'] == null ? null : double.parse(json['latitude'].toString()),
-      longitude: json['longitude'] == null ? null : double.parse(json['longitude'].toString()),
+      latitude: json['latitude'] == null
+          ? null
+          : double.parse(json['latitude'].toString()),
+      longitude: json['longitude'] == null
+          ? null
+          : double.parse(json['longitude'].toString()),
       url: json['url'],
     );
   }
 
-  Map<String,dynamic> toJson() {
+  Map<String, dynamic> toJson() {
     return {
       "id": id,
       "name": name,
@@ -578,7 +618,7 @@ class TicketmasterAttraction {
     );
   }
 
-  Map<String,dynamic> toJson() {
+  Map<String, dynamic> toJson() {
     return {
       "classifications": classifications.map((e) => e.toJson()).toList(),
       "id": id,
@@ -610,13 +650,14 @@ class TicketmasterLinks {
     return TicketmasterLinks(
       facebook: json['facebook'].isNotEmpty ? json['facebook'][0]?.url : null,
       twitter: json['twitter'].isNotEmpty ? json['twitter'][0]?.url : null,
-      instagram: json['instagram'].isNotEmpty ? json['instagram'][0]?.url : null,
+      instagram:
+          json['instagram'].isNotEmpty ? json['instagram'][0]?.url : null,
       wiki: json['wiki'].isNotEmpty ? json['wiki'][0]?.url : null,
       homepage: json['homepage'].isNotEmpty ? json['homepage'][0]?.url : null,
     );
   }
 
-  Map<String,dynamic> toJson() {
+  Map<String, dynamic> toJson() {
     return {
       "facebook": facebook,
       "twitter": twitter,

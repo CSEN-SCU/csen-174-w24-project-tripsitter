@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:intl/intl.dart';
 import 'package:tripsitter/classes/profile.dart';
 import 'package:tripsitter/classes/ticketmaster.dart';
 import 'package:tripsitter/classes/trip.dart';
@@ -9,14 +10,25 @@ import 'package:tripsitter/components/events/event_info_dialog.dart';
 import 'package:tripsitter/components/events/events_map.dart';
 import 'package:tripsitter/components/events/select_events.dart';
 import 'package:tripsitter/helpers/api.dart';
+import 'package:tripsitter/popups/checkbox_popup.dart';
 
 class EventsOptions extends StatefulWidget {
   final Trip trip;
   final List<UserProfile> profiles;
+  final Map<String, GlobalKey> participantsPopupKeys;
+  final Map<String, List<String>> selectedParticipantsMap;
+  final Map<String, bool> participantsPopupOpenState;
   final Function? setState;
 
-  EventsOptions(
-      {required this.trip, required this.profiles, this.setState, super.key});
+  const EventsOptions({
+    required this.trip,
+    required this.profiles,
+    required this.participantsPopupKeys,
+    required this.selectedParticipantsMap,
+    required this.participantsPopupOpenState,
+    this.setState,
+    super.key,
+  });
 
   @override
   State<EventsOptions> createState() => _EventsOptionsState();
@@ -25,7 +37,6 @@ class EventsOptions extends StatefulWidget {
 class _EventsOptionsState extends State<EventsOptions>
     with TickerProviderStateMixin {
   List<TicketmasterEvent> events = [];
-
   Trip get trip => widget.trip;
 
   late AnimationController controller;
@@ -68,6 +79,7 @@ class _EventsOptionsState extends State<EventsOptions>
       endDateTime: trip.endDate,
     ));
 
+    // After fetching events, initialize GlobalKeys for each
     setState(() {
       events = call;
     });
@@ -77,6 +89,9 @@ class _EventsOptionsState extends State<EventsOptions>
 
   @override
   Widget build(BuildContext context) {
+    // Initialize a counter variable before mapping the events to TableRows
+    int rowIndex = 0;
+
     return ListView(
       children: [
         Wrap(
