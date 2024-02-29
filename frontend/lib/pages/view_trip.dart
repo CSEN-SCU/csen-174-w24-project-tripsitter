@@ -15,6 +15,7 @@ import 'package:provider/provider.dart';
 import 'package:tripsitter/components/navbar.dart';
 import 'package:tripsitter/components/trip_dash.dart';
 import 'package:tripsitter/components/trip_side_column.dart';
+import 'package:tripsitter/pages/checkout.dart';
 import 'package:tripsitter/pages/login.dart';
 
 class ViewTrip extends StatelessWidget {
@@ -99,6 +100,11 @@ class ViewTrip extends StatelessWidget {
                               title: Text("Activities"),
                               onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => MobileWrapper(title: "Select Activites", child: SelectEvents(trip, profiles)))),
                             ),
+                            ListTile(
+                              leading: const Icon(Icons.credit_card),
+                              title: Text("Checkout"),
+                              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => MobileWrapper(trip: trip, profiles: profiles, title: "Checkout", child: CheckoutPage(trip: trip, profiles: profiles)))),
+                            )
                             
                           ],
                         );
