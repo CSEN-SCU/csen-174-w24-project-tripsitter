@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:tripsitter/classes/profile.dart';
 import 'package:tripsitter/classes/trip.dart';
 import 'package:tripsitter/helpers/api.dart';
-import 'package:tripsitter/pages/checkout_page.dart';
+import 'package:tripsitter/pages/checkout.dart';
 
 class TripSideColumn extends StatelessWidget {
   final Trip? trip;
