@@ -613,7 +613,7 @@ class FlightFareDetailsBySegment {
   final String? brandedFare;
   final String? brandedFareLabel;
   final String classType;
-  final FlightIncludedCheckedBags includedCheckedBags;
+  final FlightIncludedCheckedBags? includedCheckedBags;
   final List<FlightAmenity> amenities;
 
   const FlightFareDetailsBySegment({
@@ -636,23 +636,26 @@ class FlightFareDetailsBySegment {
       brandedFareLabel: json['brandedFareLabel'],
       classType: json['class'],
       includedCheckedBags:
-          FlightIncludedCheckedBags.fromJson(json['includedCheckedBags']),
+          json['includedCheckedBags'] == null ? null : FlightIncludedCheckedBags.fromJson(json['includedCheckedBags']),
       amenities: json['amenities'] == null ? [] : List<FlightAmenity>.from(
           json['amenities'].map((amenity) => FlightAmenity.fromJson(amenity))),
     );
   }
 
   Map<String, dynamic> toJson() {
-    return {
+    Map<String,dynamic> json =  {
       'segmentId': segmentId,
       'cabin': cabin,
       'fareBasis': fareBasis,
       'brandedFare': brandedFare,
       'brandedFareLabel': brandedFareLabel,
       'class': classType,
-      'includedCheckedBags': includedCheckedBags.toJson(),
       'amenities': amenities.map((amenity) => amenity.toJson()).toList(),
     };
+    if(includedCheckedBags != null) {
+      json['includedCheckedBags'] = includedCheckedBags!.toJson();
+    }
+    return json;
   }
 }
 

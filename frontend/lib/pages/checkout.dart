@@ -32,6 +32,8 @@ class _CheckoutPageState extends State<CheckoutPage> {
         child: CircularProgressIndicator()
       );
     }
+    bool split = trip.usingSplitPayments;
+    String uid = user.uid;
     return Scaffold(
       appBar: const TripSitterNavbar(),
       body: AbsorbPointer(
@@ -47,47 +49,57 @@ class _CheckoutPageState extends State<CheckoutPage> {
                 children: [
                   Text("Checkout Page"),
                   Text("Trip: ${widget.trip.name}"),
-                  if(trip.flights.isNotEmpty)
+                  if((split ? trip.flights.where((f) => f.members.contains(uid)) : trip.flights).isNotEmpty)
                     ...[
-                      Text("Flights: \$${trip.flightsPrice} total"),
-                      for(var flight in trip.flights)
+                      Text("Flights: \$${split ? trip.userFlightsPrice(uid) : trip.flightsPrice}${split ? "" : " total"}"),
+                      for(var flight in (split ? trip.flights.where((f) => f.members.contains(uid)) : trip.flights))
                         ...[
-                          Text("${flight.departureAirport} -> ${flight.arrivalAirport} (${flight.price == null ? "Unknown price" : "\$${flight.price} total"})"),
-                          Text(flight.members.map((e) => widget.profiles.firstWhere((profile) => profile.id == e).name).join(", ")),
+                          Text("${flight.departureAirport} -> ${flight.arrivalAirport} (${split ? (flight.userPrice(uid) == null ? "Unknown price" : "\$${flight.userPrice(uid)}") : (flight.price == null ? "Unknown price" : "\$${flight.price} total")})"),
+                          if(!split)
+                            Text(flight.members.map((e) => widget.profiles.firstWhere((profile) => profile.id == e).name).join(", ")),
                         ],
                         Container(height: 10)
                     ],
-                  if(trip.hotels.isNotEmpty)
+                  if((split ? trip.hotels.where((h) => h.members.contains(uid)) : trip.hotels).isNotEmpty)
                     ...[
-                      Text("Hotels: \$${trip.hotelsPrice} total"),
-                      for(var hotel in trip.hotels)
+                      Text("Hotels: \$${split ? trip.userHotelsPrice(uid) : trip.hotelsPrice}${split ? "" : " total"}"),
+                      for(var hotel in (split ? trip.hotels.where((h) => h.members.contains(uid)) : trip.hotels))
                         ...[
-                          Text("${hotel.name} (${hotel.price == null ? "Unknown price" : "\$${hotel.price} total"})"),
-                          Text(hotel.members.map((e) => widget.profiles.firstWhere((profile) => profile.id == e).name).join(", ")),
+                          Text("${hotel.name} (${split ? (hotel.userPrice(uid) == null ? "Unknown price" : "\$${hotel.userPrice(uid)}") :(hotel.price == null ? "Unknown price" : "\$${hotel.price} total")})"),
+                          if(!split)
+                            Text(hotel.members.map((e) => widget.profiles.firstWhere((profile) => profile.id == e).name).join(", ")),
                         ],
-                        Container(height: 10)
+                      Container(height: 10)
                     ],
-                  if(trip.rentalCars.isNotEmpty)
+                  if((split ? trip.rentalCars.where((r) => r.members.contains(uid)) : trip.rentalCars).isNotEmpty)
                     ...[
-                      Text("Rental Cars: \$${trip.rentalCarsPrice} total"),
-                      for(var car in trip.rentalCars)
+                      Text("Rental Cars: \$${split ? trip.userRentalCarsPrice(uid) : trip.rentalCarsPrice}${split ? "" : " total"}"),
+                      for(var rentalCar in (split ? trip.rentalCars.where((r) => r.members.contains(uid)) : trip.rentalCars))
                         ...[
-                          Text("${car.name} (\$${car.price} total)"),
-                          Text(car.members.map((e) => widget.profiles.firstWhere((profile) => profile.id == e).name).join(", ")),
+                          Text("${rentalCar.name} (${split ? ("\$${rentalCar.userPrice(uid)}") : ("\$${rentalCar.price} total")})"),
+                          if(!split)
+                            Text(rentalCar.members.map((e) => widget.profiles.firstWhere((profile) => profile.id == e).name).join(", ")),
                         ],
-                        Container(height: 10)
+                      Container(height: 10)
                     ],
-                  if(trip.activities.isNotEmpty)
+                  if((split ? trip.activities.where((a) => a.participants.contains(uid)) : trip.activities).isNotEmpty)
                     ...[
-                      Text("Activities: \$${trip.activitiesPrice} total"),
-                      for(var activity in trip.activities)
+                      Text("Activities: \$${split ? trip.userActivitiesPrice(uid) : trip.activitiesPrice} total"),
+                      for(var activity in (split ? trip.activities.where((a) => a.participants.contains(uid)) : trip.activities))
                         ...[
-                          Text("${activity.event.name} (${activity.price == null ? "Unknown price" : "\$${activity.price} total"})"),
-                          Text(activity.participants.map((e) => widget.profiles.firstWhere((profile) => profile.id == e).name).join(", ")),
+                          Text("${activity.event.name} (${split ? (activity.userPrice(uid) == null ? "Unknown price" : "\$${activity.userPrice(uid)}") : (activity.price == null ? "Unknown price" : "\$${activity.price} total")})"),
+                          if(!split)
+                            Text(activity.participants.map((e) => widget.profiles.firstWhere((profile) => profile.id == e).name).join(", ")),
                         ],
-                        Container(height: 10)
+                      Container(height: 10)
                     ],
-                  Text("Total price: \$${trip.totalPrice}"),
+                  Text("${split ? "Your total" : "Total price"}: \$${trip.totalPrice}"),
+                  if((split ? trip.rentalCars.where((r) => r.members.contains(uid)) : trip.rentalCars).isNotEmpty || (split ? trip.activities.where((a) => a.participants.contains(uid)) : trip.activities).isNotEmpty)
+                    ...[
+                      Container(height: 50),
+                      Text("Note: Only flights and hotels can be paid directly through TripSitter. After purchasing, you will be directed to the rental car and activity websites to complete your purchase."),
+                      Text("Amount owed to TripSitter: \$${split ? trip.userStripePrice(uid) : trip.stripePrice}")
+                    ],
                   ConstrainedBox(
                     constraints: const BoxConstraints(
                       maxHeight: 100,

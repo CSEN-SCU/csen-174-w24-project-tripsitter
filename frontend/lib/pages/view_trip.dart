@@ -100,12 +100,18 @@ class ViewTrip extends StatelessWidget {
                               title: Text("Activities"),
                               onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => MobileWrapper(title: "Select Activites", child: SelectEvents(trip, profiles)))),
                             ),
+                            CheckboxListTile(
+                              value: trip.usingSplitPayments,
+                              title: Text("Split payments"), 
+                              onChanged: (bool? value) {
+                                trip.toggleSplitPayments();
+                              },
+                            ),
                             ListTile(
                               leading: const Icon(Icons.credit_card),
                               title: Text("Checkout"),
                               onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => MobileWrapper(trip: trip, profiles: profiles, title: "Checkout", child: CheckoutPage(trip: trip, profiles: profiles)))),
-                            )
-                            
+                            ),
                           ],
                         );
                       }

@@ -124,7 +124,7 @@ class TripsitterApi {
   }
 
   static Future<PaymentIntentData> createPaymentIntent(String userId, Trip trip) async {
-    int amount = (trip.totalPrice*100).floor();
+    int amount = ((trip.usingSplitPayments ? trip.userStripePrice(userId) : trip.stripePrice)*100).floor();
     String description = trip.itineraryStr;
 
     Uri uri = useHttps ? Uri.https(baseUrl,createPaymentIntentUrl) : Uri.http(baseUrl, createPaymentIntentUrl);
