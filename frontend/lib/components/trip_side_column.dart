@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:tripsitter/classes/profile.dart';
 import 'package:tripsitter/classes/trip.dart';
 import 'package:tripsitter/helpers/api.dart';
+import 'package:tripsitter/pages/checkout.dart';
 
 class TripSideColumn extends StatefulWidget {
   final Trip? trip;
@@ -62,8 +63,18 @@ class _TripSideColumnState extends State<TripSideColumn> {
             }
           },
           icon: Icon(Icons.add),
-          label: Text("Add Member"))
-    ]);
+          label: Text("Add Member")
+        ),
+        Container(height: 10),
+        ElevatedButton.icon(
+          icon: Icon(Icons.credit_card),
+          onPressed: () {
+            Navigator.push(context, MaterialPageRoute(builder: (context) => CheckoutPage(trip: widget.trip!, profiles: profiles)));
+          }, 
+          label: Text("Checkout"),
+        )
+      ]
+    );
   }
 }
 

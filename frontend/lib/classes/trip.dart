@@ -1,5 +1,8 @@
+import 'dart:math';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:tripsitter/classes/car.dart';
 import 'package:tripsitter/classes/city.dart';
 import 'package:tripsitter/classes/flights.dart';
@@ -11,7 +14,6 @@ class Trip {
   final String _id;
   final List<String> _uids;
   final Map<String, double> _prices;
-  double _totalPrice;
   String _name;
   DateTime _startDate;
   DateTime _endDate;
@@ -26,7 +28,6 @@ class Trip {
     required String id,
     required List<String> uids,
     required Map<String, double> prices,
-    required double totalPrice,
     required String name,
     required DateTime startDate,
     required DateTime endDate,
@@ -39,7 +40,6 @@ class Trip {
   }) : _id = id,
        _uids = uids,
        _prices = prices,
-       _totalPrice = totalPrice,
        _name = name,
        _startDate = startDate,
        _endDate = endDate,
@@ -53,7 +53,6 @@ class Trip {
   String get id => _id;
   List<String> get uids => _uids;
   Map<String, double> get prices => _prices;
-  double get totalPrice => _totalPrice;
   String get name => _name;
   DateTime get startDate => _startDate;
   DateTime get endDate => _endDate;
@@ -64,6 +63,58 @@ class Trip {
   List<RentalCarGroup> get rentalCars => _rentalCars;
   List<Activity> get activities => _activities;
 
+  double get totalPrice {
+    return flightsPrice + hotelsPrice + rentalCarsPrice + activitiesPrice;
+  }
+
+  double get flightsPrice {
+    double total = 0;
+    for(FlightGroup group in _flights) {
+      if(group.price != null) {
+        total += group.price!;
+      }
+    }
+    return total;
+  }
+
+  double get hotelsPrice {
+    double total = 0;
+    for(HotelGroup group in _hotels) {
+      if(group.price != null) {
+        total += group.price!;
+      }
+    }
+    return total;
+  }
+
+  double get rentalCarsPrice {
+    double total = 0;
+    for(RentalCarGroup group in _rentalCars) {
+      total += group.price;
+    }
+    return total;
+  }
+
+  double get activitiesPrice {
+    double total = 0;
+    for(Activity activity in _activities) {
+      if(activity.price != null) {
+        total += activity.price!;
+      }
+    }
+    return total;
+  }
+
+  String get itineraryStr {
+    List<String> lines = [];
+
+    lines.add(_name);
+    lines.add("${DateFormat("MM/dd/yyyy").format(_startDate)} - ${DateFormat("MM/dd/yyyy").format(_endDate)}");
+    lines.add("${_destination.name}, ${_destination.country}");
+
+    return lines.join("\n");
+  }
+
   Future<void> save() async {
     await _save();
   }
@@ -72,7 +123,6 @@ class Trip {
     return {
       "uids": _uids,
       "prices": _prices,
-      "totalPrice": _totalPrice,
       "name": _name,
       "startDate": _startDate,
       "endDate": _endDate,
@@ -104,7 +154,6 @@ class Trip {
       id: doc.id,
       uids: (data['uids'] as List).map((item) => item as String).toList(),
       prices: Map<String,double>.from(data['prices']),
-      totalPrice: data['totalPrice'],
       name: data['name'],
       startDate: data['startDate'].toDate(),
       endDate: data['endDate'].toDate(),
@@ -219,6 +268,11 @@ class FlightGroup {
   FlightOffer? _selected;
   Future<void> Function() _save;
 
+  double? get price {
+    if(_selected == null) return 0;
+    return double.tryParse(_selected!.price.total);
+  }
+
   FlightGroup({
     required List<String> members,
     required String departureAirport,
@@ -305,6 +359,11 @@ class HotelGroup {
   HotelInfo? _selectedInfo;
   Future<void> Function() _save;
 
+  double? get price {
+    if(_selectedOffer == null) return 0;
+    return double.tryParse(_selectedOffer!.price.total ?? "");
+  }
+
   HotelGroup({
     required name,
     required members,
@@ -389,6 +448,11 @@ class RentalCarGroup {
   RentalCarOffer? _selected;
   Future<void> Function() _save;
 
+  double get price {
+    if(_selected == null) return 0;
+    return _selected!.price;
+  }
+
   RentalCarGroup({
     required members,
     required options,
@@ -460,6 +524,17 @@ class Activity {
   final TicketmasterEvent _event;
   final List<String> _participants;
   Future<void> Function() _save;
+
+  double? get price {
+    if(_event.prices.isEmpty) {
+      return null;
+    }
+    double perPerson = _event.prices.map((e) => e.min).reduce(min);
+    if(perPerson == 0) {
+      return null;
+    }
+    return perPerson * _participants.length;
+  }
 
   Activity({
     required TicketmasterEvent event,
