@@ -4,8 +4,10 @@ import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:tripsitter/classes/payment.dart';
 import 'package:tripsitter/classes/profile.dart';
 import 'package:tripsitter/classes/trip.dart';
+import 'package:tripsitter/components/checkout/confirmation.dart';
 import 'package:tripsitter/components/navbar.dart';
 import 'package:tripsitter/components/payment.dart';
+import 'package:tripsitter/components/checkout/trip_summary.dart';
 import 'package:tripsitter/helpers/api.dart';
 
 class CheckoutPage extends StatefulWidget {
@@ -48,51 +50,12 @@ class _CheckoutPageState extends State<CheckoutPage> {
               child: ListView(
                 children: [
                   Text("Checkout Page"),
-                  Text("Trip: ${widget.trip.name}"),
-                  if((split ? trip.flights.where((f) => f.members.contains(uid)) : trip.flights).isNotEmpty)
-                    ...[
-                      Text("Flights: \$${split ? trip.userFlightsPrice(uid) : trip.flightsPrice}${split ? "" : " total"}"),
-                      for(var flight in (split ? trip.flights.where((f) => f.members.contains(uid)) : trip.flights))
-                        ...[
-                          Text("${flight.departureAirport} -> ${flight.arrivalAirport} (${split ? (flight.userPrice(uid) == null ? "Unknown price" : "\$${flight.userPrice(uid)}") : (flight.price == null ? "Unknown price" : "\$${flight.price} total")})"),
-                          if(!split)
-                            Text(flight.members.map((e) => widget.profiles.firstWhere((profile) => profile.id == e).name).join(", ")),
-                        ],
-                        Container(height: 10)
-                    ],
-                  if((split ? trip.hotels.where((h) => h.members.contains(uid)) : trip.hotels).isNotEmpty)
-                    ...[
-                      Text("Hotels: \$${split ? trip.userHotelsPrice(uid) : trip.hotelsPrice}${split ? "" : " total"}"),
-                      for(var hotel in (split ? trip.hotels.where((h) => h.members.contains(uid)) : trip.hotels))
-                        ...[
-                          Text("${hotel.name} (${split ? (hotel.userPrice(uid) == null ? "Unknown price" : "\$${hotel.userPrice(uid)}") :(hotel.price == null ? "Unknown price" : "\$${hotel.price} total")})"),
-                          if(!split)
-                            Text(hotel.members.map((e) => widget.profiles.firstWhere((profile) => profile.id == e).name).join(", ")),
-                        ],
-                      Container(height: 10)
-                    ],
-                  if((split ? trip.rentalCars.where((r) => r.members.contains(uid)) : trip.rentalCars).isNotEmpty)
-                    ...[
-                      Text("Rental Cars: \$${split ? trip.userRentalCarsPrice(uid) : trip.rentalCarsPrice}${split ? "" : " total"}"),
-                      for(var rentalCar in (split ? trip.rentalCars.where((r) => r.members.contains(uid)) : trip.rentalCars))
-                        ...[
-                          Text("${rentalCar.name} (${split ? ("\$${rentalCar.userPrice(uid)}") : ("\$${rentalCar.price} total")})"),
-                          if(!split)
-                            Text(rentalCar.members.map((e) => widget.profiles.firstWhere((profile) => profile.id == e).name).join(", ")),
-                        ],
-                      Container(height: 10)
-                    ],
-                  if((split ? trip.activities.where((a) => a.participants.contains(uid)) : trip.activities).isNotEmpty)
-                    ...[
-                      Text("Activities: \$${split ? trip.userActivitiesPrice(uid) : trip.activitiesPrice} total"),
-                      for(var activity in (split ? trip.activities.where((a) => a.participants.contains(uid)) : trip.activities))
-                        ...[
-                          Text("${activity.event.name} (${split ? (activity.userPrice(uid) == null ? "Unknown price" : "\$${activity.userPrice(uid)}") : (activity.price == null ? "Unknown price" : "\$${activity.price} total")})"),
-                          if(!split)
-                            Text(activity.participants.map((e) => widget.profiles.firstWhere((profile) => profile.id == e).name).join(", ")),
-                        ],
-                      Container(height: 10)
-                    ],
+                  TripSummary(
+                    trip: trip,
+                    split: split,
+                    uid: uid,
+                    profiles: widget.profiles,
+                  ),
                   Text("${split ? "Your total" : "Total price"}: \$${trip.totalPrice}"),
                   if((split ? trip.rentalCars.where((r) => r.members.contains(uid)) : trip.rentalCars).isNotEmpty || (split ? trip.activities.where((a) => a.participants.contains(uid)) : trip.activities).isNotEmpty)
                     ...[
@@ -139,12 +102,33 @@ class _CheckoutPageState extends State<CheckoutPage> {
                           print(intent.status);
           
                           if(intent.status == PaymentIntentsStatus.Succeeded) {
-                            print("PAYMENT COMPLETE!");
+                            if(trip.usingSplitPayments) {
+                              trip.paymentsComplete[user.uid] = true;
+                              // check if all users on the trip have paid
+                              bool allPaid = true;
+                              for(String uid in trip.uids) {
+                                if(trip.paymentsComplete[uid] != true) {
+                                  allPaid = false;
+                                  break;
+                                }
+                              }
+                              if(allPaid) {
+                                await trip.complete();
+                                Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => ConfirmationPage(trip: trip, profiles: widget.profiles)));
+                              }
+                              else {
+                                await trip.save();
+                                Navigator.pop(context);
+                              }
+                            }
+                            else {
+                              await trip.complete();
+                              Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => ConfirmationPage(trip: trip, profiles: widget.profiles)));
+                            }
                             if(mounted) {
                               setState(() {
                                 loading = false;
                               });
-                            
                             }
                           }
                           else if(mounted){

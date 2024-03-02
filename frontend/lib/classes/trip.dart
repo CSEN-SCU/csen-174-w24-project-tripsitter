@@ -313,6 +313,7 @@ class Trip {
 
   Future<void> complete() async {
     _isConfirmed = true;
+    _frozen = true;
     await _save();
   }
 

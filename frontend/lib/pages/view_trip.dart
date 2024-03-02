@@ -15,7 +15,7 @@ import 'package:provider/provider.dart';
 import 'package:tripsitter/components/navbar.dart';
 import 'package:tripsitter/components/trip_dash.dart';
 import 'package:tripsitter/components/trip_side_column.dart';
-import 'package:tripsitter/pages/checkout.dart';
+import 'package:tripsitter/components/checkout/checkout.dart';
 import 'package:tripsitter/pages/login.dart';
 
 class ViewTrip extends StatelessWidget {

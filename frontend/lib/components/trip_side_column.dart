@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:tripsitter/classes/profile.dart';
 import 'package:tripsitter/classes/trip.dart';
 import 'package:tripsitter/helpers/api.dart';
-import 'package:tripsitter/pages/checkout.dart';
+import 'package:tripsitter/components/checkout/checkout.dart';
 
 class TripSideColumn extends StatelessWidget {
   final Trip? trip;
@@ -62,13 +62,18 @@ class TripSideColumn extends StatelessWidget {
                 trip!.toggleSplitPayments();
               },
             ),
-            ElevatedButton.icon(
-              icon: Icon(Icons.credit_card),
-              onPressed: () {
-                Navigator.push(context, MaterialPageRoute(builder: (context) => CheckoutPage(trip: trip!, profiles: profiles)));
-              }, 
-              label: Text("Checkout"),
-            ),
+            if((trip!.usingSplitPayments ? trip!.paymentsComplete[user.uid] != true : !trip!.isConfirmed))
+              ElevatedButton.icon(
+                icon: Icon(Icons.credit_card),
+                onPressed: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => CheckoutPage(trip: trip!, profiles: profiles)));
+                }, 
+                label: Text("Checkout"),
+              ),
+            if((!trip!.isConfirmed && trip!.usingSplitPayments && trip!.paymentsComplete[user.uid] == true))
+               Text("Awaiting payment from all members", style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+            if(trip!.isConfirmed)
+              Text("Trip is confirmed", style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold))
           ]
       ]
     );
