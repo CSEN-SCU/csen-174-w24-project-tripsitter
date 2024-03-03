@@ -106,6 +106,16 @@ class _CarGroupsState extends State<CarGroups> {
                     ),
                   ),
                   ...group.options.map((RentalCarOffer car) => ListTile(
+                    leading: Radio<RentalCarOffer>(
+                      value: car,
+                      groupValue: group.selected,
+                      onChanged: (RentalCarOffer? value) async {
+                        if(value == null) return;
+                        await group.selectOption(value);
+                        setState(() {});
+                        widget.setState();
+                      },
+                    ),
                     title: Text("${car.sipp.fromSipp()} (${car.carName} or similar)"),
                     subtitle: Text("${car.provider.providerName}, \$${car.price.toStringAsFixed(2)}"),
                     trailing: Row(
