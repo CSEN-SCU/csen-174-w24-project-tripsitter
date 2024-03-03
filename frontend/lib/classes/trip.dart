@@ -153,7 +153,7 @@ class Trip {
     Trip t = Trip(
       id: doc.id,
       uids: (data['uids'] as List).map((item) => item as String).toList(),
-      prices: Map<String,double>.from(data['prices']),
+      prices: Map<String,double>.from(data['prices'] ?? {}),
       name: data['name'],
       startDate: data['startDate'].toDate(),
       endDate: data['endDate'].toDate(),
