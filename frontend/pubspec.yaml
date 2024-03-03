@@ -62,6 +62,7 @@ dependencies:
   collection: ^1.18.0
   url_launcher: ^6.2.4
   tuple: ^2.0.2
+  image_picker_web: ^3.1.1
 
 dev_dependencies:
   flutter_test:

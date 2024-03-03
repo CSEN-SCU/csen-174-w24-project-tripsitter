@@ -1,3 +1,4 @@
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:tripsitter/classes/profile.dart';
@@ -5,45 +6,62 @@ import 'package:tripsitter/classes/trip.dart';
 import 'package:tripsitter/helpers/api.dart';
 import 'package:tripsitter/pages/checkout.dart';
 
-class TripSideColumn extends StatelessWidget {
+class TripSideColumn extends StatefulWidget {
   final Trip? trip;
   const TripSideColumn(this.trip, {super.key});
 
   @override
+  State<TripSideColumn> createState() => _TripSideColumnState();
+}
+
+class _TripSideColumnState extends State<TripSideColumn> {
+  String? image = null;
+  @override
   Widget build(BuildContext context) {
-    if(trip == null) {
+    if (widget.trip == null) {
       return Container();
     }
     List<UserProfile> profiles = Provider.of<List<UserProfile>>(context);
-    return Column(
-      children: [
-        Text("Members: ${trip!.uids.length}", style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-        ...profiles.map((UserProfile profile) => ListTile(
-          leading: CircleAvatar(
-            backgroundImage: profile.photoUrl != null ? NetworkImage(profile.photoUrl!) : null,
-            child: profile.photoUrl == null ? const Icon(Icons.person) : null,
-          ),
-          title: Text(profile.name),
-          subtitle: Text(profile.email),
-          trailing: IconButton(
-            icon: const Icon(Icons.remove),
-            onPressed: () async {
-              await TripsitterApi.removeUser(profile.id, trip!.id);
-            },
-          )
-        )).toList(),
-        TextButton.icon(
+    UserProfile? profile = Provider.of<UserProfile?>(context);
+    if (image == null && (profile?.hasPhoto ?? false)) {
+      FirebaseStorage.instance
+          .ref('pictures/${profile!.id}')
+          .getDownloadURL()
+          .then((a) {
+        if (mounted) setState(() => image = a);
+      });
+    }
+    return Column(children: [
+      Text("Members: ${widget.trip!.uids.length}",
+          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+      ...profiles
+          .map((UserProfile profile) => ListTile(
+              leading: CircleAvatar(
+                backgroundImage: (profile.hasPhoto && image != null)
+                    ? NetworkImage(image!)
+                    : null,
+                child: !profile.hasPhoto ? const Icon(Icons.person) : null,
+              ),
+              title: Text(profile.name),
+              subtitle: Text(profile.email),
+              trailing: IconButton(
+                icon: const Icon(Icons.remove),
+                onPressed: () async {
+                  await TripsitterApi.removeUser(profile.id, widget.trip!.id);
+                },
+              )))
+          .toList(),
+      TextButton.icon(
           onPressed: () async {
             String? email = await showDialog<String>(
-              context: context, 
-              builder: (BuildContext context) {
-                return const AddMemberDialog();
-              }
-            );
-            if(email != null) {
-              await TripsitterApi.addUser(email, trip!.id);
+                context: context,
+                builder: (BuildContext context) {
+                  return const AddMemberDialog();
+                });
+            if (email != null) {
+              await TripsitterApi.addUser(email, widget.trip!.id);
             }
-          }, 
+          },
           icon: Icon(Icons.add),
           label: Text("Add Member")
         ),
@@ -51,7 +69,7 @@ class TripSideColumn extends StatelessWidget {
         ElevatedButton.icon(
           icon: Icon(Icons.credit_card),
           onPressed: () {
-            Navigator.push(context, MaterialPageRoute(builder: (context) => CheckoutPage(trip: trip!, profiles: profiles)));
+            Navigator.push(context, MaterialPageRoute(builder: (context) => CheckoutPage(trip: widget.trip!, profiles: profiles)));
           }, 
           label: Text("Checkout"),
         )
@@ -74,29 +92,22 @@ class _AddMemberDialogState extends State<AddMemberDialog> {
   Widget build(BuildContext context) {
     return AlertDialog(
       title: Text("Add Member"),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          TextField(
-            controller: _emailController,
-            decoration: InputDecoration(
-              labelText: "Email"
-            ),
-          ),
-          ElevatedButton(
+      content: Column(mainAxisSize: MainAxisSize.min, children: [
+        TextField(
+          controller: _emailController,
+          decoration: InputDecoration(labelText: "Email"),
+        ),
+        ElevatedButton(
             onPressed: () {
               Navigator.pop(context, _emailController.text);
-            }, 
-            child: Text("Add")
-          ),
-          ElevatedButton(
+            },
+            child: Text("Add")),
+        ElevatedButton(
             onPressed: () {
               Navigator.pop(context);
-            }, 
-            child: Text("Cancel")
-          )
-        ]
-      ),
+            },
+            child: Text("Cancel"))
+      ]),
     );
   }
 }
