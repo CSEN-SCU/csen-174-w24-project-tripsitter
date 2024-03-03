@@ -121,16 +121,24 @@ class _ProfilePageState extends State<ProfilePage> {
         if (mounted) setState(() => image = a);
       });
     }
-    FirebaseFirestore.instance
-        .collection('trips')
-        .where('uids', arrayContains: profile.id)
-        .get()
-        .then((s) => s.docs.map(((doc) => Trip.fromFirestore(doc))));
+    // print(profile.id);
+    // FirebaseFirestore.instance
+    //     .collection('trips')
+    //     .where('uids', arrayContains: profile.id)
+    //     .get()
+    //     .then((s) {
+    //       s.docs.map(((doc) => Trip.fromFirestore(doc)));
+    //     });
     return MultiProvider(
       providers: [
         StreamProvider.value(
             value: Trip.getTripsByProfile(profile.id),
-            initialData: List<Trip>.empty(growable: true))
+            initialData: List<Trip>.empty(growable: true),
+            catchError: (_, err) {
+              print(err);
+              return List<Trip>.empty(growable: true);
+            }
+          )
       ],
       child: Scaffold(
         appBar: AppBar(

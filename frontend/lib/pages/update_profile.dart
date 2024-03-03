@@ -56,6 +56,7 @@ class _UpdateProfileState extends State<UpdateProfile> {
   UserProfile? profile;
 
   bool newProfile = false;
+  bool loadingPic = false;
 
   Future<void> getProfile() async {
     User? user = FirebaseAuth.instance.currentUser;
@@ -125,23 +126,31 @@ class _UpdateProfileState extends State<UpdateProfile> {
     if (img == null) {
       return;
     }
+    if(mounted) {
+      setState(() {
+        loadingPic = true;
+      });
+    }
     Uint8List raw = await img.readAsBytes();
     Reference ref = FirebaseStorage.instance.ref('pictures/${user?.uid}');
     try {
       await ref.putData(raw);
       String url = await ref.getDownloadURL();
-      await FirebaseFirestore.instance
-          .collection("users")
-          .doc(user!.uid)
-          .update({
-        "hasProfilePic": true,
-      });
-      setState(() {
-        image = url;
-        profile?.updatePhoto(true);
-      });
+      image = url;
+      await profile?.updatePhoto(true);
+      if(mounted) setState(() {});
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Profile picture uploaded successfully!'),
+        ),
+      );
     } on FirebaseException catch (e) {
       print(e);
+    }
+    if(mounted) {
+      setState(() {
+        loadingPic = false;
+      });
     }
   }
 
@@ -159,6 +168,14 @@ class _UpdateProfileState extends State<UpdateProfile> {
             AspectRatio(aspectRatio: 1.0, child: CircularProgressIndicator()),
         constraints: BoxConstraints(maxHeight: 200, maxWidth: 200),
       ));
+    }
+    if (image == null && profile!.hasPhoto) {
+      FirebaseStorage.instance
+          .ref('pictures/${profile!.id}')
+          .getDownloadURL()
+          .then((a) {
+        if (mounted) setState(() => image = a);
+      });
     }
 
     return Scaffold(
@@ -239,8 +256,17 @@ class _UpdateProfileState extends State<UpdateProfile> {
                   },
                 ),
               ),
-              ElevatedButton(
-                  onPressed: () => uploadImage(), child: Text("Select Image")),
+              ListTile(
+                leading: loadingPic ? CircularProgressIndicator() : CircleAvatar(
+                  backgroundImage:
+                      (profile!.hasPhoto && image != null)
+                          ? NetworkImage(image!)
+                          : null,
+                  child: !(profile!.hasPhoto && image != null)
+                      ? Icon(Icons.person)
+                      : null),
+                title: ElevatedButton(onPressed: () => uploadImage(), child: Text("Select Image")),
+              ),
               ElevatedButton(
                   onPressed: () async {
                     if (profile!.hometown == null) {
