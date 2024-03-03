@@ -68,7 +68,9 @@ class _CreateTripState extends State<CreateTrip> {
     Trip newTrip = Trip(
       id: doc.id, 
       uids: [uid], 
-      prices: {uid: 0},
+      paymentsComplete: {uid: false},
+      frozen: false,
+      usingSplitPayments: false,
       name: "My trip to ${selectedCity!.name}",
       startDate: startDate!, 
       endDate: endDate!, 

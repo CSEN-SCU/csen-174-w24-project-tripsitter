@@ -100,11 +100,23 @@ class _FlightGroupsState extends State<FlightGroups> {
                       ListTile(
                         // selected: group.selected == offer,
                         // selectedColor: Colors.green[200],
+                        leading: Radio<FlightOffer>(
+                          value: offer, 
+                          groupValue: group.selected, 
+                          onChanged: (FlightOffer? value) async {
+                            if(value == null) return;
+                            await group.selectOption(value);
+                            setState(() {
+                              
+                            });
+                            widget.setState();
+                          },
+                        ),
                         subtitle: Text("\$${offer.price.total}"),
                         title: Text(offer.itineraries.map((i) {
                           return "${DateFormat(DateFormat.HOUR_MINUTE).format(i.segments.first.departure.at)} - ${DateFormat(DateFormat.HOUR_MINUTE).format(i.segments.last.arrival.at)}";
                         }).join(", ")),
-                        leading: IconButton(
+                        trailing: IconButton(
                           icon: Icon(Icons.remove),
                           onPressed: () async {
                             await group.removeOption(offer);

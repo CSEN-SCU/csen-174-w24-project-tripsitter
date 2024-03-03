@@ -108,6 +108,17 @@ class _HotelGroupsState extends State<HotelGroups> {
                   ),
                   for(int i = 0; i < group.infos.length; i++)
                     ListTile(
+                      leading: Radio<HotelInfo>(
+                        value: group.infos[i],
+                        groupValue: group.selectedInfo,
+                        onChanged: (HotelInfo? value) async {
+                          if(value == null) return;
+                          await group.selectOption(group.infos[i], group.offers[i]);
+                          setState(() {
+                            widget.setState();
+                          });
+                        },
+                      ),
                       title: Text("${group.infos[i].name} (\$${group.offers[i].price.total})"),
                       subtitle: Text("${group.offers[i].room?.description?.text ?? 'No description available'}"),
                       trailing: Row(

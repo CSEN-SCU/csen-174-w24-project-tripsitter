@@ -4,8 +4,10 @@ import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:tripsitter/classes/payment.dart';
 import 'package:tripsitter/classes/profile.dart';
 import 'package:tripsitter/classes/trip.dart';
+import 'package:tripsitter/components/checkout/confirmation.dart';
 import 'package:tripsitter/components/navbar.dart';
 import 'package:tripsitter/components/payment.dart';
+import 'package:tripsitter/components/checkout/trip_summary.dart';
 import 'package:tripsitter/helpers/api.dart';
 
 class CheckoutPage extends StatefulWidget {
@@ -32,6 +34,8 @@ class _CheckoutPageState extends State<CheckoutPage> {
         child: CircularProgressIndicator()
       );
     }
+    bool split = trip.usingSplitPayments;
+    String uid = user.uid;
     return Scaffold(
       appBar: const TripSitterNavbar(),
       body: AbsorbPointer(
@@ -46,48 +50,19 @@ class _CheckoutPageState extends State<CheckoutPage> {
               child: ListView(
                 children: [
                   Text("Checkout Page"),
-                  Text("Trip: ${widget.trip.name}"),
-                  if(trip.flights.isNotEmpty)
+                  TripSummary(
+                    trip: trip,
+                    split: split,
+                    uid: uid,
+                    profiles: widget.profiles,
+                  ),
+                  Text("${split ? "Your total" : "Total price"}: \$${trip.totalPrice}"),
+                  if((split ? trip.rentalCars.where((r) => r.members.contains(uid)) : trip.rentalCars).isNotEmpty || (split ? trip.activities.where((a) => a.participants.contains(uid)) : trip.activities).isNotEmpty)
                     ...[
-                      Text("Flights: \$${trip.flightsPrice} total"),
-                      for(var flight in trip.flights)
-                        ...[
-                          Text("${flight.departureAirport} -> ${flight.arrivalAirport} (${flight.price == null ? "Unknown price" : "\$${flight.price} total"})"),
-                          Text(flight.members.map((e) => widget.profiles.firstWhere((profile) => profile.id == e).name).join(", ")),
-                        ],
-                        Container(height: 10)
+                      Container(height: 50),
+                      Text("Note: Only flights and hotels can be paid directly through TripSitter. After purchasing, you will be directed to the rental car and activity websites to complete your purchase."),
+                      Text("Amount owed to TripSitter: \$${split ? trip.userStripePrice(uid) : trip.stripePrice}")
                     ],
-                  if(trip.hotels.isNotEmpty)
-                    ...[
-                      Text("Hotels: \$${trip.hotelsPrice} total"),
-                      for(var hotel in trip.hotels)
-                        ...[
-                          Text("${hotel.name} (${hotel.price == null ? "Unknown price" : "\$${hotel.price} total"})"),
-                          Text(hotel.members.map((e) => widget.profiles.firstWhere((profile) => profile.id == e).name).join(", ")),
-                        ],
-                        Container(height: 10)
-                    ],
-                  if(trip.rentalCars.isNotEmpty)
-                    ...[
-                      Text("Rental Cars: \$${trip.rentalCarsPrice} total"),
-                      for(var car in trip.rentalCars)
-                        ...[
-                          Text("${car.name} (\$${car.price} total)"),
-                          Text(car.members.map((e) => widget.profiles.firstWhere((profile) => profile.id == e).name).join(", ")),
-                        ],
-                        Container(height: 10)
-                    ],
-                  if(trip.activities.isNotEmpty)
-                    ...[
-                      Text("Activities: \$${trip.activitiesPrice} total"),
-                      for(var activity in trip.activities)
-                        ...[
-                          Text("${activity.event.name} (${activity.price == null ? "Unknown price" : "\$${activity.price} total"})"),
-                          Text(activity.participants.map((e) => widget.profiles.firstWhere((profile) => profile.id == e).name).join(", ")),
-                        ],
-                        Container(height: 10)
-                    ],
-                  Text("Total price: \$${trip.totalPrice}"),
                   ConstrainedBox(
                     constraints: const BoxConstraints(
                       maxHeight: 100,
@@ -127,12 +102,33 @@ class _CheckoutPageState extends State<CheckoutPage> {
                           print(intent.status);
           
                           if(intent.status == PaymentIntentsStatus.Succeeded) {
-                            print("PAYMENT COMPLETE!");
+                            if(trip.usingSplitPayments) {
+                              trip.paymentsComplete[user.uid] = true;
+                              // check if all users on the trip have paid
+                              bool allPaid = true;
+                              for(String uid in trip.uids) {
+                                if(trip.paymentsComplete[uid] != true) {
+                                  allPaid = false;
+                                  break;
+                                }
+                              }
+                              if(allPaid) {
+                                await trip.complete();
+                                Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => ConfirmationPage(trip: trip, profiles: widget.profiles)));
+                              }
+                              else {
+                                await trip.save();
+                                Navigator.pop(context);
+                              }
+                            }
+                            else {
+                              await trip.complete();
+                              Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => ConfirmationPage(trip: trip, profiles: widget.profiles)));
+                            }
                             if(mounted) {
                               setState(() {
                                 loading = false;
                               });
-                            
                             }
                           }
                           else if(mounted){
