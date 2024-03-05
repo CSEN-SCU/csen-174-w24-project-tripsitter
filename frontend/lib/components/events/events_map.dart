@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:mapbox_gl/mapbox_gl.dart';
 import 'package:tripsitter/classes/profile.dart';
 import 'package:tripsitter/classes/ticketmaster.dart';
 import 'package:tripsitter/classes/trip.dart';
 import 'package:tripsitter/components/map.dart';
+
+const String mapboxToken = String.fromEnvironment("MAPBOX_ACCESS_TOKEN");
 
 class EventsMap extends StatelessWidget {
   final Trip trip;

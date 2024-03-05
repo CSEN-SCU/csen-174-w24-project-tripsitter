@@ -65,93 +65,91 @@ class _EventsItineraryState extends State<EventsItinerary> {
                     visualDensity: VisualDensity(vertical: 4), // to expand
                     subtitle: Text(
                         '${activity.event.venues.firstOrNull?.name}\n${activity.event.startTime.getFormattedDate()}'),
-                    trailing: Container(
-                      child: Column(
-                        children: [
-                          Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              IconButton(
-                                  icon: Icon(Icons.info),
-                                  onPressed: () {
-                                    showDialog(
-                                      context: context,
-                                      builder: (BuildContext context) {
-                                        return EventPopup(activity.event);
-                                      },
-                                    );
-                                  }),
-                              ElevatedButton(
-                                onPressed: () async {
-                                  await widget.trip.removeActivity(activity);
-                                  setState(() {});
-                                  if (widget.setState != null) {
-                                    widget.setState!();
-                                  }
-                                },
-                                child: const Text('Remove'),
-                              ),
-                            ],
-                          ),
-                          SizedBox(height: 2),
-                          FilterButton(
-                            text: 'Participants',
-                            icon: Icon(
-                              widget.participantsPopupOpenState[
-                                          activity.event.id] ??
-                                      false
-                                  ? Icons.arrow_drop_up
-                                  : Icons.arrow_drop_down,
+                    trailing: Column(
+                      children: [
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            IconButton(
+                                icon: Icon(Icons.info),
+                                onPressed: () {
+                                  showDialog(
+                                    context: context,
+                                    builder: (BuildContext context) {
+                                      return EventPopup(activity.event);
+                                    },
+                                  );
+                                }),
+                            ElevatedButton(
+                              onPressed: () async {
+                                await widget.trip.removeActivity(activity);
+                                setState(() {});
+                                if (widget.setState != null) {
+                                  widget.setState!();
+                                }
+                              },
+                              child: const Text('Remove'),
                             ),
-                            globalKey: widget.participantsPopupKeys[activity
-                                .event.id]!, // Use the activity's specific key
-                            onPressed: () {
-                              final activityId = activity.event.id;
-                              setState(() {
-                                widget.participantsPopupOpenState[activityId] =
-                                    true;
-                              });
-                              final participantOptions =
-                                  widget.profiles.map((p) => p.name).toList();
-                              final currentlySelected = widget.profiles
-                                  .where((p) => widget
-                                      .selectedParticipantsMap[activityId]!
-                                      .contains(p.id))
-                                  .map((p) => p.name)
-                                  .toList();
-                              CheckboxPopup(
-                                options: participantOptions,
-                                selected: currentlySelected,
-                                onSelected: (List<String> selectedNames) {
-                                  // Update the selected participants map based on names
-                                  setState(() {
-                                    widget.selectedParticipantsMap[activityId] =
-                                        widget.profiles
-                                            .where((profile) => selectedNames
-                                                .contains(profile.name))
-                                            .map((profile) => profile.id)
-                                            .toList();
-
-                                    // Update the actual activity participants to reflect changes
-                                    activity.participants.clear();
-                                    activity.participants.addAll(widget
-                                        .selectedParticipantsMap[activityId]!);
-                                  });
-                                },
-                                format: (s) => s.toString(),
-                              )
-                                  .showPopup(context,
-                                      widget.participantsPopupKeys[activityId]!)
-                                  .then((_) {
-                                setState(() {
-                                  widget.participantsPopupOpenState[
-                                      activityId] = false;
-                                });
-                              });
-                            },
+                          ],
+                        ),
+                        SizedBox(height: 2),
+                        FilterButton(
+                          text: 'Participants',
+                          icon: Icon(
+                            widget.participantsPopupOpenState[
+                                        activity.event.id] ??
+                                    false
+                                ? Icons.arrow_drop_up
+                                : Icons.arrow_drop_down,
                           ),
-                        ],
-                      ),
+                          globalKey: widget.participantsPopupKeys[activity
+                              .event.id]!, // Use the activity's specific key
+                          onPressed: () {
+                            final activityId = activity.event.id;
+                            setState(() {
+                              widget.participantsPopupOpenState[activityId] =
+                                  true;
+                            });
+                            final participantOptions =
+                                widget.profiles.map((p) => p.name).toList();
+                            final currentlySelected = widget.profiles
+                                .where((p) => widget
+                                    .selectedParticipantsMap[activityId]!
+                                    .contains(p.id))
+                                .map((p) => p.name)
+                                .toList();
+                            CheckboxPopup(
+                              options: participantOptions,
+                              selected: currentlySelected,
+                              onSelected: (List<String> selectedNames) {
+                                // Update the selected participants map based on names
+                                setState(() {
+                                  widget.selectedParticipantsMap[activityId] =
+                                      widget.profiles
+                                          .where((profile) => selectedNames
+                                              .contains(profile.name))
+                                          .map((profile) => profile.id)
+                                          .toList();
+
+                                  // Update the actual activity participants to reflect changes
+                                  activity.participants.clear();
+                                  activity.participants.addAll(widget
+                                      .selectedParticipantsMap[activityId]!);
+                                });
+                              },
+                              format: (s) => s.toString(),
+                            )
+                                .showPopup(context,
+                                    widget.participantsPopupKeys[activityId]!)
+                                .then((_) {
+                              setState(() {
+                                widget.participantsPopupOpenState[
+                                    activityId] = false;
+                              });
+                            });
+                          },
+                        ),
+                      ],
                     ),
                   ),
                 );
