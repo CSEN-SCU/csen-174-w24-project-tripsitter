@@ -50,8 +50,8 @@ dependencies:
     git:
       url: https://github.com/Marco4763/maps
       ref: feature/agp-8
-  flutter_stripe: ^10.0.0
-  flutter_stripe_web: ^5.0.0
+  flutter_stripe: ^10.1.0
+  flutter_stripe_web: ^5.1.0
   http: ^1.2.0
   intl: ^0.19.0
   hexcolor: ^3.0.1

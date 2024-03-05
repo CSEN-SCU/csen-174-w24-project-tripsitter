@@ -56,7 +56,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                     uid: uid,
                     profiles: widget.profiles,
                   ),
-                  Text("${split ? "Your total" : "Total price"}: \$${trip.totalPrice}"),
+                  Text("${split ? "Your total" : "Total price"}: \$${split ? trip.userTotalPrice(uid) : trip.totalPrice}"),
                   if((split ? trip.rentalCars.where((r) => r.members.contains(uid)) : trip.rentalCars).isNotEmpty || (split ? trip.activities.where((a) => a.participants.contains(uid)) : trip.activities).isNotEmpty)
                     ...[
                       Container(height: 50),
@@ -102,6 +102,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                           print(intent.status);
           
                           if(intent.status == PaymentIntentsStatus.Succeeded) {
+                            trip.freeze();
                             if(trip.usingSplitPayments) {
                               trip.paymentsComplete[user.uid] = true;
                               // check if all users on the trip have paid

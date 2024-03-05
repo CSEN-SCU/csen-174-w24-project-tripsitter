@@ -27,6 +27,7 @@ class ConfirmationPage extends StatelessWidget {
         child: Column(
           children: [
             Text("Thank you for your purchase!"),
+            Text("Your trip is confirmed!"),
             TripSummary(
               trip: trip,
               split: split,
