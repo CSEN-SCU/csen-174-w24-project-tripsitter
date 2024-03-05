@@ -107,6 +107,7 @@ class ProfilePage extends StatefulWidget {
 
 class _ProfilePageState extends State<ProfilePage> {
   String? image = null;
+  bool upcoming = true;
   @override
   Widget build(BuildContext context) {
     UserProfile? profile = Provider.of<UserProfile?>(context);
@@ -121,14 +122,7 @@ class _ProfilePageState extends State<ProfilePage> {
         if (mounted) setState(() => image = a);
       });
     }
-    // print(profile.id);
-    // FirebaseFirestore.instance
-    //     .collection('trips')
-    //     .where('uids', arrayContains: profile.id)
-    //     .get()
-    //     .then((s) {
-    //       s.docs.map(((doc) => Trip.fromFirestore(doc)));
-    //     });
+
     return MultiProvider(
       providers: [
         StreamProvider.value(
@@ -137,8 +131,7 @@ class _ProfilePageState extends State<ProfilePage> {
             catchError: (_, err) {
               print(err);
               return List<Trip>.empty(growable: true);
-            }
-          )
+            })
       ],
       child: Scaffold(
         appBar: AppBar(
@@ -212,14 +205,35 @@ class _ProfilePageState extends State<ProfilePage> {
                         Center(
                           child: Row(
                             children: [
-                              Text("Upcoming"),
+                              ElevatedButton(
+                                  onPressed: () {
+                                    upcoming = true;
+                                    setState(() {});
+                                  },
+                                  child: Text("Upcoming")),
                               Icon(Icons.compare_arrows),
-                              Text("Past")
+                              ElevatedButton(
+                                  onPressed: () {
+                                    upcoming = false;
+                                    setState(() {});
+                                  },
+                                  child: Text("Past"))
                             ],
                           ),
                         ),
                         Builder(builder: (context) {
                           List<Trip> trips = Provider.of<List<Trip>>(context);
+                          if (upcoming) {
+                            trips = trips
+                                .where((element) =>
+                                    element.endDate.isAfter(DateTime.now()))
+                                .toList();
+                          } else {
+                            trips = trips
+                                .where((element) =>
+                                    element.endDate.isBefore(DateTime.now()))
+                                .toList();
+                          }
                           return Expanded(
                             child: ListView.builder(
                                 itemCount: trips.length,
