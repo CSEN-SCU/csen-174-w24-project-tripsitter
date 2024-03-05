@@ -70,6 +70,10 @@ In the API endpoints explorer, look for the field called "X-RapidAPI-Key" and co
 SKYSCRAPER_KEY=<your-key>
 
 
+### Firebase Admin
+Open the Firebase Project and go to the [Service Accounts page](https://console.firebase.google.com/project/_/settings/serviceaccounts/adminsdk). Then, generate a new "Firebase Admin SDK" private key, which should download a JSON file. Rename this file to admin.json and add it into the `backend/src` and `backend/lib` folders. This will allow you to add and remove users from the trip through their email address.
+
+
 ## Running the frontend
 
 Make sure you've installed the latest dependencies: `cd frontend && flutter pub get`

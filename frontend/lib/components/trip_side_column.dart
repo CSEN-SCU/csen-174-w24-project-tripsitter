@@ -48,7 +48,7 @@ class _TripSideColumnState extends State<TripSideColumn> {
           title: Text(profile.name),
           subtitle: Text(profile.email),
           trailing: trip!.frozen ? (trip!.usingSplitPayments ? Icon(
-            (trip!.paymentsComplete[user.uid] ?? false) ? Icons.credit_card : Icons.credit_card_off
+            (trip!.paymentsComplete[profile.id] ?? false) ? Icons.credit_card : Icons.credit_card_off
           ) : null) : IconButton(
             icon: const Icon(Icons.remove),
             onPressed: () async {
