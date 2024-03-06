@@ -139,6 +139,10 @@ class HotelOffer {
   final HotelPolicies? policies;
   final String self;
 
+  bool operator ==(other) {
+    return identical(this, other) || (other is HotelOffer && other.id == id);
+  }
+
   const HotelOffer({
     required this.id,
     required this.checkInDate,

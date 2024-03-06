@@ -57,6 +57,10 @@ class RentalCarOffer {
   final VndrRating vndrRating;
   final int seat;
   final RentalCarProvider provider;
+  
+  bool operator ==(other) {
+    return identical(this, other) || (other is RentalCarOffer && other.guid == guid);
+  }
 
   RentalCarOffer({
     required this.sipp,

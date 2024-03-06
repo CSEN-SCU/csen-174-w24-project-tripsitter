@@ -113,10 +113,10 @@ class _HotelGroupsState extends State<HotelGroups> {
                   ),
                   for(int i = 0; i < group.infos.length; i++)
                     ListTile(
-                      leading: Radio<HotelInfo>(
-                        value: group.infos[i],
-                        groupValue: group.selectedInfo,
-                        onChanged: (HotelInfo? value) async {
+                      leading: Radio<HotelOffer>(
+                        value: group.offers[i],
+                        groupValue: group.selectedOffer,
+                        onChanged: (HotelOffer? value) async {
                           if(value == null) return;
                           await group.selectOption(group.infos[i], group.offers[i]);
                           setState(() {
