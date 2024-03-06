@@ -1,10 +1,12 @@
 import 'package:collection/collection.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:tripsitter/classes/flights.dart';
 import 'package:tripsitter/classes/profile.dart';
 import 'package:tripsitter/classes/trip.dart';
+import 'package:tripsitter/components/comments_popup.dart';
 import 'package:tripsitter/components/flights/flight_options.dart';
 import 'package:tripsitter/components/mobile_wrapper.dart';
 import 'package:tripsitter/helpers/locators.dart';
@@ -67,6 +69,7 @@ class _FlightGroupsState extends State<FlightGroups> {
   @override
   Widget build(BuildContext context) {
     bool isMobile = Provider.of<bool>(context);
+    User? user = Provider.of<User?>(context);
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: ListView(
@@ -100,16 +103,53 @@ class _FlightGroupsState extends State<FlightGroups> {
                       ListTile(
                         // selected: group.selected == offer,
                         // selectedColor: Colors.green[200],
+                        leading: Radio<FlightOffer>(
+                          value: offer, 
+                          groupValue: group.selected, 
+                          onChanged: (FlightOffer? value) async {
+                            if(value == null) return;
+                            await group.selectOption(value);
+                            setState(() {
+                              
+                            });
+                            widget.setState();
+                          },
+                        ),
                         subtitle: Text("\$${offer.price.total}"),
                         title: Text(offer.itineraries.map((i) {
                           return "${DateFormat(DateFormat.HOUR_MINUTE).format(i.segments.first.departure.at)} - ${DateFormat(DateFormat.HOUR_MINUTE).format(i.segments.last.arrival.at)}";
                         }).join(", ")),
-                        leading: IconButton(
-                          icon: Icon(Icons.remove),
-                          onPressed: () async {
-                            await group.removeOption(offer);
-                            widget.setState();
-                          },
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            CommentsPopup(
+                              comments: offer.comments,
+                              profiles: widget.profiles,
+                              myUid: user!.uid,
+                              removeComment: (TripComment comment) async {
+                                offer.removeComment(comment);
+                                await trip.save();
+                                if(mounted) {setState((){});}
+                              },
+                              addComment: (String comment) async {
+                                offer.addComment(TripComment(
+                                    comment: comment,
+                                    uid: user!.uid,
+                                    date: DateTime.now())
+                                  );
+                                await trip.save();
+                                if(mounted) {setState((){});}
+                              },
+                            ),
+                            IconButton(
+                              icon: Icon(Icons.delete),
+                              onPressed: () async {
+                                await group.removeOption(offer);
+                                widget.setState();
+                              },
+                            ),
+
+                          ],
                         ),
                         // trailing: IconButton(
                         //   icon: Icon(Icons.add),

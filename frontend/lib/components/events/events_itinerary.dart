@@ -1,16 +1,32 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:tripsitter/classes/filterbutton.dart';
 import 'package:tripsitter/classes/profile.dart';
 import 'package:tripsitter/classes/trip.dart';
+import 'package:tripsitter/components/comments_popup.dart';
 import 'package:tripsitter/components/events/event_info_dialog.dart';
 import 'package:tripsitter/components/events/events_options.dart';
 import 'package:tripsitter/components/mobile_wrapper.dart';
+import 'package:tripsitter/popups/checkbox_popup.dart';
 
 class EventsItinerary extends StatefulWidget {
   final Trip trip;
   final List<UserProfile> profiles;
+  final Map<String, GlobalKey> participantsPopupKeys;
+  final Map<String, List<String>> selectedParticipantsMap;
+  final Map<String, bool> participantsPopupOpenState;
   final Function? setState;
-  const EventsItinerary({required this.trip, required this.profiles, this.setState, super.key});
+
+  const EventsItinerary({
+    required this.trip,
+    required this.profiles,
+    required this.participantsPopupKeys,
+    required this.selectedParticipantsMap,
+    required this.participantsPopupOpenState,
+    this.setState,
+    super.key,
+  });
 
   @override
   State<EventsItinerary> createState() => _EventsItineraryState();
@@ -18,118 +34,170 @@ class EventsItinerary extends StatefulWidget {
 
 class _EventsItineraryState extends State<EventsItinerary> {
   @override
+  void initState() {
+    super.initState();
+    for (var activity in widget.trip.activities) {
+      widget.participantsPopupKeys[activity.event.id] = GlobalKey();
+      widget.participantsPopupOpenState[activity.event.id] = false;
+    }
+    widget.trip.activities.forEach((activity) {
+      widget.selectedParticipantsMap[activity.event.id] =
+          List.from(activity.participants);
+    });
+  }
+
+// If your events can change, update popupKeys accordingly
+
+  @override
   Widget build(BuildContext context) {
+    User? user = Provider.of<User?>(context);
     bool isMobile = Provider.of<bool>(context);
-    return ListView(
-      children: [
-        Text('Itinerary', style: Theme.of(context).textTheme.displayMedium?.copyWith(decoration: TextDecoration.underline, fontWeight: FontWeight.bold)),
-        ...widget.trip.activities.map((activity) => Builder(
-          builder: (context) {
-            bool remove = widget.profiles.every((profile) => activity.participants.contains(profile.id));
-            return Card(
-              child: ListTile(
-                  title: Text(activity.event.name),
-                  isThreeLine: true,
-                  visualDensity: VisualDensity(vertical: 4), // to expand
-                  subtitle: Text('${activity.event.venues.firstOrNull?.name}\n${activity.event.startTime.localDate} ${activity.event.startTime.localTime}'),
-                  trailing: Column(
-                    children: [
-                      Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          IconButton(
-                            icon: Icon(Icons.info),
-                            onPressed: () {
-                              showDialog(
-                                context: context,
-                                builder: (BuildContext context) {
-                                  return EventPopup(activity.event);
-                                },
-                              );
-                            }
-                          ),
-                          ElevatedButton(
-                            onPressed: () async {
-                              await widget.trip.removeActivity(activity);
-                              setState(() {});
-                              if(widget.setState != null) {
-                                widget.setState!();
-                              }
-                            },
-                            child: const Text('Remove'),
-                          ),
-                        ],
-                      ),
-                      SizedBox(height: 3),
-                      PopupMenuButton<UserProfile>(
-                        itemBuilder: (BuildContext context) {
-                          return [
-                            PopupMenuItem(
-                              value: UserProfile(id: "id", name: "name", email: "email", hometown: null, numberTrips: 0, joinDate: DateTime.now()),
-                              child: Text("${remove ? "Remove" : "Add"} all", style: TextStyle(fontWeight: FontWeight.bold)),
+    return ListView(children: [
+      Text('Itinerary',
+          style: Theme.of(context).textTheme.displayMedium?.copyWith(
+              decoration: TextDecoration.underline,
+              fontWeight: FontWeight.bold)),
+      ...widget.trip.activities
+          .map((activity) => Builder(builder: (context) {
+                bool remove = widget.profiles.every(
+                    (profile) => activity.participants.contains(profile.id));
+                return Card(
+                  child: ListTile(
+                    leading: CommentsPopup(
+                      comments: activity.comments,
+                      profiles: widget.profiles,
+                      myUid: user!.uid,
+                      removeComment: (TripComment comment) async {
+                        await activity.removeComment(comment);
+                        if(mounted) {setState((){});}
+                      },
+                      addComment: (String comment) async {
+                        await activity.addComment(TripComment(
+                            comment: comment,
+                            uid: user!.uid,
+                            date: DateTime.now())
+                          );
+                        if(mounted) {setState((){});}
+                      },
+                    ),
+                    title: Text(activity.event.name),
+                    isThreeLine: true,
+                    visualDensity: VisualDensity(vertical: 4), // to expand
+                    subtitle: Text(
+                        '${activity.event.venues.firstOrNull?.name}\n${activity.event.startTime.getFormattedDate()}'),
+                    trailing: Column(
+                      children: [
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            IconButton(
+                                icon: Icon(Icons.info),
+                                onPressed: () {
+                                  showDialog(
+                                    context: context,
+                                    builder: (BuildContext context) {
+                                      return EventPopup(activity.event);
+                                    },
+                                  );
+                                }),
+                            ElevatedButton(
+                              onPressed: () async {
+                                await widget.trip.removeActivity(activity);
+                                setState(() {});
+                                if (widget.setState != null) {
+                                  widget.setState!();
+                                }
+                              },
+                              child: const Text('Remove'),
                             ),
-                            ...widget.profiles.map((UserProfile profile) => PopupMenuItem(
-                            value: profile,
-                            child: Row(
-                              children: [
-                                if(activity.participants.contains(profile.id))
-                                  Icon(Icons.check),
-                                if(!activity.participants.contains(profile.id))
-                                  Icon(Icons.add),
-                                Text(profile.name),
-                              ],
-                            ),
-                          )).toList()
-                          ];
-                        },
-                        child: Container(
-                          child: Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Text("Participants"),
-                          ),
-                          decoration: BoxDecoration(
-                            border: Border.all(color: Colors.black),
-                            borderRadius: BorderRadius.circular(5),
-                          )
+                          ],
                         ),
-                        onSelected: (UserProfile profile) async {
-                          if(profile.id == "id") {
-                            for(UserProfile profile in widget.profiles) {
-                              if(!remove && !activity.participants.contains(profile.id)) {
-                                await activity.addParticipant(profile.id);
-                              }
-                              else if(remove && activity.participants.contains(profile.id)) {
-                                await activity.removeParticipant(profile.id);
-                              }
-                            }
-                          }
-                          else {
-                            if(activity.participants.contains(profile.id)) {
-                              await activity.removeParticipant(profile.id);
-                            } else {
-                              await activity.addParticipant(profile.id);
-                            }
-                          }
-                          setState(() {});
-                        },
-                      ),
-                    ],
+                        SizedBox(height: 3),
+                        FilterButton(
+                          text: 'Participants',
+                          icon: Icon(
+                            widget.participantsPopupOpenState[
+                                        activity.event.id] ??
+                                    false
+                                ? Icons.arrow_drop_up
+                                : Icons.arrow_drop_down,
+                          ),
+                          globalKey: widget.participantsPopupKeys[activity
+                              .event.id]!, // Use the activity's specific key
+                          onPressed: () {
+                            final activityId = activity.event.id;
+                            setState(() {
+                              widget.participantsPopupOpenState[activityId] =
+                                  true;
+                            });
+                            final participantOptions =
+                                widget.profiles.map((p) => p.name).toList();
+                            final currentlySelected = widget.profiles
+                                .where((p) => widget
+                                    .selectedParticipantsMap[activityId]!
+                                    .contains(p.id))
+                                .map((p) => p.name)
+                                .toList();
+                            CheckboxPopup(
+                              options: participantOptions,
+                              selected: currentlySelected,
+                              onSelected: (List<String> selectedNames) {
+                                // Update the selected participants map based on names
+                                setState(() {
+                                  widget.selectedParticipantsMap[activityId] =
+                                      widget.profiles
+                                          .where((profile) => selectedNames
+                                              .contains(profile.name))
+                                          .map((profile) => profile.id)
+                                          .toList();
+
+                                  // Update the actual activity participants to reflect changes
+                                  activity.participants.clear();
+                                  activity.participants.addAll(widget
+                                      .selectedParticipantsMap[activityId]!);
+                                });
+                              },
+                              format: (s) => s.toString(),
+                            )
+                                .showPopup(context,
+                                    widget.participantsPopupKeys[activityId]!)
+                                .then((_) {
+                              setState(() {
+                                widget.participantsPopupOpenState[activityId] =
+                                    false;
+                              });
+                            });
+                          },
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-            );
-          }
-        )).toList(),
-        if(isMobile)
-          ElevatedButton(
-            onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => MobileWrapper(title: "Add Event", child: EventsOptions(trip: widget.trip, profiles: widget.profiles, setState: () {
-              setState(() {});
-              if(widget.setState != null) {
-                widget.setState!();
-              }
-            })))),
-            child: const Text('Add Event'),
-          )
-      ]
-    );
+                );
+              }))
+          .toList(),
+      if (isMobile)
+        ElevatedButton(
+          onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => MobileWrapper(
+                      title: "Add Event",
+                      child: EventsOptions(
+                          trip: widget.trip,
+                          profiles: widget.profiles,
+                          participantsPopupKeys: widget.participantsPopupKeys,
+                          selectedParticipantsMap:
+                              widget.selectedParticipantsMap,
+                          participantsPopupOpenState:
+                              widget.participantsPopupOpenState,
+                          setState: () {
+                            setState(() {});
+                            if (widget.setState != null) {
+                              widget.setState!();
+                            }
+                          })))),
+          child: const Text('Add Event'),
+        )
+    ]);
   }
 }

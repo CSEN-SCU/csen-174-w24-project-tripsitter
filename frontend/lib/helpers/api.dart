@@ -5,8 +5,10 @@ import 'package:tripsitter/classes/car.dart';
 import 'package:tripsitter/classes/flights.dart';
 
 import 'package:http/http.dart' as http;
+import 'package:tripsitter/classes/payment.dart';
 import 'package:tripsitter/classes/ticketmaster.dart';
 import 'package:tripsitter/classes/hotels.dart';
+import 'package:tripsitter/classes/trip.dart';
 
 class TripsitterApi {
   static const String baseUrl = '127.0.0.1:5001';
@@ -26,6 +28,7 @@ class TripsitterApi {
   static const String searchRentalCarsUrl = "$baseApiUrl/search/cars";
 
   static const String addUserUrl = '$baseApiUrl/trip/user';
+  static const String createPaymentIntentUrl = '$baseApiUrl/checkout/intent';
 
   static Image getAirlineImage(String iata) {
     return Image.network('http${useHttps ? "s" : ""}://$baseUrl$airlineLogoUrl?iata=$iata', width: 50, height: 50);
@@ -117,6 +120,24 @@ class TripsitterApi {
       return offers;
     } else {
       throw Exception('Failed to load rental cars');
+    }
+  }
+
+  static Future<PaymentIntentData> createPaymentIntent(String userId, Trip trip) async {
+    int amount = ((trip.usingSplitPayments ? trip.userStripePrice(userId) : trip.stripePrice)*100).floor();
+    String description = trip.itineraryStr;
+
+    Uri uri = useHttps ? Uri.https(baseUrl,createPaymentIntentUrl) : Uri.http(baseUrl, createPaymentIntentUrl);
+    http.Response response = await http.post(uri, body: jsonEncode({
+      'userId': userId, 
+      'amount': amount.toString(), 
+      'currency': 'USD',
+      'description': description,
+    }), headers: {'Content-Type': 'application/json'});
+    if (response.statusCode == 200) {
+      return PaymentIntentData.fromJson(jsonDecode(response.body));
+    } else {
+      throw Exception('Failed to create payment intent');
     }
   }
 }

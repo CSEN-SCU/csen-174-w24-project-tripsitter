@@ -1,3 +1,5 @@
+import 'package:tripsitter/classes/trip.dart';
+
 class HotelQuery {
   String? cityCode;
   double? latitude;
@@ -71,6 +73,7 @@ class HotelInfo {
   final String cityCode;
   final double latitude;
   final double longitude;
+  final List<TripComment> comments;
 
   const HotelInfo({
     required this.type,
@@ -81,6 +84,7 @@ class HotelInfo {
     required this.cityCode,
     required this.latitude,
     required this.longitude,
+    required this.comments
   });
 
   factory HotelInfo.fromJson(Map<String, dynamic> json) {
@@ -93,11 +97,12 @@ class HotelInfo {
       cityCode: json['cityCode'],
       latitude: json['latitude'].toDouble(),
       longitude: json['longitude'].toDouble(),
+      comments: json["comments"] != null ? List<TripComment>.from(json["comments"].map((x) => TripComment.fromJson(x))) : List.empty(growable: true),
     );
   }
 
-  Map<String, dynamic> toJson() {
-    return {
+  Map<String, dynamic> toJson({bool includeComments = true}) {
+    Map<String,dynamic> json = {
       'type': type,
       'hotelId': hotelId,
       'chainCode': chainCode,
@@ -107,6 +112,18 @@ class HotelInfo {
       'latitude': latitude,
       'longitude': longitude,
     };
+    if(includeComments){
+      json['comments'] = comments.map((comment) => comment.toJson()).toList();
+    }
+    return json;
+  }
+
+  Future<void> addComment(TripComment comment) async {
+    comments.add(comment);
+  }
+
+  Future<void> removeComment(TripComment comment) async {
+    comments.remove(comment);
   }
 }
 
@@ -121,6 +138,10 @@ class HotelOffer {
   final HotelPrice price;
   final HotelPolicies? policies;
   final String self;
+
+  bool operator ==(other) {
+    return identical(this, other) || (other is HotelOffer && other.id == id);
+  }
 
   const HotelOffer({
     required this.id,
