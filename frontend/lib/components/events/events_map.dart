@@ -25,6 +25,7 @@ class EventsMap extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(height: 520, child: TripsitterMap());
+    return SizedBox(
+        height: 520, child: TripsitterMap(trip: trip, events: events));
   }
 }
