@@ -66,6 +66,7 @@ class _CreateTripState extends State<CreateTrip> {
     }
     DocumentReference doc = FirebaseFirestore.instance.collection('trips').doc();
     Trip newTrip = Trip(
+      comments: List.empty(growable: true),
       id: doc.id, 
       uids: [uid], 
       paymentsComplete: {uid: false},
@@ -76,10 +77,10 @@ class _CreateTripState extends State<CreateTrip> {
       endDate: endDate!, 
       destination: selectedCity!, 
       isConfirmed: false,
-      flights: [], 
-      hotels: [], 
-      rentalCars: [], 
-      activities: []
+      flights: List.empty(growable: true), 
+      hotels: List.empty(growable: true), 
+      rentalCars: List.empty(growable: true), 
+      activities: List.empty(growable: true)
     );
     await newTrip.save();
     UserProfile? profile = Provider.of<UserProfile?>(context, listen: false); 

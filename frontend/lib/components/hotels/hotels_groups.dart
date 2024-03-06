@@ -1,8 +1,10 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:tripsitter/classes/hotels.dart';
 import 'package:tripsitter/classes/profile.dart';
 import 'package:tripsitter/classes/trip.dart';
+import 'package:tripsitter/components/comments_popup.dart';
 import 'package:tripsitter/components/hotels/hotel_info_dialog.dart';
 import 'package:tripsitter/components/hotels/hotels_options.dart';
 import 'package:tripsitter/components/mobile_wrapper.dart';
@@ -22,8 +24,11 @@ class HotelGroups extends StatefulWidget {
 }
 
 class _HotelGroupsState extends State<HotelGroups> {
+  Trip get trip => widget.trip;
+
   @override
   Widget build(BuildContext context) {
+    User? user = Provider.of<User?>(context);
     bool isMobile = Provider.of<bool>(context);
     return Padding(
       padding: const EdgeInsets.all(8.0),
@@ -124,6 +129,25 @@ class _HotelGroupsState extends State<HotelGroups> {
                       trailing: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
+                          CommentsPopup(
+                            comments: group.infos[i].comments,
+                            profiles: widget.profiles,
+                            myUid: user!.uid,
+                            removeComment: (TripComment comment) async {
+                              group.infos[i].removeComment(comment);
+                              await trip.save();
+                              if(mounted) {setState((){});}
+                            },
+                            addComment: (String comment) async {
+                              group.infos[i].addComment(TripComment(
+                                  comment: comment,
+                                  uid: user!.uid,
+                                  date: DateTime.now())
+                                );
+                              await trip.save();
+                              if(mounted) {setState((){});}
+                            },
+                          ),
                           IconButton(
                             icon: const Icon(Icons.info),
                             onPressed: () {
