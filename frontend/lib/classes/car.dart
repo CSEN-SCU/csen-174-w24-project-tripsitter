@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:intl/intl.dart';
+import 'package:tripsitter/classes/trip.dart';
 
 class RentalCarQuery {
   String name;
@@ -31,6 +32,7 @@ class RentalCarQuery {
 }
 
 class RentalCarOffer {
+  final List<TripComment> comments;
   final String sipp;
   final int puRnId;
   final String guid;
@@ -81,12 +83,14 @@ class RentalCarOffer {
     required this.vndrRating,
     required this.seat,
     required this.provider,
+    required this.comments,
   });
 
   factory RentalCarOffer.fromJson(Map<String, dynamic> json) => RentalCarOffer(
         sipp: json["sipp"],
         puRnId: json["pu_rn_id"],
         guid: json["guid"],
+        comments: json["comments"] != null ? List<TripComment>.from(json["comments"].map((x) => TripComment.fromJson(x))) : List.empty(growable: true),
         bookingPanelOptionGuid: json["booking_panel_option_guid"],
         adds: RentalCarAdds.fromJson(json["adds"]),
         pu: json["pu"],
@@ -110,7 +114,8 @@ class RentalCarOffer {
         provider: RentalCarProvider.fromJson(json["provider"]),
       );
 
-  Map<String, dynamic> toJson() => {
+  Map<String, dynamic> toJson({bool includeComments = true}){
+    Map<String,dynamic> json = {
         "sipp": sipp,
         "pu_rn_id": puRnId,
         "guid": guid,
@@ -136,6 +141,19 @@ class RentalCarOffer {
         "seat": seat,
         "provider": provider.toJson(),
       };
+    if(includeComments){
+      json["comments"] = comments.map((e) => e.toJson()).toList();
+    }
+    return json;
+  }
+
+  Future<void> addComment(TripComment comment) async {
+    comments.add(comment);
+  }
+
+  Future<void> removeComment(TripComment comment) async {
+    comments.remove(comment);
+  }
 }
 
 class RentalCarAdds {
