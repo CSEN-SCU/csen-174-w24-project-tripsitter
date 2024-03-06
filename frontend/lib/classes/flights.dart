@@ -301,7 +301,13 @@ class FlightOffer {
   }
 
   @override
-  bool operator == (covariant FlightOffer that) {
+  bool operator ==(that) {
+    if(identical(this, that)) {
+      return true;
+    }
+    if(that is! FlightOffer) {
+      return false;
+    }
     // if(id == that.id) {
     //   return true;
     // }
