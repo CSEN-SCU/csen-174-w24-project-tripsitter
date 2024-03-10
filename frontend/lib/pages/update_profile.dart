@@ -267,6 +267,7 @@ class _UpdateProfileState extends State<UpdateProfile> {
                       : null),
                 title: ElevatedButton(onPressed: () => uploadImage(), child: Text("Select Image")),
               ),
+              SizedBox(height: 10),
               ElevatedButton(
                   onPressed: () async {
                     if (profile!.hometown == null) {
@@ -279,7 +280,14 @@ class _UpdateProfileState extends State<UpdateProfile> {
                       Navigator.pushReplacementNamed(context, "/");
                     }
                   },
-                  child: Text("Save Profile"))
+                  child: Text("Save Profile"),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor:
+                                    Color.fromARGB(255, 125, 175, 220),
+                                foregroundColor: Colors.black,
+                              ),
+              )
+                  
             ]),
           ),
         ));

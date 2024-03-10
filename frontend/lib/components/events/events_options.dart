@@ -9,6 +9,7 @@ import 'package:tripsitter/components/events/event_info_dialog.dart';
 import 'package:tripsitter/components/events/select_events.dart';
 import 'package:tripsitter/helpers/api.dart';
 import 'package:tripsitter/popups/checkbox_popup.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class EventsOptions extends StatefulWidget {
   final Trip trip;
@@ -66,11 +67,12 @@ class _EventsOptionsState extends State<EventsOptions> {
 
     return ListView(
       children: [
-        Text("Choose Activities",
-            style: Theme.of(context)
-                .textTheme
-                .displayMedium
-                ?.copyWith(fontWeight: FontWeight.bold)),
+        // Text("Choose Activities",
+        //     style: Theme.of(context)
+        //         .textTheme
+        //         .displayMedium
+        //         ?.copyWith(fontWeight: FontWeight.bold)),
+        Text("Choose Activities", style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
         if (events.isNotEmpty)
           Table(
               columnWidths: const <int, TableColumnWidth>{

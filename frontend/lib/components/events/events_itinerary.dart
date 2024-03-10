@@ -9,6 +9,7 @@ import 'package:tripsitter/components/events/event_info_dialog.dart';
 import 'package:tripsitter/components/events/events_options.dart';
 import 'package:tripsitter/components/mobile_wrapper.dart';
 import 'package:tripsitter/popups/checkbox_popup.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class EventsItinerary extends StatefulWidget {
   final Trip trip;
@@ -53,10 +54,23 @@ class _EventsItineraryState extends State<EventsItinerary> {
     User? user = Provider.of<User?>(context);
     bool isMobile = Provider.of<bool>(context);
     return ListView(children: [
-      Text('Itinerary',
-          style: Theme.of(context).textTheme.displayMedium?.copyWith(
-              decoration: TextDecoration.underline,
-              fontWeight: FontWeight.bold)),
+      // Text('Itinerary',
+      //     style: Theme.of(context).textTheme.displayMedium?.copyWith(
+      //         decoration: TextDecoration.underline,
+      //         fontWeight: FontWeight.bold)),
+      Center(
+        child: Text(
+          'Itinerary',
+          style: GoogleFonts.kadwa(
+            textStyle: const TextStyle(
+              color: Colors.black,
+              fontWeight: FontWeight.bold,
+              fontSize: 30,
+            ),
+          ),
+        ),
+      ),
+
       ...widget.trip.activities
           .map((activity) => Builder(builder: (context) {
                 bool remove = widget.profiles.every(
@@ -69,15 +83,18 @@ class _EventsItineraryState extends State<EventsItinerary> {
                       myUid: user!.uid,
                       removeComment: (TripComment comment) async {
                         await activity.removeComment(comment);
-                        if(mounted) {setState((){});}
+                        if (mounted) {
+                          setState(() {});
+                        }
                       },
                       addComment: (String comment) async {
                         await activity.addComment(TripComment(
                             comment: comment,
                             uid: user!.uid,
-                            date: DateTime.now())
-                          );
-                        if(mounted) {setState((){});}
+                            date: DateTime.now()));
+                        if (mounted) {
+                          setState(() {});
+                        }
                       },
                     ),
                     title: Text(activity.event.name),

@@ -85,7 +85,7 @@ class MyApp extends StatelessWidget {
                   onGenerateRoute: router.generator,
                   title: 'TripSitter',
                   theme: ThemeData(
-                    colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple, brightness: Brightness.light),
+                    colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue, brightness: Brightness.light),
                     useMaterial3: true,
                   ),
                   home: const LoginPage(),
@@ -102,7 +102,7 @@ class MyApp extends StatelessWidget {
                   onGenerateRoute: router.generator,
                   title: 'TripSitter',
                   theme: ThemeData(
-                    colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple, brightness: Brightness.light),
+                    colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue, brightness: Brightness.light),
                     useMaterial3: true,
                   ),
                 ),
