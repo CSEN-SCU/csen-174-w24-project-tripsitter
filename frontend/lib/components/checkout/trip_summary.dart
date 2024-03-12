@@ -4,10 +4,11 @@ import 'package:tripsitter/classes/trip.dart';
 
 class TripSummary extends StatelessWidget {
   final Trip trip;
-  final bool split;
   final String uid;
   final List<UserProfile> profiles;
-  const TripSummary({required this.trip, required this.split, required this.uid, required this.profiles, super.key});
+  const TripSummary({required this.trip, required this.uid, required this.profiles, super.key});
+
+  bool get split => trip.usingSplitPayments;
 
   @override
   Widget build(BuildContext context) {
@@ -20,6 +21,8 @@ class TripSummary extends StatelessWidget {
               for(var flight in (split ? trip.flights.where((f) => f.members.contains(uid)) : trip.flights))
                 ...[
                   Text("${flight.departureAirport} -> ${flight.arrivalAirport} (${split ? (flight.userPrice(uid) == null ? "Unknown price" : "\$${flight.userPrice(uid)}") : (flight.price == null ? "Unknown price" : "\$${flight.price} total")})"),
+                  if(flight.pnr != null)
+                    Text("Confirmation number: ${flight.pnr}"),
                   if(!split)
                     Text(flight.members.map((e) => profiles.firstWhere((profile) => profile.id == e).name).join(", ")),
                 ],
@@ -31,6 +34,8 @@ class TripSummary extends StatelessWidget {
               for(var hotel in (split ? trip.hotels.where((h) => h.members.contains(uid)) : trip.hotels))
                 ...[
                   Text("${hotel.name} (${split ? (hotel.userPrice(uid) == null ? "Unknown price" : "\$${hotel.userPrice(uid)}") :(hotel.price == null ? "Unknown price" : "\$${hotel.price} total")})"),
+                  if(hotel.pnr != null)
+                    Text("Confirmation Number: ${hotel.pnr}"),
                   if(!split)
                     Text(hotel.members.map((e) => profiles.firstWhere((profile) => profile.id == e).name).join(", ")),
                 ],

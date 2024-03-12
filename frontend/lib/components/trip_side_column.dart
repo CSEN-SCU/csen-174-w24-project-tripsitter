@@ -5,6 +5,8 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:tripsitter/classes/flights.dart';
+import 'package:tripsitter/classes/hotels.dart';
 import 'package:tripsitter/classes/profile.dart';
 import 'package:tripsitter/classes/trip.dart';
 import 'package:tripsitter/components/profile_pic.dart';
@@ -127,7 +129,7 @@ class _TripSideColumnState extends State<TripSideColumn> {
                 icon: Icon(Icons.credit_card),
                 onPressed: () {
                   Navigator.push(context, MaterialPageRoute(builder: (context) => CheckoutPage(trip: trip!, profiles: profiles)));
-                }, 
+                },
                 label: Text("Checkout"),
               ),
             if((!trip!.isConfirmed && trip!.usingSplitPayments && trip!.paymentsComplete[user.uid] == true))

@@ -54,7 +54,8 @@ class _FlightOptionsState extends State<FlightOptions> {
       FlightOffer offer = flight.offers.first;
       currentDepth++;
       flights = flight.next;
-      if((flights ?? []).isEmpty) {
+      print(flights);
+      if((currentDepth == 2)) {
         print("No more flights");
         currentGroup!.addOption(offer);
         flights = originalFlights;
