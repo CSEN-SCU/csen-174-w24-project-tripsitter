@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/widgets.dart';
 import 'package:collection/collection.dart';
+import 'package:tripsitter/classes/trip.dart';
 
 class FlightsQuery {
   String origin;
@@ -222,6 +223,7 @@ class FlightOffer {
   final FlightPricingOptions pricingOptions;
   final List<String> validatingAirlineCodes;
   final List<FlightTravelerPricing> travelerPricings;
+  final List<TripComment> comments;
 
   const FlightOffer({
     required this.type,
@@ -238,7 +240,16 @@ class FlightOffer {
     required this.pricingOptions,
     required this.validatingAirlineCodes,
     required this.travelerPricings,
+    required this.comments,
   });
+
+  Future<void> addComment(TripComment comment) async {
+    comments.add(comment);
+  }
+
+  Future<void> removeComment(TripComment comment) async {
+    comments.remove(comment);
+  }
 
   factory FlightOffer.fromJson(Map<String, dynamic> json) {
     return FlightOffer(
@@ -259,11 +270,12 @@ class FlightOffer {
       travelerPricings: List<FlightTravelerPricing>.from(
           json['travelerPricings'].map((travelerPricing) =>
               FlightTravelerPricing.fromJson(travelerPricing))),
+      comments: json["comments"] != null ? List<TripComment>.from(json["comments"].map((x) => TripComment.fromJson(x))) : List.empty(growable: true),
     );
   }
 
-  Map<String, dynamic> toJson() {
-    return {
+  Map<String, dynamic> toJson({bool includeComments = false}) {
+    Map<String, dynamic> json = {
       'type': type,
       'id': id,
       'source': source,
@@ -282,10 +294,20 @@ class FlightOffer {
           .map((travelerPricing) => travelerPricing.toJson())
           .toList(),
     };
+    if(includeComments){
+      json["comments"] = comments.map((e) => e.toJson()).toList();
+    }
+    return json;
   }
 
   @override
-  bool operator == (covariant FlightOffer that) {
+  bool operator ==(that) {
+    if(identical(this, that)) {
+      return true;
+    }
+    if(that is! FlightOffer) {
+      return false;
+    }
     // if(id == that.id) {
     //   return true;
     // }

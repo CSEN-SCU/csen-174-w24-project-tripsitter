@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:tripsitter/classes/car.dart';
@@ -5,6 +6,7 @@ import 'package:tripsitter/classes/profile.dart';
 import 'package:tripsitter/classes/trip.dart';
 import 'package:tripsitter/components/cars/car_info_dialog.dart';
 import 'package:tripsitter/components/cars/cars_options.dart';
+import 'package:tripsitter/components/comments_popup.dart';
 import 'package:tripsitter/components/mobile_wrapper.dart';
 import 'package:tripsitter/helpers/formatters.dart';
 
@@ -22,8 +24,10 @@ class CarGroups extends StatefulWidget {
 }
 
 class _CarGroupsState extends State<CarGroups> {
+  Trip get trip => widget.trip;
   @override
   Widget build(BuildContext context) {
+    User? user = Provider.of<User?>(context);
     bool isMobile = Provider.of<bool>(context);
     return Padding(
       padding: const EdgeInsets.all(8.0),
@@ -121,6 +125,25 @@ class _CarGroupsState extends State<CarGroups> {
                     trailing: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
+                        CommentsPopup(
+                          comments: car.comments,
+                          profiles: widget.profiles,
+                          myUid: user!.uid,
+                          removeComment: (TripComment comment) async {
+                            car.removeComment(comment);
+                            await trip.save();
+                            if(mounted) {setState((){});}
+                          },
+                          addComment: (String comment) async {
+                            car.addComment(TripComment(
+                                comment: comment,
+                                uid: user!.uid,
+                                date: DateTime.now())
+                              );
+                            await trip.save();
+                            if(mounted) {setState((){});}
+                          },
+                        ),
                         IconButton(
                           icon: Icon(Icons.info),
                           onPressed: () {

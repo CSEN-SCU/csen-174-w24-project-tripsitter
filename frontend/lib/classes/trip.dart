@@ -10,6 +10,40 @@ import 'package:tripsitter/classes/hotels.dart';
 import 'package:tripsitter/classes/ticketmaster.dart';
 import 'dart:async';
 
+class TripComment {
+  final String _uid;
+  final String _comment;
+  final DateTime _date;
+
+  TripComment({
+    required String uid,
+    required String comment,
+    required DateTime date,
+  }) : _uid = uid,
+       _comment = comment,
+       _date = date;
+
+  String get uid => _uid;
+  String get comment => _comment;
+  DateTime get date => _date;
+
+  Map<String, dynamic> toJson() {
+    return {
+      "uid": _uid,
+      "comment": _comment,
+      "date": Timestamp.fromDate(_date),
+    };
+  }
+
+  factory TripComment.fromJson(Map<String, dynamic> json) {
+    return TripComment(
+      uid: json['uid'],
+      comment: json['comment'],
+      date: (json['date'] as Timestamp).toDate(),
+    );
+  }
+}
+
 class Trip {
   final String _id;
   final List<String> _uids;
@@ -26,6 +60,7 @@ class Trip {
   List<HotelGroup> _hotels;
   List<RentalCarGroup> _rentalCars;
   List<Activity> _activities;
+  List<TripComment> _comments;
 
   Trip({
     required String id,
@@ -42,6 +77,7 @@ class Trip {
     required List<HotelGroup> hotels,
     required List<RentalCarGroup> rentalCars,
     required List<Activity> activities,
+    required List<TripComment> comments,
   }) : _id = id,
        _uids = uids,
        _name = name,
@@ -55,6 +91,7 @@ class Trip {
        _flights = flights,
        _hotels = hotels,
        _rentalCars = rentalCars,
+       _comments = comments,
        _activities = activities;
   
   String get id => _id;
@@ -71,6 +108,7 @@ class Trip {
   Map<String, bool> get paymentsComplete => _paymentsComplete;
   bool get usingSplitPayments => _usingSplitPayments;
   bool get frozen => _frozen;
+  List<TripComment> get comments => _comments;
 
   double get totalPrice {
     return flightsPrice + hotelsPrice + rentalCarsPrice + activitiesPrice;
@@ -188,6 +226,7 @@ class Trip {
       "rentalCars": _rentalCars.map((rentalCar) => rentalCar.toJson()).toList(),
       "activities": _activities.map((activity) => activity.toJson()).toList(),
       "frozen": _frozen,
+      "comments": _comments.map((comment) => comment.toJson()).toList(),
     };
   }
 
@@ -209,6 +248,7 @@ class Trip {
     Trip t = Trip(
       id: doc.id,
       uids: (data['uids'] as List).map((item) => item as String).toList(),
+      comments: data["comments"] != null ? List<TripComment>.from(data["comments"].map((x) => TripComment.fromJson(x))) : List.empty(growable: true),
       usingSplitPayments: data['usingSplitPayments'] ?? false,
       frozen: data['frozen'] ?? false,
       paymentsComplete: Map<String,bool>.from(data['paymentsComplete'] ?? {}),
@@ -217,10 +257,10 @@ class Trip {
       endDate: data['endDate'].toDate(),
       destination: City.fromJson(data['destination']),
       isConfirmed: data['isConfirmed'],
-      flights: [],
-      hotels: [],
-      rentalCars: [],
-      activities: [],
+      flights: List.empty(growable: true),
+      hotels: List.empty(growable: true),
+      rentalCars: List.empty(growable: true),
+      activities: List.empty(growable: true),
     );
 
     t._flights = (data['flights'] as List).map((flight) => FlightGroup.fromJson(flight, t._save)).toList();
@@ -236,7 +276,7 @@ class Trip {
       members: members,
       departureAirport: departureAirport,
       arrivalAirport: arrivalAirport,
-      options: [],
+      options: List.empty(growable: true),
       selected: null,
       save: _save,
     ));
@@ -274,6 +314,7 @@ class Trip {
 
   Future<void> addActivity(TicketmasterEvent event, List<String> uids) async {
     _activities.add(Activity(
+      comments: List<TripComment>.empty(growable: true),
       event: event,
       participants: uids,
       save: _save,
@@ -324,6 +365,16 @@ class Trip {
 
   Future<void> toggleSplitPayments() async {
     _usingSplitPayments = !_usingSplitPayments;
+    await _save();
+  }
+
+  Future<void> addComment(TripComment comment) async {
+    _comments.add(comment);
+    await _save();
+  }
+
+  Future<void> removeComment(TripComment comment) async {
+    _comments.remove(comment);
     await _save();
   }
 
@@ -401,6 +452,7 @@ class FlightGroup {
   }
 
   Future<void> removeOption(FlightOffer option) async {
+    int index = _options.indexOf(option);
     _options.remove(option);
     await _save();
   }
@@ -448,12 +500,12 @@ class HotelGroup {
   }
 
   HotelGroup({
-    required name,
-    required members,
-    required infos,
-    required offers,
-    selectedOffer,
-    selectedInfo,
+    required String name,
+    required List<String> members,
+    required List<HotelInfo> infos,
+    required List<HotelOffer> offers,
+    HotelOffer? selectedOffer,
+    HotelInfo? selectedInfo,
     required Future<void> Function() save,
   }) : 
     _save = save,
@@ -470,9 +522,9 @@ class HotelGroup {
       name: json['name'],
       infos: (json['infos'] as List).map((option) => HotelInfo.fromJson(option)).toList(),
       offers: (json['offers'] as List).map((offer) => HotelOffer.fromJson(offer)).toList(),
-      selectedInfo: json['selectedOption'] != null ? HotelOption.fromJson(json['selectedOption']) : null,
+      selectedInfo: json['selectedInfo'] != null ? HotelInfo.fromJson(json['selectedInfo']) : null,
       selectedOffer: json['selectedOffer'] != null ? HotelOffer.fromJson(json['selectedOffer']) : null,
-      save: save
+      save: save,
     );
   }
 
@@ -542,10 +594,10 @@ class RentalCarGroup {
   }
 
   RentalCarGroup({
-    required members,
-    required options,
-    required name,
-    selected,
+    required List<String> members,
+    required List<RentalCarOffer> options,
+    required String name,
+    RentalCarOffer? selected,
     required Future<void> Function() save,
   }) : 
     _save = save,
@@ -560,7 +612,7 @@ class RentalCarGroup {
       name: json['name'],
       options: (json['options'] as List).map((option) => RentalCarOffer.fromJson(option)).toList(),
       selected: json['selected'] != null ? RentalCarOffer.fromJson(json['selected']) : null,
-      save: save
+      save: save,
     );
   }
 
@@ -611,6 +663,7 @@ class RentalCarGroup {
 class Activity {
   final TicketmasterEvent _event;
   final List<String> _participants;
+  final List<TripComment> _comments;
   Future<void> Function() _save;
 
   double? get price {
@@ -638,20 +691,24 @@ class Activity {
   Activity({
     required TicketmasterEvent event,
     required List<String> participants,
+    required List<TripComment> comments,
     required Future<void> Function() save,
   }) : _event = event,
        _participants = participants,
+        _comments = comments,
        _save = save;
 
   Map<String, dynamic> toJson() {
     return {
       "event": _event.toJson(),
       "participants": _participants,
+      "comments": _comments.map((comment) => comment.toJson()).toList(),
     };
   }
 
   TicketmasterEvent get event => _event;
   List<String> get participants => _participants;
+  List<TripComment> get comments => _comments;
 
   Future<void> addParticipant(String uid) async {
     _participants.add(uid);
@@ -665,9 +722,20 @@ class Activity {
 
   factory Activity.fromJson(Map<String, dynamic> json, Future<void> Function() save){
     return Activity(
+      comments: (json['comments'] as List).map((comment) => TripComment.fromJson(comment)).toList(),
       event: TicketmasterEvent.fromJson(json['event']),
       participants: (json['participants'] as List).map((item) => item as String).toList(),
       save: save
     );
   } 
+
+  Future<void> addComment(TripComment comment) async {
+    _comments.add(comment);
+    await _save();
+  }
+
+  Future<void> removeComment(TripComment comment) async {
+    _comments.remove(comment);
+    await _save();
+  }
 }
