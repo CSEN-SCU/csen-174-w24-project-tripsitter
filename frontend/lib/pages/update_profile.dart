@@ -126,7 +126,7 @@ class _UpdateProfileState extends State<UpdateProfile> {
     if (img == null) {
       return;
     }
-    if(mounted) {
+    if (mounted) {
       setState(() {
         loadingPic = true;
       });
@@ -138,7 +138,7 @@ class _UpdateProfileState extends State<UpdateProfile> {
       String url = await ref.getDownloadURL();
       image = url;
       await profile?.updatePhoto(true);
-      if(mounted) setState(() {});
+      if (mounted) setState(() {});
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Profile picture uploaded successfully!'),
@@ -147,7 +147,7 @@ class _UpdateProfileState extends State<UpdateProfile> {
     } on FirebaseException catch (e) {
       print(e);
     }
-    if(mounted) {
+    if (mounted) {
       setState(() {
         loadingPic = false;
       });
@@ -180,7 +180,7 @@ class _UpdateProfileState extends State<UpdateProfile> {
 
     return Scaffold(
         appBar: AppBar(
-          title: Text(user!.uid),
+          title: Text(newProfile ? "Create Profile" : "Update Profile"),
         ),
         //TODO: pull ID, Prompt for name, Pull Email, Prompt for hometown, initialize number of trips to 0, populate join date, prompt for user photo, default stripe ID
         //store all of that info into the db
@@ -188,7 +188,6 @@ class _UpdateProfileState extends State<UpdateProfile> {
           child: ConstrainedBox(
             constraints: BoxConstraints(maxWidth: 600),
             child: Column(children: [
-              Text(newProfile ? "Create Profile" : "Update Profile"),
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: TextField(
@@ -201,21 +200,6 @@ class _UpdateProfileState extends State<UpdateProfile> {
                     fillColor: Colors.grey[300],
                     border: InputBorder.none,
                     labelText: 'Name',
-                  ),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: TextField(
-                  controller: emailController,
-                  onChanged: (value) {
-                    profile!.updateEmail(value);
-                  },
-                  decoration: InputDecoration(
-                    filled: true,
-                    fillColor: Colors.grey[300],
-                    border: InputBorder.none,
-                    labelText: 'Email',
                   ),
                 ),
               ),
@@ -257,15 +241,18 @@ class _UpdateProfileState extends State<UpdateProfile> {
                 ),
               ),
               ListTile(
-                leading: loadingPic ? CircularProgressIndicator() : CircleAvatar(
-                  backgroundImage:
-                      (profile!.hasPhoto && image != null)
-                          ? NetworkImage(image!)
-                          : null,
-                  child: !(profile!.hasPhoto && image != null)
-                      ? Icon(Icons.person)
-                      : null),
-                title: ElevatedButton(onPressed: () => uploadImage(), child: Text("Select Image")),
+                leading: loadingPic
+                    ? CircularProgressIndicator()
+                    : CircleAvatar(
+                        backgroundImage: (profile!.hasPhoto && image != null)
+                            ? NetworkImage(image!)
+                            : null,
+                        child: !(profile!.hasPhoto && image != null)
+                            ? Icon(Icons.person)
+                            : null),
+                title: ElevatedButton(
+                    onPressed: () => uploadImage(),
+                    child: Text("Select Image")),
               ),
               ElevatedButton(
                   onPressed: () async {
