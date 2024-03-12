@@ -1,8 +1,10 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:tripsitter/classes/filterbutton.dart';
 import 'package:tripsitter/classes/profile.dart';
 import 'package:tripsitter/classes/trip.dart';
+import 'package:tripsitter/components/comments_popup.dart';
 import 'package:tripsitter/components/events/event_info_dialog.dart';
 import 'package:tripsitter/components/events/events_options.dart';
 import 'package:tripsitter/components/mobile_wrapper.dart';
@@ -48,6 +50,7 @@ class _EventsItineraryState extends State<EventsItinerary> {
 
   @override
   Widget build(BuildContext context) {
+    User? user = Provider.of<User?>(context);
     bool isMobile = Provider.of<bool>(context);
     return ListView(children: [
       Text('Itinerary',
@@ -60,6 +63,23 @@ class _EventsItineraryState extends State<EventsItinerary> {
                     (profile) => activity.participants.contains(profile.id));
                 return Card(
                   child: ListTile(
+                    leading: CommentsPopup(
+                      comments: activity.comments,
+                      profiles: widget.profiles,
+                      myUid: user!.uid,
+                      removeComment: (TripComment comment) async {
+                        await activity.removeComment(comment);
+                        if(mounted) {setState((){});}
+                      },
+                      addComment: (String comment) async {
+                        await activity.addComment(TripComment(
+                            comment: comment,
+                            uid: user!.uid,
+                            date: DateTime.now())
+                          );
+                        if(mounted) {setState((){});}
+                      },
+                    ),
                     title: Text(activity.event.name),
                     isThreeLine: true,
                     visualDensity: VisualDensity(vertical: 4), // to expand

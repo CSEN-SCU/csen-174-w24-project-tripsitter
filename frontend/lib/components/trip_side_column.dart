@@ -1,11 +1,16 @@
+import 'dart:html';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:tripsitter/classes/profile.dart';
 import 'package:tripsitter/classes/trip.dart';
+import 'package:tripsitter/components/profile_pic.dart';
 import 'package:tripsitter/helpers/api.dart';
 import 'package:tripsitter/components/checkout/checkout.dart';
+import 'package:tripsitter/pages/profile_page.dart';
 
 class TripSideColumn extends StatefulWidget {
   final Trip? trip;
@@ -16,6 +21,7 @@ class TripSideColumn extends StatefulWidget {
 }
 
 class _TripSideColumnState extends State<TripSideColumn> {
+  TextEditingController commentController = TextEditingController();
 
   Trip? get trip => widget.trip;
 
@@ -31,24 +37,11 @@ class _TripSideColumnState extends State<TripSideColumn> {
       children: [
         Text("Members: ${trip!.uids.length}", style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
         ...profiles.map((UserProfile profile) => ListTile(
-          leading: FutureBuilder(
-            future: FirebaseStorage.instance.ref('pictures/${profile.id}').getDownloadURL(),
-            builder: 
-            (BuildContext context, AsyncSnapshot<String> snapshot) {
-              return CircleAvatar(
-                backgroundImage:
-                    (profile.hasPhoto && snapshot.hasData && snapshot.data != null)
-                        ? NetworkImage(snapshot.data!)
-                        : null,
-                child: !(profile.hasPhoto && snapshot.hasData && snapshot.data != null)
-                    ? Icon(Icons.person)
-                    : null);
-            }
-          ),
+          leading: ProfilePicture(profile),
           title: Text(profile.name),
           subtitle: Text(profile.email),
           trailing: trip!.frozen ? (trip!.usingSplitPayments ? Icon(
-            (trip!.paymentsComplete[user.uid] ?? false) ? Icons.credit_card : Icons.credit_card_off
+            (trip!.paymentsComplete[profile.id] ?? false) ? Icons.credit_card : Icons.credit_card_off
           ) : null) : IconButton(
             icon: const Icon(Icons.remove),
             onPressed: () async {
@@ -69,6 +62,55 @@ class _TripSideColumnState extends State<TripSideColumn> {
           },
           icon: Icon(Icons.add),
           label: Text("Add Member")
+        ),
+        Text("Discussion", style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+        ...trip!.comments.map((TripComment comment) => ListTile(
+          subtitle: Text(DateFormat('yyyy-MM-dd – kk:mm').format(comment.date)),
+          isThreeLine: true,
+          title: Text("${profiles.firstWhere((element) => element.id == comment.uid).name}\n${comment.comment}"),
+          // leading: ProfilePicture(profiles.firstWhere((element) => element.id == comment.uid)),
+          trailing: comment.uid == user!.uid ? IconButton(
+            icon: Icon(Icons.delete),
+            onPressed: () async {
+              await trip!.removeComment(comment);
+              if(!mounted) return;
+              setState(() {});
+            },
+          ) : null,
+        )).toList(),
+        ListTile(
+          title: TextField(
+            controller: commentController,
+            decoration: InputDecoration(
+              border: OutlineInputBorder(),
+              labelText: 'Add Comment',
+            ),
+            onSubmitted: (String value) async {
+              await trip!.addComment(TripComment(
+                comment: value,
+                uid: user.uid,
+                date: DateTime.now()
+              ));
+              commentController.clear();
+              if(!mounted) return;
+              setState(() {
+              });
+            }
+          ),
+          trailing: IconButton(
+            icon: const Icon(Icons.send),
+            onPressed: () async {
+              await trip!.addComment(TripComment(
+                comment: commentController.text,
+                uid: user.uid,
+                date: DateTime.now()
+              ));
+              commentController.clear();
+              if(!mounted) return;
+              setState(() {
+              });
+            },
+          ),
         ),
         if(!isMobile)
           ...[
