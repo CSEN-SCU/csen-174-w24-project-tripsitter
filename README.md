@@ -28,7 +28,7 @@ It is also encouraged that you copy the config.json file to the root directory o
 
 If you are also developing for iOS and Android, follow the respective guides. Follow the "Configure credentials" and "Configure your secret token" sections. You don't need to configure your public token.
 
-- [iOS](https://docs.mapbox.com/ios/maps/guides/install/#configure-credentials) 
+- [iOS](https://docs.mapbox.com/ios/maps/guides/install/#configure-credentials)
 - [Android](https://docs.mapbox.com/android/maps/guides/install/#configure-credentials)
 
 ### Stripe API
