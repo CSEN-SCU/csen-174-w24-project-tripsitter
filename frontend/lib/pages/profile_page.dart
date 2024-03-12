@@ -8,6 +8,7 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:tripsitter/classes/profile.dart';
 import 'package:tripsitter/classes/trip.dart';
+import 'package:tripsitter/components/navbar.dart';
 import 'package:tripsitter/components/new_trip_popup.dart';
 import 'package:tripsitter/components/payment.dart';
 import 'package:tripsitter/helpers/locators.dart';
@@ -43,12 +44,14 @@ class _TripInfoState extends State<TripInfo> {
         },
         style: ElevatedButton.styleFrom(
           backgroundColor: widget.col,
-          textStyle: TextStyle(color: Colors.black),
+          textStyle: TextStyle(color: Colors.black, fontSize: 20, height: 2),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(0)),
         ),
         child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   name,
@@ -135,11 +138,8 @@ class _ProfilePageState extends State<ProfilePage> {
             })
       ],
       child: Scaffold(
-        appBar: AppBar(
-          //contains the logo and trip sitter name
-          title: Text('This Is the Profile Page'),
-        ),
-        //contains two columns to contain the user info in one and the trip info in the other
+        appBar:
+            const TripSitterNavbar(), //contains two columns to contain the user info in one and the trip info in the other
 
         body: Center(
           child: Row(
@@ -152,6 +152,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       Column(
                     children: [
                       Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         //profile part
                         children: [
                           Container(
@@ -160,6 +161,7 @@ class _ProfilePageState extends State<ProfilePage> {
                               //the icon and change button
                               children: [
                                 CircleAvatar(
+                                    radius: 100,
                                     backgroundImage:
                                         (profile.hasPhoto && image != null)
                                             ? NetworkImage(image!)
@@ -177,9 +179,15 @@ class _ProfilePageState extends State<ProfilePage> {
                           ),
                           Container(
                             //width: MediaQuery.of(context).size.width*.55 ,
+
                             child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(profile.name),
+                                Text(
+                                  profile.name,
+                                  style: TextStyle(
+                                      fontSize: 30, decorationThickness: 2),
+                                ),
                                 Text(
                                     "Tripping since ${DateFormat.yMMM().format(profile.joinDate)}"),
                                 Text("Number of trips: ${profile.numberTrips}"),
@@ -192,7 +200,10 @@ class _ProfilePageState extends State<ProfilePage> {
                           onPressed: () {
                             Navigator.pushNamed(context, "/new");
                           },
-                          child: Text("Create New Trip"))
+                          child: Text("Create New Trip")),
+                      Container(
+                          alignment: Alignment.bottomLeft,
+                          child: Image.asset("cityscape.png"))
                       //button and possible picture/video
                     ],
                   )),
@@ -201,10 +212,12 @@ class _ProfilePageState extends State<ProfilePage> {
                   width: MediaQuery.of(context).size.width * .45,
                   child: Center(
                     child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Text("My Trips"),
                         Center(
                           child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               ElevatedButton(
                                   onPressed: () {
@@ -212,7 +225,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                     setState(() {});
                                   },
                                   child: Text("Upcoming")),
-                              Icon(Icons.compare_arrows),
+                              Icon(Icons.swap_horiz_sharp),
                               ElevatedButton(
                                   onPressed: () {
                                     upcoming = false;
@@ -242,9 +255,17 @@ class _ProfilePageState extends State<ProfilePage> {
                                 itemCount: trips.length,
                                 itemBuilder: (BuildContext context, int index) {
                                   // Generate a widget for each item in the list
-                                  return TripInfo(
-                                      trip: trips[index],
-                                      col: Color.fromARGB(255, 148, 148, 148));
+                                  if (index % 2 == 0) {
+                                    return TripInfo(
+                                        trip: trips[index],
+                                        col:
+                                            Color.fromARGB(255, 217, 217, 217));
+                                  } else {
+                                    return TripInfo(
+                                        trip: trips[index],
+                                        col:
+                                            Color.fromARGB(255, 245, 245, 245));
+                                  }
                                 }),
                           );
                         }),
