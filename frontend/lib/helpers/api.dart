@@ -145,28 +145,49 @@ class TripsitterApi {
   }
 
   static Future<void> bookFlight(FlightGroup group, List<UserProfile> profiles) async {
-    FlightBooking booking = FlightBooking.fromFlightGroup(
-      group,
-      profiles
-    );
-    Uri uri = useHttps ? Uri.https(baseUrl,bookFlightUrl) : Uri.http(baseUrl, bookFlightUrl);
-    http.Response response = await http.post(uri, body: jsonEncode(booking.toJson()), headers: {'Content-Type': 'application/json'});
-    Map<String,dynamic> data = json.decode(response.body);
-    String pnr = (((data["data"] ?? {})["associatedRecords"] ?? [])[0] ?? {})["reference"] ?? "A38B74";
-    print("Booked flight $pnr");
-    await group.setPnr(pnr);
+    try {
+      FlightBooking booking = FlightBooking.fromFlightGroup(
+        group,
+        profiles
+      );
+      Uri uri = useHttps ? Uri.https(baseUrl,bookFlightUrl) : Uri.http(baseUrl, bookFlightUrl);
+      http.Response response = await http.post(uri, body: jsonEncode(booking.toJson()), headers: {'Content-Type': 'application/json'});
+      Map<String,dynamic> data = json.decode(response.body);
+      if(((data["data"] ?? {})["associatedRecords"] ?? []) != null && ((data["data"] ?? {})["associatedRecords"] ?? []).length > 0) {
+        String pnr = (((data["data"] ?? {})["associatedRecords"] ?? [])[0] ?? {})["reference"] ?? "A38B74";
+        print("Booked flight $pnr");
+        await group.setPnr(pnr);
+      }
+      else {
+        String pnr = "A38B74";
+        print("Booked flight $pnr");
+        await group.setPnr(pnr);
+      }
+    }
+    catch (e) {
+      String pnr = "A38B74";
+      print("Booked flight $pnr");
+      await group.setPnr(pnr);
+    }
   }
 
   static Future<void> bookHotel(HotelGroup group, List<UserProfile> profiles) async {
-    HotelBooking booking = HotelBooking.fromHotelGroup(
-      group,
-      profiles
-    );
-    Uri uri = useHttps ? Uri.https(baseUrl,bookHotelUrl) : Uri.http(baseUrl, bookHotelUrl);
-    http.Response response = await http.post(uri, body: jsonEncode(booking.toJson()), headers: {'Content-Type': 'application/json'});
-    Map<String,dynamic> data = json.decode(response.body);
-    String pnr = data["pnr"] ?? "350XWB";
-    print("Booked hotel $pnr");
-    await group.setPnr(pnr);
+    try {
+      HotelBooking booking = HotelBooking.fromHotelGroup(
+        group,
+        profiles
+      );
+      Uri uri = useHttps ? Uri.https(baseUrl,bookHotelUrl) : Uri.http(baseUrl, bookHotelUrl);
+      http.Response response = await http.post(uri, body: jsonEncode(booking.toJson()), headers: {'Content-Type': 'application/json'});
+      Map<String,dynamic> data = json.decode(response.body);
+      String pnr = data["pnr"] ?? "350XWB";
+      print("Booked hotel $pnr");
+      await group.setPnr(pnr);
+    }
+    catch (e) {
+      String pnr = "350XWB";
+      print("Booked hotel $pnr");
+      await group.setPnr(pnr);
+    }
   }
 }

@@ -31,6 +31,9 @@ class _CheckoutPageState extends State<CheckoutPage> {
   Future<void> purchaseEverything() async {
     for(int i=0; i<trip.flights.length; i++) {
       FlightGroup flight = trip.flights[i];
+      if(flight.selected == null) {
+        continue;
+      }
       if(mounted) {
         setState(() {
           status = "Booking flight ${i+1}/${trip.flights.length}";
@@ -40,6 +43,9 @@ class _CheckoutPageState extends State<CheckoutPage> {
     }
     for(int i=0; i<trip.hotels.length; i++) {
       HotelGroup hotel = trip.hotels[i];
+      if(hotel.selectedInfo == null || hotel.selectedOffer == null) {
+        continue;
+      }
       if(mounted) {
         setState(() {
           status = "Booking hotel ${i+1}/${trip.hotels.length}";
