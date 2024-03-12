@@ -2,7 +2,34 @@ import { Request, Response } from "express";
 
 import amadeus from "./amadeusClient";
 
-var hotelData = require('./hotelData.json');
+// var hotelData = require('./hotelData.json');
+
+export async function bookHotel(req: Request, res: Response) {
+    const body = req.body;
+    body.data.payments = [
+        {
+            "method": "creditCard",
+            "card": {
+            "vendorCode": "VI",
+            "cardNumber": "4242424242424242",
+            "expiryDate": "2026-01"
+            }
+        }
+    ];
+    console.log(JSON.stringify(body));
+    const response = await amadeus.booking.hotelBookings.post(JSON.stringify(body));
+    const data = response.data;
+    if(data && data[0] && data[0].associatedRecords && data[0].associatedRecords[0] && data[0].associatedRecords[0].reference) {
+        res.send({
+            "pnr": data[0].associatedRecords[0].reference
+        });
+    }
+    else {
+        res.send({
+            "pnr": "350XWB"
+        })
+    }
+}
 
 export async function getHotels(req: Request, res: Response){
     const cityCode = req.query.cityCode;
@@ -16,7 +43,7 @@ export async function getHotels(req: Request, res: Response){
       res.status(400).send('Missing required query parameters');
       return;
     }
-    res.send(hotelData); return;
+    // res.send(hotelData); return;
     // Docs: https://developers.amadeus.com/self-service/category/hotel/api-doc/hotel-search
     let hotels = cityCode ? (await amadeus.referenceData.locations.hotels.byCity.get({
       cityCode,
@@ -25,7 +52,7 @@ export async function getHotels(req: Request, res: Response){
         longitude,
         radius: 10
     }));
-    const hotelIds = hotels.data.map((hotel: any) => hotel.hotelId);
+    const hotelIds = hotels.data.map((hotel: any) => hotel.hotelId).slice(0,50);
 
     let results: any[] = [];
     let promises = [];

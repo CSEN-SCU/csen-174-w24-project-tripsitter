@@ -1,48 +1,16 @@
 import 'dart:math';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:tripsitter/classes/car.dart';
 import 'package:tripsitter/classes/city.dart';
 import 'package:tripsitter/classes/flights.dart';
 import 'package:tripsitter/classes/hotels.dart';
+import 'package:tripsitter/classes/profile.dart';
 import 'package:tripsitter/classes/ticketmaster.dart';
 import 'dart:async';
-
-class TripComment {
-  final String _uid;
-  final String _comment;
-  final DateTime _date;
-
-  TripComment({
-    required String uid,
-    required String comment,
-    required DateTime date,
-  }) : _uid = uid,
-       _comment = comment,
-       _date = date;
-
-  String get uid => _uid;
-  String get comment => _comment;
-  DateTime get date => _date;
-
-  Map<String, dynamic> toJson() {
-    return {
-      "uid": _uid,
-      "comment": _comment,
-      "date": Timestamp.fromDate(_date),
-    };
-  }
-
-  factory TripComment.fromJson(Map<String, dynamic> json) {
-    return TripComment(
-      uid: json['uid'],
-      comment: json['comment'],
-      date: (json['date'] as Timestamp).toDate(),
-    );
-  }
-}
 
 class Trip {
   final String _id;
@@ -278,6 +246,7 @@ class Trip {
       arrivalAirport: arrivalAirport,
       options: List.empty(growable: true),
       selected: null,
+      pnr: null,
       save: _save,
     ));
     await _save();
@@ -289,7 +258,7 @@ class Trip {
   }
 
   Future<HotelGroup> createHotelGroup(String name, List<String> members) async {
-    HotelGroup hotel = HotelGroup(name: name, members: members, offers: List<HotelOffer>.empty(growable: true), infos: List<HotelInfo>.empty(growable: true), save: save);
+    HotelGroup hotel = HotelGroup(name: name, pnr: null, members: members, offers: List<HotelOffer>.empty(growable: true), infos: List<HotelInfo>.empty(growable: true), save: save);
     _hotels.add(hotel);
     await _save();
     return hotel;
@@ -386,6 +355,7 @@ class FlightGroup {
   String _arrivalAirport;
   List<FlightOffer> _options;
   FlightOffer? _selected;
+  String? _pnr;
   Future<void> Function() _save;
 
   double? get price {
@@ -405,6 +375,7 @@ class FlightGroup {
     required String departureAirport,
     required String arrivalAirport,
     required List<FlightOffer> options,
+    required String? pnr,
     FlightOffer? selected,
     required Future<void> Function() save,
   }) : _members = members,
@@ -412,6 +383,7 @@ class FlightGroup {
        _arrivalAirport = arrivalAirport,
        _options = options,
        _selected = selected,
+       _pnr = pnr,
        _save = save;
 
   factory FlightGroup.fromJson(Map<String, dynamic> json, Future<void> Function() save) {
@@ -420,6 +392,7 @@ class FlightGroup {
       members: (json['members'] as List).map((e) => e as String).toList(),
       departureAirport: json['departureAirport'],
       arrivalAirport: json['arrivalAirport'],
+      pnr: json["pnr"],
       options: (json['options'] as List).map((option) => FlightOffer.fromJson(option)).toList(),
       selected: json['selected'] != null ? FlightOffer.fromJson(json['selected']) : null,
     );
@@ -432,6 +405,7 @@ class FlightGroup {
       "arrivalAirport": _arrivalAirport,
       "options": _options.map((option) => option.toJson()).toList(),
       "selected": _selected?.toJson(),
+      "pnr": _pnr
     };
   }
 
@@ -440,9 +414,15 @@ class FlightGroup {
   String get arrivalAirport => _arrivalAirport;
   List<FlightOffer> get options => _options;
   FlightOffer? get selected => _selected;
+  String? get pnr => _pnr;
 
   Future<void> selectOption(FlightOffer option) async {
     _selected = option;
+    await _save();
+  }
+
+  Future<void> setPnr(String pnr) async {
+    _pnr = pnr;
     await _save();
   }
 
@@ -483,6 +463,7 @@ class HotelGroup {
   List<HotelInfo> _infos;
   List<HotelOffer> _offers;
   String _name;
+  String? _pnr;
   HotelOffer? _selectedOffer;
   HotelInfo? _selectedInfo;
   Future<void> Function() _save;
@@ -504,6 +485,7 @@ class HotelGroup {
     required List<String> members,
     required List<HotelInfo> infos,
     required List<HotelOffer> offers,
+    required String? pnr,
     HotelOffer? selectedOffer,
     HotelInfo? selectedInfo,
     required Future<void> Function() save,
@@ -513,6 +495,7 @@ class HotelGroup {
     _name = name,
     _offers = offers,
     _infos = infos,
+    _pnr = pnr,
     _selectedOffer = selectedOffer,
     _selectedInfo = selectedInfo;
 
@@ -520,6 +503,7 @@ class HotelGroup {
     return HotelGroup(
       members: (json['members'] as List).map((item) => item as String).toList(),
       name: json['name'],
+      pnr: json['pnr'],
       infos: (json['infos'] as List).map((option) => HotelInfo.fromJson(option)).toList(),
       offers: (json['offers'] as List).map((offer) => HotelOffer.fromJson(offer)).toList(),
       selectedInfo: json['selectedInfo'] != null ? HotelInfo.fromJson(json['selectedInfo']) : null,
@@ -534,6 +518,7 @@ class HotelGroup {
   List<HotelOffer> get offers => _offers;
   HotelOffer? get selectedOffer => _selectedOffer;
   HotelInfo? get selectedInfo => _selectedInfo;
+  String? get pnr => _pnr;
 
   Map<String, dynamic> toJson() {
     return {
@@ -543,6 +528,7 @@ class HotelGroup {
       "offers": _offers.map((offer) => offer.toJson()).toList(),
       "selectedOffer": selectedOffer?.toJson(),
       "selectedInfo": selectedInfo?.toJson(),
+      "pnr": _pnr
     };
   }
 
@@ -572,6 +558,11 @@ class HotelGroup {
   }
   Future<void> setName(String name) async {
     _name = name;
+    await _save();
+  }
+
+  Future<void> setPnr(String pnr) async {
+    _pnr = pnr;
     await _save();
   }
 }
@@ -737,5 +728,109 @@ class Activity {
   Future<void> removeComment(TripComment comment) async {
     _comments.remove(comment);
     await _save();
+  }
+}
+
+class TripComment {
+  final String _uid;
+  final String _comment;
+  final DateTime _date;
+
+  TripComment({
+    required String uid,
+    required String comment,
+    required DateTime date,
+  }) : _uid = uid,
+       _comment = comment,
+       _date = date;
+
+  String get uid => _uid;
+  String get comment => _comment;
+  DateTime get date => _date;
+
+  Map<String, dynamic> toJson() {
+    return {
+      "uid": _uid,
+      "comment": _comment,
+      "date": Timestamp.fromDate(_date),
+    };
+  }
+
+  factory TripComment.fromJson(Map<String, dynamic> json) {
+    return TripComment(
+      uid: json['uid'],
+      comment: json['comment'],
+      date: (json['date'] as Timestamp).toDate(),
+    );
+  }
+}
+
+
+class TravelerInfo {
+  final int id;
+  final String dateOfBirth;
+  final String firstName;
+  final String lastName;
+  final String email;
+  final String gender;
+  final String countryCode;
+  final String phoneNumber;
+
+  TravelerInfo({
+    required this.id,
+    required this.dateOfBirth,
+    required this.firstName,
+    required this.lastName,
+    required this.email,
+    required this.gender,
+    required this.countryCode,
+    required this.phoneNumber,
+  });
+
+  Map<String, dynamic> toFlightJson() {
+    return {
+      "id": (id+1).toString(),
+      "dateOfBirth": dateOfBirth,
+      "name": {
+        "firstName": firstName,
+        "lastName": lastName,
+      },
+      "gender": gender.toUpperCase(),
+      "contact": {
+        "emailAddress": email,
+        "phones": [{
+          "deviceType": "MOBILE",
+          "countryCallingCode": countryCode,
+          "number": phoneNumber
+        }]
+      }
+    };
+  }
+
+  Map<String, dynamic> toHotelJson() {
+    return {
+      "name": {
+        "title": gender == "Male" ? "MR" : (gender == "Female" ? "MS" : "MX"),
+        "firstName": firstName.toUpperCase(),
+        "lastName": lastName.toUpperCase()
+      },
+      "contact": {
+        "phone": "+$countryCode$phoneNumber",
+        "email": email
+      }
+    };
+  }
+
+  factory TravelerInfo.fromUserProfile(UserProfile profile, int num) {
+    return TravelerInfo(
+      id: num,
+      gender: profile.gender,
+      countryCode: profile.countryCode,
+      phoneNumber: profile.phoneNumber,
+      dateOfBirth: DateFormat("yyyy-MM-dd").format(profile.birthDate),
+      firstName: profile.name.split(" ").first,
+      lastName: profile.name.split(" ").slice(1).join(" "),
+      email: profile.email
+    );
   }
 }

@@ -19,7 +19,6 @@ import 'package:tripsitter/no_animation_page_route.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   setPathUrlStrategy();
-  print("STRIPE KEY: ${const String.fromEnvironment('STRIPE_PK_TEST')}");
   Stripe.publishableKey = const String.fromEnvironment('STRIPE_PK_TEST');
   await Stripe.instance.applySettings();
   await Firebase.initializeApp(
