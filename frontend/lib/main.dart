@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
+import 'package:hexcolor/hexcolor.dart';
 import 'package:tripsitter/classes/flights.dart';
 import 'package:tripsitter/classes/profile.dart';
 import 'package:tripsitter/helpers/api.dart';
@@ -84,7 +85,7 @@ class MyApp extends StatelessWidget {
               title: 'TripSitter',
               theme: ThemeData(
                 colorScheme: ColorScheme.fromSeed(
-                    seedColor: Colors.blue, brightness: Brightness.light),
+                    seedColor: HexColor("#C6D6FF"), brightness: Brightness.light),
                 useMaterial3: true,
               ),
               home: const LoginPage(),
@@ -102,7 +103,7 @@ class MyApp extends StatelessWidget {
               title: 'TripSitter',
               theme: ThemeData(
                 colorScheme: ColorScheme.fromSeed(
-                    seedColor: Colors.blue, brightness: Brightness.light),
+                    seedColor: HexColor("#C6D6FF"), brightness: Brightness.light),
                 useMaterial3: true,
               ),
             ),
