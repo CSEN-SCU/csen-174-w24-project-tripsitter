@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:tripsitter/classes/car.dart';
+import 'package:tripsitter/classes/filterbutton.dart';
 import 'package:tripsitter/classes/trip.dart';
 import 'package:tripsitter/components/cars/car_info_dialog.dart';
 import 'package:tripsitter/helpers/api.dart';
 import 'package:tripsitter/helpers/formatters.dart';
+import 'package:tripsitter/popups/checkbox_popup.dart';
 
 class CarOptions extends StatefulWidget {
   final RentalCarGroup? currentGroup;
@@ -33,7 +35,225 @@ class _CarOptionsState extends State<CarOptions> {
       dropOff: DateTime(2024, 4, 3, 10, 0),
     );
     cars = await TripsitterApi.searchRentalCars(query);
+    final Set<String> rentalCompanies = {};
+    for (RentalCarOffer car in cars) {
+      rentalCompanies.add(car.provider.providerName);
+    }
+
+    final rentals = rentalCompanies.toList();
+    rentals.sort((a, b) => a.compareTo(b));
+    _selectedCompanies = [...rentals];
     setState(() {});
+  }
+
+  bool _isCompanyOpen = false;
+  bool _isSizeOpen = false;
+  bool _isDriveOpen = false;
+  bool _isFuelOpen = false;
+  List<String> _selectedCompanies = [];
+  final GlobalKey _companyKey = GlobalKey();
+  final GlobalKey _sizeKey = GlobalKey();
+  final GlobalKey _driveKey = GlobalKey();
+  final GlobalKey _fuelKey = GlobalKey();
+
+  void _showCompanyPopup(){
+    if(cars.isEmpty) return;
+    setState(() {
+      _isCompanyOpen = true;
+    });
+
+    final Set<String> rentalCompanies = {};
+    for (RentalCarOffer car in cars) {
+      rentalCompanies.add(car.provider.providerName);
+    }
+
+    final rentals = rentalCompanies.toList();
+    rentals.sort((a, b) => a.compareTo(b));
+
+    final popup = CheckboxPopup(
+      options: rentals,
+      format: (String option) => option,
+      selected: _selectedCompanies,
+      onSelected: (List<String> newSelected) {
+        setState(() {
+          _selectedCompanies = newSelected;
+          // getFlights(reset: false);
+        });
+      },
+    );
+
+    popup.showPopup(context, _companyKey).then((_) {
+      setState(() {
+        _isCompanyOpen = false;
+      });
+    });
+  }
+
+  Map<String,String> sizes = {
+      "C": "Compact",
+      "D": "Compact Elite",
+      "E": "Economy",
+      "H": "Economy Elite",
+      "F": "Fullsize",
+      "G": "Fullsize Elite",
+      "I": "Intermediate",
+      "J": "Intermediate Elite",
+      "L": "Luxury",
+      "M": "Mini",
+      "N": "Mini Elite",
+      "O": "Oversize",
+      "P": "Premium",
+      "R": "Standard Elite",
+      "S": "Standard",
+      "U": "Premium Elite",
+      "W": "Luxury Elite",
+      "X": "Special",
+    };
+  List<String> allSizes = ["C","E","F","I","L","M","O","P","S","X"];
+  Map<String, List<String>> sizeMap = {
+    "C": ["C","D"],
+    "E": ["E","H"],
+    "F": ["F","G"],
+    "I": ["I","J"],
+    "L": ["L","W"],
+    "M": ["M","N"],
+    "O": ["O"],
+    "P": ["P"],
+    "S": ["S","R"],
+    "X": ["X"],
+  };
+  List<String> _selectedSizes = ["C","E","F","I","L","M","O","P","S","X"];
+
+  void _showSizePopup(){
+    if(cars.isEmpty) return;
+    setState(() {
+      _isSizeOpen = true;
+    });
+
+    final popup = CheckboxPopup(
+      options: allSizes,
+      format: (String option) => sizes[option],
+      selected: _selectedSizes,
+      onSelected: (List<String> newSelected) {
+        setState(() {
+          _selectedSizes = newSelected;
+          // getFlights(reset: false);
+        });
+      },
+    );
+
+    popup.showPopup(context, _sizeKey).then((_) {
+      setState(() {
+        _isSizeOpen = false;
+      });
+    });
+  }
+
+  Map<String, List<String>> driveMap = {
+    "M": ["M", "N", "C"],
+    "A": ["A", "B", "D"]
+  };
+
+  List<String> _selectedDrive = ["M","A"];
+  void _showDrivePopup() {
+    if(cars.isEmpty) return;
+    setState(() {
+      _isDriveOpen = true;
+    });
+
+    final popup = CheckboxPopup(
+      options: ["M","A"],
+      format: (String option) => option == "M" ? "Manual" : "Automatic",
+      selected: _selectedDrive,
+      onSelected: (List<String> newSelected) {
+        setState(() {
+          _selectedDrive = newSelected;
+        });
+      },
+    );
+
+    popup.showPopup(context, _driveKey).then((_) {
+      setState(() {
+        _isDriveOpen = false;
+      });
+    });
+  }
+
+  List<String> _selectedFuel = ["N","Z","D","E","H","I","S","F","B","X"];
+
+
+  Map<String, String> fuel = {
+      "N": "Gasoline",
+      "Z": "Petrol",
+      "D": "Diesel",
+      "E": "Electric",
+      "H": "Hybrid",
+      "I": "Hybrid Plug-in",
+      "S": "LPG/Compressed Gas",
+      "F": "Multi Fuel/Power",
+      "B": "Hydrogen",
+      "X": "Ethanol",
+    };
+  
+  Map<String, List<String>> fuelMap = {
+    "N": ["N", "R"],
+    "Z": ["Z", "V"],
+    "D": ["D", "Q"],
+    "E": ["E", "C"],
+    "H": ["H"],
+    "I": ["I"],
+    "S": ["S", "L"],
+    "F": ["F", "M"],
+    "B": ["B", "A"],
+    "X": ["X", "U"]
+  };
+
+  void _showFuelPopup() {
+    if(cars.isEmpty) return;
+    setState(() {
+      _isFuelOpen = true;
+    });
+
+    final popup = CheckboxPopup(
+      options: fuel.keys.toList(),
+      format: (String option) => fuel[option],
+      selected: _selectedFuel,
+      onSelected: (List<String> newSelected) {
+        setState(() {
+          _selectedFuel = newSelected;
+        });
+      },
+    );
+
+    popup.showPopup(context, _fuelKey).then((_) {
+      setState(() {
+        _isFuelOpen = false;
+      });
+    });
+  }
+
+  bool filterCar(RentalCarOffer car) {
+    if (_selectedCompanies.isNotEmpty) {
+      if (!_selectedCompanies.contains(car.provider.providerName)) {
+        return false;
+      }
+    }
+    if(_selectedSizes.isNotEmpty) {
+      if(!_selectedSizes.any((s) => sizeMap[s]!.contains(car.sipp[0]))) {
+        return false;
+      }
+    }
+    if(_selectedDrive.isNotEmpty) {
+      if(!_selectedDrive.any((s) => driveMap[s]!.contains(car.sipp[2]))) {
+        return false;
+      }
+    }
+    if(_selectedFuel.isNotEmpty) {
+      if(!_selectedFuel.any((s) => fuelMap[s]!.contains(car.sipp[3]))) {
+        return false;
+      }
+    }
+    return true;
   }
   
   @override
@@ -45,7 +265,48 @@ class _CarOptionsState extends State<CarOptions> {
       child: ListView(
         children: [
           Text("Rental Cars for ${widget.currentGroup!.name}", style: Theme.of(context).textTheme.displayMedium?.copyWith(decoration: TextDecoration.underline, fontWeight: FontWeight.bold)),
-          for (RentalCarOffer car in cars)
+          Wrap(
+            spacing: 10,
+            children: <Widget>[
+              FilterButton(
+                  text: 'Company',
+                  globalKey: _companyKey,
+                  onPressed: () => _showCompanyPopup(),
+                  icon: Icon(
+                    _isCompanyOpen
+                        ? Icons.arrow_drop_up
+                        : Icons.arrow_drop_down,
+                  )),
+              FilterButton(
+                  text: 'Size',
+                  globalKey: _sizeKey,
+                  onPressed: () => _showSizePopup(),
+                  icon: Icon(
+                    _isSizeOpen
+                        ? Icons.arrow_drop_up
+                        : Icons.arrow_drop_down,
+                  )),
+              FilterButton(
+                  text: 'Drive',
+                  globalKey: _driveKey,
+                  onPressed: () => _showDrivePopup(),
+                  icon: Icon(
+                    _isDriveOpen
+                        ? Icons.arrow_drop_up
+                        : Icons.arrow_drop_down,
+                  )),
+              FilterButton(
+                  text: 'Fuel',
+                  globalKey: _fuelKey,
+                  onPressed: () => _showFuelPopup(),
+                  icon: Icon(
+                    _isFuelOpen
+                        ? Icons.arrow_drop_up
+                        : Icons.arrow_drop_down,
+                  )),
+            ],
+          ),
+          for (RentalCarOffer car in cars.where(filterCar))
             ListTile(
               leading: Image.network("https://logos.skyscnr.com/images/carhire/sippmaps/${car.group.img}", width: 80, height: 80),
               title: Text("${car.sipp.fromSipp()} (${car.carName} or similar)"),
