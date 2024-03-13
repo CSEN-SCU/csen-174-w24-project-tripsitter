@@ -195,8 +195,8 @@ class _HotelOptionsState extends State<HotelOptions> {
     switch (_selectedSort) {
       case HotelSortOption.price:
         return _sortDirection
-            ? minPrice(a.offers)!.compareTo(minPrice(b.offers)!)
-            : minPrice(b.offers)!.compareTo(minPrice(a.offers)!);
+            ? double.parse(minPrice(a.offers) ?? "0.0").compareTo(double.parse(minPrice(b.offers) ?? "0"))
+            : double.parse(minPrice(b.offers) ?? "0.0").compareTo(double.parse(minPrice(a.offers) ?? "0"));
       case HotelSortOption.distance:
         if(arrivalAirport == null) return 0;
         return !_sortDirection
