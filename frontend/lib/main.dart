@@ -84,7 +84,7 @@ class MyApp extends StatelessWidget {
               title: 'TripSitter',
               theme: ThemeData(
                 colorScheme: ColorScheme.fromSeed(
-                    seedColor: Colors.deepPurple, brightness: Brightness.light),
+                    seedColor: Colors.blue, brightness: Brightness.light),
                 useMaterial3: true,
               ),
               home: const LoginPage(),
@@ -102,7 +102,7 @@ class MyApp extends StatelessWidget {
               title: 'TripSitter',
               theme: ThemeData(
                 colorScheme: ColorScheme.fromSeed(
-                    seedColor: Colors.deepPurple, brightness: Brightness.light),
+                    seedColor: Colors.blue, brightness: Brightness.light),
                 useMaterial3: true,
               ),
             ),

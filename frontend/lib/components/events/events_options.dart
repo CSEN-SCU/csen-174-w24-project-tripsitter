@@ -11,6 +11,7 @@ import 'package:tripsitter/components/events/events_map.dart';
 import 'package:tripsitter/components/events/select_events.dart';
 import 'package:tripsitter/helpers/api.dart';
 import 'package:tripsitter/popups/checkbox_popup.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class EventsOptions extends StatefulWidget {
   final Trip trip;
@@ -94,12 +95,14 @@ class _EventsOptionsState extends State<EventsOptions>
 
     return ListView(
       children: [
+        // Text("Choose Activities",
+        //     style: Theme.of(context)
+        //         .textTheme
+        //         .displayMedium
+        //         ?.copyWith(fontWeight: FontWeight.bold)),
         Wrap(
           children: [
-            Text("Choose Activites",
-                style: Theme.of(context).textTheme.displayMedium?.copyWith(
-                    decoration: TextDecoration.underline,
-                    fontWeight: FontWeight.bold)),
+            Text("Choose Activities", style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
             Padding(
               padding: const EdgeInsets.fromLTRB(80, 10, 0, 0),
               child: Text("Toggle Map Mode",

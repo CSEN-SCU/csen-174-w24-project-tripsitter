@@ -44,7 +44,7 @@ class _CarOptionsState extends State<CarOptions> {
       padding: const EdgeInsets.all(8.0),
       child: ListView(
         children: [
-          Text("Rental Cars for ${widget.currentGroup!.name}", style: Theme.of(context).textTheme.displayMedium?.copyWith(decoration: TextDecoration.underline, fontWeight: FontWeight.bold)),
+          Text("Rental Cars for ${widget.currentGroup!.name}", style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
           for (RentalCarOffer car in cars)
             ListTile(
               leading: Image.network("https://logos.skyscnr.com/images/carhire/sippmaps/${car.group.img}", width: 80, height: 80),

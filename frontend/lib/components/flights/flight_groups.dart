@@ -10,6 +10,7 @@ import 'package:tripsitter/components/comments_popup.dart';
 import 'package:tripsitter/components/flights/flight_options.dart';
 import 'package:tripsitter/components/mobile_wrapper.dart';
 import 'package:tripsitter/helpers/locators.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class FlightGroups extends StatefulWidget {
   final List<UserProfile> profiles;
@@ -74,7 +75,19 @@ class _FlightGroupsState extends State<FlightGroups> {
       padding: const EdgeInsets.all(8.0),
       child: ListView(
         children: [
-          Text('Flight Groups', style: Theme.of(context).textTheme.displayMedium?.copyWith(decoration: TextDecoration.underline, fontWeight: FontWeight.bold)),
+          // Text('Flight Groups', style: Theme.of(context).textTheme.displayMedium?.copyWith(decoration: TextDecoration.underline, fontWeight: FontWeight.bold)),
+          Center(
+        child: Text(
+          'Flight Groups',
+          style: GoogleFonts.kadwa(
+            textStyle: const TextStyle(
+              color: Colors.black,
+              fontWeight: FontWeight.bold,
+              fontSize: 30,
+            ),
+          ),
+        ),
+      ),
           groups.isEmpty ? const Text('No flight groups') : Column(
             children: groups.map((group) {
               return Container(
