@@ -493,7 +493,7 @@ class _FlightOptionsState extends State<FlightOptions> {
     });
   }
 
-void _showSortPopup() {
+  void _showSortPopup() {
     setState(() {
       _isSortPopupOpen = true;
     });
@@ -504,7 +504,7 @@ void _showSortPopup() {
       onSelected: (FlightSortOption value) {
         setState(() {
           _selectedSort = value;
-          _isClassPopupOpen = false;
+          _isSortPopupOpen = false;
           flights?.sort(compareFlights);
         });
       },

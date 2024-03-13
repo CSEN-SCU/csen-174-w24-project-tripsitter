@@ -3,11 +3,20 @@ import 'dart:math';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:tripsitter/classes/airport.dart';
+import 'package:tripsitter/classes/counter.dart';
+import 'package:tripsitter/classes/filterbutton.dart';
 import 'package:tripsitter/classes/hotels.dart';
 import 'package:tripsitter/classes/trip.dart';
+import 'package:tripsitter/components/flights/flight_options.dart';
 import 'package:tripsitter/components/hotels/hotel_info_dialog.dart';
 import 'package:tripsitter/helpers/api.dart';
+import 'package:tripsitter/helpers/data.dart';
 import 'package:tripsitter/helpers/formatters.dart';
+import 'package:tripsitter/helpers/locators.dart';
+import 'package:tripsitter/popups/checkbox_popup.dart';
+import 'package:tripsitter/popups/counter_popup.dart';
+import 'package:tripsitter/popups/select_popup.dart';
 
 class HotelOptions extends StatefulWidget {
   final Trip trip;
@@ -19,12 +28,32 @@ class HotelOptions extends StatefulWidget {
   State<HotelOptions> createState() => _HotelOptionsState();
 }
 
+enum HotelSortOption {
+  price,
+  distance;
+
+  @override
+  String toString() {
+    switch (this) {
+      case HotelSortOption.price:
+        return 'Price';
+      case HotelSortOption.distance:
+        return 'Distance to Airport';
+    }
+  }
+}
+
 class _HotelOptionsState extends State<HotelOptions> {
 
   @override
   void initState() {
     super.initState();
     getHotels();
+    getAirports(context).then((value) {
+      if(widget.trip.flights.isEmpty || widget.trip.flights.first.selected == null) return;
+      arrivalAirport = value.firstWhereOrNull((element) => element.iataCode == widget.trip.flights.first.arrivalAirport);
+      sortHotels();
+    });
   }
 
   List<HotelOption> hotels = [];
@@ -38,6 +67,19 @@ class _HotelOptionsState extends State<HotelOptions> {
       adults: 1,
     );
     hotels = await TripsitterApi.getHotels(query);
+    final Set<String> bedTypes = {};
+    for (var hotel in hotels) {
+      for (var offer in hotel.offers) {
+        if(offer.room?.typeEstimated?.bedType != null) {
+          bedTypes.add(offer.room!.typeEstimated!.bedType!);
+        }
+      }
+    }
+
+    final bedList = bedTypes.toList();
+    bedList.sort((a, b) => a.compareTo(b));
+    _selectedbedTypes = [...bedList];
+    sortHotels();
     // for(HotelOption hotel in hotels) {
       // print(hotel.offers.first.toJson());
     // }
@@ -49,6 +91,132 @@ class _HotelOptionsState extends State<HotelOptions> {
     List<String> prices = offers.map((o) => o.price.total).whereNotNull().toList();
     return prices.isEmpty ? null : prices.map((p) => double.parse(p)).reduce(min).toString();
   }
+
+  int minBeds = 1;
+  List<String> _selectedbedTypes = [];
+
+  bool _sortDirection = true;
+  bool _isSortOpen = false;
+  bool _isBedCountOpen = false;
+  bool _isBedTypeOpen = false;
+  final GlobalKey _sortKey = GlobalKey();
+  final GlobalKey _bedCountKey = GlobalKey();
+  final GlobalKey _bedTypeKey = GlobalKey();
+  HotelSortOption _selectedSort = HotelSortOption.price;
+
+  void _showCountPopup() async {
+    setState(() {
+      _isBedCountOpen = true;
+    });
+    List<CounterVariable> variables = [
+      CounterVariable(name: "Min # of Beds", value: minBeds),
+    ];
+
+    // Show the popup and await the modified variables
+    final List<CounterVariable> updatedVariables = await showCounterPopup(
+      context: context,
+      key: _bedCountKey,
+      variables: variables,
+    );
+    setState(() {
+      minBeds = updatedVariables
+          .firstWhere((variable) => variable.name == "Min # of Beds")
+          .value;
+      _isBedCountOpen = false;
+    });
+  }
+
+  void _showTypePopup() async {
+    if(hotels.isEmpty) return;
+    setState(() {
+      _isBedTypeOpen = true;
+    });
+
+    final Set<String> bedTypes = {};
+    for (var hotel in hotels) {
+      for (var offer in hotel.offers) {
+        if(offer.room?.typeEstimated?.bedType != null) {
+          bedTypes.add(offer.room!.typeEstimated!.bedType!);
+        }
+      }
+    }
+
+    final bedList = bedTypes.toList();
+    bedList.sort((a, b) => a.compareTo(b));
+
+    final popup = CheckboxPopup(
+      options: bedList,
+      format: (String option) => option[0] + option.substring(1).toLowerCase(),
+      selected: _selectedbedTypes,
+      onSelected: (List<String> newSelected) {
+        setState(() {
+          _selectedbedTypes = newSelected;
+          // getFlights(reset: false);
+        });
+      },
+    );
+
+    popup.showPopup(context, _bedTypeKey).then((_) {
+      setState(() {
+        _isBedTypeOpen = false;
+      });
+    });
+  }
+
+  void _showSortPopup() {
+    setState(() {
+      _isSortOpen = true;
+    });
+
+    final popup = SelectOnePopup<HotelSortOption>(
+      options: HotelSortOption.values,
+      selected: _selectedSort,
+      onSelected: (HotelSortOption value) {
+        setState(() {
+          _selectedSort = value;
+          _isSortOpen = false;
+          sortHotels();
+        });
+      },
+    );
+
+    popup.showPopup(context, _sortKey).then((_) {
+      setState(() {
+        _isSortOpen = false;
+      });
+    });
+  }
+
+  sortHotels() {
+    hotels.sort(compareHotels);
+  }
+
+  int compareHotels(HotelOption a, HotelOption b) {
+    switch (_selectedSort) {
+      case HotelSortOption.price:
+        return _sortDirection
+            ? minPrice(a.offers)!.compareTo(minPrice(b.offers)!)
+            : minPrice(b.offers)!.compareTo(minPrice(a.offers)!);
+      case HotelSortOption.distance:
+        if(arrivalAirport == null) return 0;
+        return !_sortDirection
+            ? distance(a.hotel.latitude ?? 0, a.hotel.longitude ?? 0, arrivalAirport!.lat, arrivalAirport!.lon).compareTo(distance(b.hotel.latitude ?? 0, b.hotel.longitude ?? 0, arrivalAirport!.lat, arrivalAirport!.lon))
+            : distance(b.hotel.latitude ?? 0, b.hotel.longitude ?? 0, arrivalAirport!.lat, arrivalAirport!.lon).compareTo(distance(a.hotel.latitude ?? 0, a.hotel.longitude ?? 0, arrivalAirport!.lat, arrivalAirport!.lon));
+
+    }
+  }
+
+  Airport? arrivalAirport;
+
+  List<HotelOption> get hotelsFiltered {
+    return hotels.where((hotel) {
+      if(hotel.offers.isEmpty) return false;
+      if(hotel.offers.map((o) => o.room?.typeEstimated?.bedType).whereNotNull().isEmpty) return false;
+      if(hotel.offers.map((o) => o.room?.typeEstimated?.bedType).whereNotNull().any((t) => !_selectedbedTypes.contains(t))) return false;
+      if(hotel.offers.map((o) => o.room?.typeEstimated?.beds).whereNotNull().any((c) => c < minBeds)) return false;
+      return true;
+    }).toList();
+  }
   
   @override
   Widget build(BuildContext context) {
@@ -59,11 +227,56 @@ class _HotelOptionsState extends State<HotelOptions> {
       child: ListView(
         children: [
           Text("Hotels for ${widget.currentGroup!.name}", style: Theme.of(context).textTheme.displayMedium?.copyWith(decoration: TextDecoration.underline, fontWeight: FontWeight.bold)),
-          for (int i = 0; i < hotels.length; i++)
+          Row(
+            children: [
+              Expanded(
+                child: Wrap(
+                  spacing: 10,
+                  children: <Widget>[
+                    FilterButton(
+                        text: '# Beds',
+                        globalKey: _bedCountKey,
+                        onPressed: _showCountPopup,
+                        icon: Icon(
+                          _isBedCountOpen
+                              ? Icons.arrow_drop_up
+                              : Icons.arrow_drop_down,
+                        )),
+                    FilterButton(
+                        text: 'Bed Type',
+                        globalKey: _bedTypeKey,
+                        onPressed: _showTypePopup,
+                        icon: Icon(
+                          _isBedTypeOpen
+                              ? Icons.arrow_drop_up
+                              : Icons.arrow_drop_down,
+                        )),
+                  ],
+                ),
+              ),
+              FilterButton(
+                color: Colors.grey[100]!,
+                text: _selectedSort.toString(),
+                globalKey: _sortKey,
+                onPressed: _showSortPopup,
+                icon: IconButton(
+                  onPressed: () {
+                    setState(() {
+                      _sortDirection = !_sortDirection;
+                      sortHotels();
+                    });
+                  },
+                  icon: Icon(_sortDirection
+                      ? Icons.arrow_upward
+                      : Icons.arrow_downward),
+                )),
+            ],
+          ),
+          for (int i = 0; i < hotelsFiltered.length; i++)
             ExpansionTile(
               title: ListTile(
                 // leading: Image.network("https://logos.skyscnr.com/images/carhire/sippmaps/${car.group.img}", width: 80, height: 80),
-                title: Text("${hotels[i].hotel.name}"),
+                title: Text("${hotelsFiltered[i].hotel.name}"),
                 trailing: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -73,30 +286,30 @@ class _HotelOptionsState extends State<HotelOptions> {
                         showDialog(
                           context: context,
                           builder: (BuildContext context) {
-                            return HotelInfoDialog(hotels[i].hotel);
+                            return HotelInfoDialog(hotelsFiltered[i].hotel);
                           }
                         );
                       },
                     ),
                   ]
                 ),
-                subtitle: Text(minPrice(hotels[i].offers) != null ? "From \$${minPrice(hotels[i].offers)}" : "No price available"),
+                subtitle: Text(minPrice(hotelsFiltered[i].offers) != null ? "From \$${minPrice(hotelsFiltered[i].offers)}" : "No price available"),
               ),
-              children: hotels[i].offers.map((HotelOffer o) {
+              children: hotelsFiltered[i].offers.map((HotelOffer o) {
                 return ListTile(
                   subtitle: Text(o.room?.description?.text ?? "No description available"),
                   title: o.price.total == null ? null : Text("\$${o.price.total}"),
                   trailing: ElevatedButton(
                     onPressed: () async {
-                      if(widget.currentGroup!.infos.isNotEmpty && widget.currentGroup!.infos.map((c) => c.hotelId).contains(hotels[i].hotel.hotelId)) {
-                        await widget.currentGroup!.removeOption(widget.currentGroup!.infos.indexWhere((element) => element.hotelId == hotels[i].hotel.hotelId));
+                      if(widget.currentGroup!.infos.isNotEmpty && widget.currentGroup!.infos.map((c) => c.hotelId).contains(hotelsFiltered[i].hotel.hotelId)) {
+                        await widget.currentGroup!.removeOption(widget.currentGroup!.infos.indexWhere((element) => element.hotelId == hotelsFiltered[i].hotel.hotelId));
                       } else {
-                        await widget.currentGroup!.addOption(hotels[i].hotel, o);
+                        await widget.currentGroup!.addOption(hotelsFiltered[i].hotel, o);
                       }
                       setState(() {});
                       widget.setState();
                     },
-                    child: Text("Select${(widget.currentGroup!.infos.isNotEmpty && widget.currentGroup!.infos.map((c) => c.hotelId).contains(hotels[i].hotel.hotelId)) ? "ed" : ""}"),
+                    child: Text("Select${(widget.currentGroup!.infos.isNotEmpty && widget.currentGroup!.infos.map((c) => c.hotelId).contains(hotelsFiltered[i].hotel.hotelId)) ? "ed" : ""}"),
                   ),
                 );
               }).toList(),
