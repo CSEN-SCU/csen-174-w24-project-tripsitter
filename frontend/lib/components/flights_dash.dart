@@ -15,10 +15,10 @@ class FlightsDashBoard extends StatefulWidget {
   const FlightsDashBoard({super.key});
 
   @override
-  _FlightsDashBoardState createState() => _FlightsDashBoardState();
+  FlightsDashBoardState createState() => FlightsDashBoardState();
 }
 
-class _FlightsDashBoardState extends State<FlightsDashBoard> {
+class FlightsDashBoardState extends State<FlightsDashBoard> {
   List<String> airlines = [
     'Select All',
     'Deselect All',
@@ -100,10 +100,10 @@ class _FlightsDashBoardState extends State<FlightsDashBoard> {
                   onPressed: () {
                     // Handle select return trip
                   },
-                  child: Text('Select return trip'),
                   style: TextButton.styleFrom(
                     foregroundColor: Colors.black, // Ensures the text color for buttons
                   ),
+                  child: Text('Select return trip'),
                 ),
                 SizedBox(height: 16.0),
                 Wrap(
@@ -313,23 +313,23 @@ class FilterButton extends StatelessWidget {
   final GlobalKey globalKey;
 
   const FilterButton(
-      {required this.text, required this.onPressed, required this.globalKey});
+      {required this.text, required this.onPressed, required this.globalKey, super.key});
 
   @override
   Widget build(BuildContext context) {
     return ElevatedButton(
       key: globalKey, // Assign the globalKey to the ElevatedButton
-      onPressed: onPressed, // Use the onPressed parameter here
+      onPressed: onPressed,
+      style: ElevatedButton.styleFrom(
+        backgroundColor: Colors.grey[300],
+        foregroundColor: Colors.black,
+      ), // Use the onPressed parameter here
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
           Text(text),
           Icon(Icons.arrow_drop_down),
         ],
-      ),
-      style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.grey[300],
-        foregroundColor: Colors.black,
       ),
     );
   }

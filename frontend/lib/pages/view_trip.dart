@@ -61,7 +61,7 @@ class ViewTrip extends StatelessWidget {
                         List<UserProfile> profiles = Provider.of<List<UserProfile>>(context);
                         return Column(
                           children: [
-                            Text("${trip.name}", 
+                            Text(trip.name, 
                               style: const TextStyle(
                                 color: Colors.black,
                                 fontWeight: FontWeight.w800,
@@ -121,9 +121,9 @@ class ViewTrip extends StatelessWidget {
                       return Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Container(
-                            child: const TripDashBoard(),
+                          SizedBox(
                             width: constraints.maxWidth * 0.7,
+                            child: const TripDashBoard(),
                           ),
                           Container(
                             color: const Color.fromARGB(255, 239, 239, 239),

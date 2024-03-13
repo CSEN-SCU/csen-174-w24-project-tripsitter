@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:tripsitter/classes/airport.dart';
 import 'package:tripsitter/classes/city.dart';
 
-List<City>? _citiesCache = null;
+List<City>? _citiesCache;
 
 Future<void> _loadCities(BuildContext context) async {
     var result = await DefaultAssetBundle.of(context).loadString(
@@ -21,7 +21,7 @@ Future<List<City>> getCities(BuildContext context) async {
   return _citiesCache ?? [];
 }
 
-List<Airport>? _airportsCache = null;
+List<Airport>? _airportsCache;
 
 Future<void> _loadAmadeusAirports(BuildContext context) async {
   var result = await DefaultAssetBundle.of(context).loadString(

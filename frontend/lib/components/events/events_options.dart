@@ -2,7 +2,6 @@ import 'dart:math';
 
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:tripsitter/classes/airport.dart';
 import 'package:tripsitter/classes/filterbutton.dart';
 import 'package:tripsitter/classes/profile.dart';
@@ -69,7 +68,6 @@ class _EventsOptionsState extends State<EventsOptions>
 
   @override
   void initState() {
-    // TODO: implement initState
     isLoaded = false;
     controller = AnimationController(
       /// [AnimationController]s can be created with `vsync: this` because of
@@ -97,7 +95,6 @@ class _EventsOptionsState extends State<EventsOptions>
 
   List<String> selectedGenres = [];
   bool _sortDirection = true;
-  bool _isSortOpen = false;
   bool _isGenreOpen = false;
   final GlobalKey _sortKey = GlobalKey();
   final GlobalKey _genreKey = GlobalKey();
@@ -223,7 +220,6 @@ class _EventsOptionsState extends State<EventsOptions>
 
   void _showSortPopup() {
     setState(() {
-      _isSortOpen = true;
     });
 
     final popup = SelectOnePopup<EventSortOption>(
@@ -232,7 +228,6 @@ class _EventsOptionsState extends State<EventsOptions>
       onSelected: (EventSortOption value) {
         setState(() {
           _selectedSort = value;
-          _isSortOpen = false;
           events.sort(compareEvents);
         });
       },
@@ -240,7 +235,6 @@ class _EventsOptionsState extends State<EventsOptions>
 
     popup.showPopup(context, _sortKey).then((_) {
       setState(() {
-        _isSortOpen = false;
       });
     });
   }
@@ -248,8 +242,6 @@ class _EventsOptionsState extends State<EventsOptions>
   @override
   Widget build(BuildContext context) {
     // Initialize a counter variable before mapping the events to TableRows
-    int rowIndex = 0;
-
     return ListView(
       children: [
         // Text("Choose Activities",

@@ -1,4 +1,4 @@
-import 'dart:html';
+import 'dart:math';
 
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
@@ -24,8 +24,8 @@ class TripsitterMapState extends State<TripsitterMap> {
   var isLight = true;
   int markersCount = 0;
 
-  List<Marker> _markers = [];
-  List<_MarkerState> _markerStates = [];
+  final List<Marker> _markers = [];
+  final List<_MarkerState> _markerStates = [];
 
   void _addMarkerStates(_MarkerState markerState) {
     _markerStates.add(markerState);
@@ -62,7 +62,7 @@ class TripsitterMapState extends State<TripsitterMap> {
     if (widget.trip.hotels.isNotEmpty) {
       var selectionLists =
           widget.trip.hotels.where((s) => s.selectedInfo != null).toList();
-      selectionLists.forEach((element) {
+      for (var element in selectionLists) {
         controller
             .toScreenLocation(LatLng(element.selectedInfo?.latitude ?? 0.0,
                 element.selectedInfo?.longitude ?? 0.0))
@@ -72,12 +72,12 @@ class TripsitterMapState extends State<TripsitterMap> {
               LatLng(element.selectedInfo?.latitude ?? 0.0,
                   element.selectedInfo?.longitude ?? 0.0));
         });
-      });
+      }
     }
     if (widget.trip.flights.isNotEmpty) {
       var airports = await getAirports(context);
-      widget.trip.flights.forEach((element) {
-        airports.forEach((airport) {
+      for (var element in widget.trip.flights) {
+        for (var airport in airports) {
           if (airport.iataCode == element.arrivalAirport) {
             controller
                 .toScreenLocation(LatLng(airport.lat, airport.lon))
@@ -87,8 +87,8 @@ class TripsitterMapState extends State<TripsitterMap> {
                   LatLng(airport.lat, airport.lon));
             });
           }
-        });
-      });
+        }
+      }
       // var selectionLists =
       //     widget.trip.flights.where((s) => s.arrivalAirport != null).toList();
       // debugPrint("Selected Hotel Groups:");
@@ -238,16 +238,6 @@ class _MarkerState extends State with TickerProviderStateMixin {
     this.isHotel,
     this.isAirport,
   );
-
-  @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {

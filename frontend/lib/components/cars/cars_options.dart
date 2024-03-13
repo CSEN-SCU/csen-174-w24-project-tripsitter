@@ -168,7 +168,7 @@ class _CarOptionsState extends State<CarOptions> {
     });
 
     final popup = CheckboxPopup(
-      options: ["M","A"],
+      options: const ["M","A"],
       format: (String option) => option == "M" ? "Manual" : "Automatic",
       selected: _selectedDrive,
       onSelected: (List<String> newSelected) {

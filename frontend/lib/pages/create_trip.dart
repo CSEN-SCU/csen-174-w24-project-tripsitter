@@ -81,9 +81,11 @@ class _CreateTripState extends State<CreateTrip> {
       activities: List.empty(growable: true)
     );
     await newTrip.save();
+    // ignore: use_build_context_synchronously
     UserProfile? profile = Provider.of<UserProfile?>(context, listen: false); 
     profile?.addTrip();
     await profile?.save();
+    // ignore: use_build_context_synchronously
     Navigator.pushNamed(context, "/trip/${newTrip.id}");
   }
 

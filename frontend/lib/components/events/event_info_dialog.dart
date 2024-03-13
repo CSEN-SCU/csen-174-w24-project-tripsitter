@@ -62,10 +62,10 @@ class EventPopup extends StatelessWidget {
                               style: TextStyle(fontWeight: FontWeight.bold),
                             ),
                             TextSpan(
-                              text: (event.info.infoStr ?? '') + '\n',
+                              text: '${event.info.infoStr ?? ''}\n',
                             ),
                             TextSpan(
-                              text: (event.info.pleaseNote ?? '') + '\n',
+                              text: '${event.info.pleaseNote ?? ''}\n',
                             ),
                             TextSpan(
                               text: (event.info.ticketLimit ?? ''),

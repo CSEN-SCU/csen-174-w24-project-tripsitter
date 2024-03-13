@@ -59,7 +59,7 @@ class _SelectCarsState extends State<SelectCars> {
                 )
               )
             ),
-            Container(
+            SizedBox(
               width: constraints.maxWidth * 0.65,
               child: CarOptions(currentGroup: currentGroup, setState: () => setState((){}))
             ),

@@ -19,7 +19,6 @@ class ConfirmationPage extends StatelessWidget {
         child: CircularProgressIndicator()
       );
     }
-    bool split = trip.usingSplitPayments;
     String uid = user.uid;
     return Scaffold(
       appBar: const TripSitterNavbar(),

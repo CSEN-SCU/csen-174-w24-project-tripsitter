@@ -60,7 +60,6 @@ class _FlightOptionsState extends State<FlightOptions> {
   bool _isAirlinesPopupOpen = false;
   bool _isBagsPopupOpen = false;
   bool _isClassPopupOpen = false;
-  bool _isSortPopupOpen = false;
 
   FlightSortOption _selectedSort = FlightSortOption.price;
   bool _sortDirection = true;
@@ -311,11 +310,9 @@ class _FlightOptionsState extends State<FlightOptions> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Text(DateFormat.jm().format(
-                                    flight.segments.first.departure.at) +
-                                " - " +
-                                DateFormat.jm().format(
-                                    flight.segments.last.arrival.at)),
+                            Text("${DateFormat.jm().format(
+                                    flight.segments.first.departure.at)} - ${DateFormat.jm().format(
+                                    flight.segments.last.arrival.at)}"),
                             Text(flight.itineraries.first.duration
                                 .toDuration()
                                 .format())
@@ -333,11 +330,10 @@ class _FlightOptionsState extends State<FlightOptions> {
                               : "${(flight.segments.length - 1).toString()} stop${flight.segments.length > 2 ? "s" : ""}"),
                           flight.segments.length == 1
                               ? const Text("")
-                              : Text("Stops in " +
-                                  flight.segments
+                              : Text("Stops in ${flight.segments
                                       .sublist(1)
                                       .map((s) => s.departure.iataCode)
-                                      .join(", ")),
+                                      .join(", ")}"),
                         ],
                       ),
                     ),
@@ -495,7 +491,6 @@ class _FlightOptionsState extends State<FlightOptions> {
 
   void _showSortPopup() {
     setState(() {
-      _isSortPopupOpen = true;
     });
 
     final popup = SelectOnePopup<FlightSortOption>(
@@ -504,7 +499,6 @@ class _FlightOptionsState extends State<FlightOptions> {
       onSelected: (FlightSortOption value) {
         setState(() {
           _selectedSort = value;
-          _isSortPopupOpen = false;
           flights?.sort(compareFlights);
         });
       },
@@ -512,7 +506,6 @@ class _FlightOptionsState extends State<FlightOptions> {
 
     popup.showPopup(context, _classPopupKey).then((_) {
       setState(() {
-        _isSortPopupOpen = false;
       });
     });
   }

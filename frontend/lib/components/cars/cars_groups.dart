@@ -217,11 +217,11 @@ class _CarGroupsState extends State<CarGroups> {
                 ],
               )),
         // check if all profiles are in a group
-        if (!(widget.profiles.length > 0 &&
-            widget.trip.rentalCars.length > 0 &&
+        if (!(widget.profiles.isNotEmpty &&
+            widget.trip.rentalCars.isNotEmpty &&
             widget.profiles.every((profile) => widget.trip.rentalCars
                 .any((group) => group.members.contains(profile.id))) &&
-            widget.trip.rentalCars.every((group) => group.members.length > 0)))
+            widget.trip.rentalCars.every((group) => group.members.isNotEmpty)))
           ElevatedButton(
             onPressed: () async {
               RentalCarGroup newGroup = await widget.trip.createRentalCarGroup(

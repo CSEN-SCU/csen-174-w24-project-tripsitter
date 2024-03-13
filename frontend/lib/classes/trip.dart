@@ -431,7 +431,6 @@ class FlightGroup {
   }
 
   Future<void> removeOption(FlightOffer option) async {
-    int index = _options.indexOf(option);
     _options.remove(option);
     await _save();
   }

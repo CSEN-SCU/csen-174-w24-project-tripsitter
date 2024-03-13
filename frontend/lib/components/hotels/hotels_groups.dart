@@ -154,7 +154,7 @@ class _HotelGroupsState extends State<HotelGroups> {
                       title: Text(
                           "${group.infos[i].name} (\$${group.offers[i].price.total})"),
                       subtitle: Text(
-                          "${group.offers[i].room?.description?.text ?? 'No description available'}"),
+                          group.offers[i].room?.description?.text ?? 'No description available'),
                       trailing: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
@@ -221,11 +221,11 @@ class _HotelGroupsState extends State<HotelGroups> {
                 ],
               )),
         // check if all profiles are in a group
-        if (!(widget.profiles.length > 0 &&
-            widget.trip.hotels.length > 0 &&
+        if (!(widget.profiles.isNotEmpty &&
+            widget.trip.hotels.isNotEmpty &&
             widget.profiles.every((profile) => widget.trip.hotels
                 .any((group) => group.members.contains(profile.id))) &&
-            widget.trip.hotels.every((group) => group.members.length > 0)))
+            widget.trip.hotels.every((group) => group.members.isNotEmpty)))
           ElevatedButton(
             onPressed: () async {
               HotelGroup newGroup = await widget.trip.createHotelGroup(

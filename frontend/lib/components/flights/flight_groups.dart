@@ -48,6 +48,7 @@ class _FlightGroupsState extends State<FlightGroups> {
       continue;
     }
     if (profile.hometown != null) {
+      // ignore: use_build_context_synchronously
       var nearestAirport = await getNearestAirport(profile.hometown!, context);
       FlightGroup? existing = trip.flights.firstWhereOrNull(
         (element) => element.departureAirport == nearestAirport,

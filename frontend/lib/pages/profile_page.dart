@@ -6,7 +6,6 @@ import 'package:tripsitter/classes/profile.dart';
 import 'package:tripsitter/classes/trip.dart';
 import 'package:tripsitter/pages/update_profile.dart';
 
-//TODO: pull and populate user info. have fallbacks for photo
 class TripInfo extends StatefulWidget {
   final Trip trip;
   final Color col;
@@ -57,7 +56,7 @@ class _TripInfoState extends State<TripInfo> {
                     ),
                     const SizedBox(width: 5),
                     Text(
-                      city + ', ' + country,
+                      '$city, $country',
                       style: const TextStyle(color: Colors.black),
                     )
                   ],
@@ -93,7 +92,7 @@ class _TripInfoState extends State<TripInfo> {
             const SizedBox(width: 300),
             Center(
               child: Text(
-                '\$' + price,
+                '\$$price',
                 style: const TextStyle(color: Colors.black),
               ),
             )
@@ -110,7 +109,7 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  String? image = null;
+  String? image;
   @override
   Widget build(BuildContext context) {
     UserProfile? profile = Provider.of<UserProfile?>(context);
@@ -155,7 +154,7 @@ class _ProfilePageState extends State<ProfilePage> {
           child: Center(
             child: Row(
               children: [
-                Container(
+                SizedBox(
                     width: MediaQuery.of(context).size.width * .55,
                     child:
                         //profile info
@@ -166,47 +165,41 @@ class _ProfilePageState extends State<ProfilePage> {
                           //profile part
                           children: [
                             const SizedBox(width: 25),
-                            Container(
-                              //width: MediaQuery.of(context).size.width*.45 ,
-                              child: Column(
-                                //the icon and change button
-                                children: [
-                                  CircleAvatar(
-                                      backgroundImage:
-                                          (profile.hasPhoto && image != null)
-                                              ? NetworkImage(image!)
-                                              : null,
-                                      child:
-                                          !(profile.hasPhoto && image != null)
-                                              ? const Icon(Icons.person)
-                                              : null),
-                                  const SizedBox(height: 10),
-                                  ElevatedButton(
-                                      onPressed: () {
-                                        Navigator.pushNamed(
-                                            context, "/profile");
-                                      },
-                                      child: const Text("Edit Profile"),
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor:
-                                            const Color.fromARGB(255, 238, 238, 238),
-                                        foregroundColor: Colors.black,
-                                      )),
-                                ],
-                              ),
+                            Column(
+                              //the icon and change button
+                              children: [
+                                CircleAvatar(
+                                    backgroundImage:
+                                        (profile.hasPhoto && image != null)
+                                            ? NetworkImage(image!)
+                                            : null,
+                                    child:
+                                        !(profile.hasPhoto && image != null)
+                                            ? const Icon(Icons.person)
+                                            : null),
+                                const SizedBox(height: 10),
+                                ElevatedButton(
+                                    onPressed: () {
+                                      Navigator.pushNamed(
+                                          context, "/profile");
+                                    },
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor:
+                                          const Color.fromARGB(255, 238, 238, 238),
+                                      foregroundColor: Colors.black,
+                                    ),
+                                    child: const Text("Edit Profile")),
+                              ],
                             ),
                             const SizedBox(width: 111),
-                            Container(
-                              //width: MediaQuery.of(context).size.width*.55 ,
-                              child: Column(
-                                children: [
-                                  Text(profile.name),
-                                  Text(
-                                      "Tripping since ${DateFormat.yMMM().format(profile.joinDate)}"),
-                                  Text(
-                                      "Number of Trips: ${profile.numberTrips}"),
-                                ],
-                              ),
+                            Column(
+                              children: [
+                                Text(profile.name),
+                                Text(
+                                    "Tripping since ${DateFormat.yMMM().format(profile.joinDate)}"),
+                                Text(
+                                    "Number of Trips: ${profile.numberTrips}"),
+                              ],
                             )
                           ],
                         ),
@@ -217,12 +210,12 @@ class _ProfilePageState extends State<ProfilePage> {
                               onPressed: () {
                                 Navigator.pushNamed(context, "/new");
                               },
-                              child: const Text("Create New Trip"),
                               style: ElevatedButton.styleFrom(
                                 backgroundColor:
                                     const Color.fromARGB(255, 125, 175, 220),
                                 foregroundColor: Colors.black,
                               ),
+                              child: const Text("Create New Trip"),
                             ),
                           ],
                         ),
@@ -231,7 +224,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       ],
                     )),
                 //the trip info
-                Container(
+                SizedBox(
                     width: MediaQuery.of(context).size.width * .45,
                     child: Center(
                       child: Column(

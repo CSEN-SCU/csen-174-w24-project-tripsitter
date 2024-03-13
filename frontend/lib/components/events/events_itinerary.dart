@@ -41,10 +41,10 @@ class _EventsItineraryState extends State<EventsItinerary> {
       widget.participantsPopupKeys[activity.event.id] = GlobalKey();
       widget.participantsPopupOpenState[activity.event.id] = false;
     }
-    widget.trip.activities.forEach((activity) {
+    for (var activity in widget.trip.activities) {
       widget.selectedParticipantsMap[activity.event.id] =
           List.from(activity.participants);
-    });
+    }
   }
 
 // If your events can change, update popupKeys accordingly
@@ -73,8 +73,6 @@ class _EventsItineraryState extends State<EventsItinerary> {
 
       ...widget.trip.activities
           .map((activity) => LayoutBuilder(builder: (context, constraints) {
-                bool remove = widget.profiles.every(
-                    (profile) => activity.participants.contains(profile.id));
                 return Card(
                   child: ListTile(
                     leading: CommentsPopup(

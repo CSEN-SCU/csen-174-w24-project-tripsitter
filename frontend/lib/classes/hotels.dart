@@ -140,6 +140,7 @@ class HotelOffer {
   final HotelPolicies? policies;
   final String self;
 
+  @override
   bool operator ==(other) {
     return identical(this, other) || (other is HotelOffer && other.id == id);
   }

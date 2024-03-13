@@ -164,7 +164,7 @@ class AddMemberDialog extends StatefulWidget {
 }
 
 class _AddMemberDialogState extends State<AddMemberDialog> {
-  TextEditingController _emailController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {

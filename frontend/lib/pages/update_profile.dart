@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'dart:typed_data';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -126,8 +128,8 @@ class _UpdateProfileState extends State<UpdateProfile> {
   // }
   Future<void> uploadImage() async {
     User? user = FirebaseAuth.instance.currentUser;
-    final ImagePicker _picker = ImagePicker();
-    final XFile? img = await _picker.pickImage(source: ImageSource.gallery);
+    final ImagePicker picker = ImagePicker();
+    final XFile? img = await picker.pickImage(source: ImageSource.gallery);
     if (img == null) {
       return;
     }
@@ -159,7 +161,7 @@ class _UpdateProfileState extends State<UpdateProfile> {
     }
   }
 
-  String? image = null;
+  String? image;
 
 //text field widgit
   @override
@@ -169,9 +171,9 @@ class _UpdateProfileState extends State<UpdateProfile> {
     if (profile == null) {
       return Center(
           child: ConstrainedBox(
+        constraints: const BoxConstraints(maxHeight: 200, maxWidth: 200),
         child:
             const AspectRatio(aspectRatio: 1.0, child: CircularProgressIndicator()),
-        constraints: const BoxConstraints(maxHeight: 200, maxWidth: 200),
       ));
     }
     if (image == null && profile!.hasPhoto) {
@@ -192,7 +194,6 @@ class _UpdateProfileState extends State<UpdateProfile> {
         appBar: AppBar(
           title: Text(user!.uid),
         ),
-        //TODO: pull ID, Prompt for name, Pull Email, Prompt for hometown, initialize number of trips to 0, populate join date, prompt for user photo, default stripe ID
         //store all of that info into the db
         body: Center(
           child: ConstrainedBox(
@@ -344,12 +345,12 @@ class _UpdateProfileState extends State<UpdateProfile> {
                       Navigator.pushReplacementNamed(context, "/");
                     }
                   },
-                  child: const Text("Save Profile"),
                               style: ElevatedButton.styleFrom(
                                 backgroundColor:
                                     const Color.fromARGB(255, 125, 175, 220),
                                 foregroundColor: Colors.black,
                               ),
+                  child: const Text("Save Profile"),
               )
                   
             ]),

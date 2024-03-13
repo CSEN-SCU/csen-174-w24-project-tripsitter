@@ -100,7 +100,6 @@ class _HotelOptionsState extends State<HotelOptions> {
   List<String> _selectedbedTypes = [];
 
   bool _sortDirection = true;
-  bool _isSortOpen = false;
   bool _isBedCountOpen = false;
   bool _isBedTypeOpen = false;
   final GlobalKey _sortKey = GlobalKey();
@@ -169,7 +168,6 @@ class _HotelOptionsState extends State<HotelOptions> {
 
   void _showSortPopup() {
     setState(() {
-      _isSortOpen = true;
     });
 
     final popup = SelectOnePopup<HotelSortOption>(
@@ -178,7 +176,6 @@ class _HotelOptionsState extends State<HotelOptions> {
       onSelected: (HotelSortOption value) {
         setState(() {
           _selectedSort = value;
-          _isSortOpen = false;
           sortHotels();
         });
       },
@@ -186,7 +183,6 @@ class _HotelOptionsState extends State<HotelOptions> {
 
     popup.showPopup(context, _sortKey).then((_) {
       setState(() {
-        _isSortOpen = false;
       });
     });
   }
@@ -376,7 +372,7 @@ class _HotelOptionsState extends State<HotelOptions> {
                   ExpansionTile(
                     title: ListTile(
                       // leading: Image.network("https://logos.skyscnr.com/images/carhire/sippmaps/${car.group.img}", width: 80, height: 80),
-                      title: Text("${hotelsFiltered[i].hotel.name}"),
+                      title: Text(hotelsFiltered[i].hotel.name),
                       trailing: Row(mainAxisSize: MainAxisSize.min, children: [
                         IconButton(
                           icon: const Icon(Icons.info),

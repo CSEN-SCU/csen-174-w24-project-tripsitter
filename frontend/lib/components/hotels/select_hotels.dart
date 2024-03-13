@@ -59,7 +59,7 @@ class _SelectHotelsState extends State<SelectHotels> {
                 )
               )
             ),
-            Container(
+            SizedBox(
               width: constraints.maxWidth * 0.65,
               child: HotelOptions(
                 currentGroup: currentGroup, 
