@@ -12,13 +12,14 @@ import 'package:tripsitter/components/flights/select_flight.dart';
 import "package:tripsitter/components/trip_center_console.dart";
 import 'package:google_fonts/google_fonts.dart';
 
-class PageType { 
+class PageType {
   static const String Hotel = "Hotels";
   static const String Flights = "Flights";
   static const String RentalCar = "Rental Cars";
   static const String Activities = "Activities";
   static const String Cities = "Cities";
 }
+
 class TripConsoleDot extends StatefulWidget {
   final String type;
   final Trip trip;
@@ -133,10 +134,8 @@ class _TripConsoleDotState extends State<TripConsoleDot> {
     return AnimatedPositioned(
       duration: const Duration(milliseconds: 200),
       curve: Curves.linear,
-      left: widget.positions[type]!.x -
-          (0.5 * widget.positions[type]!.size),
-      top: widget.positions[type]!.y -
-          (0.5 * widget.positions[type]!.size),
+      left: widget.positions[type]!.x - (0.5 * widget.positions[type]!.size),
+      top: widget.positions[type]!.y - (0.5 * widget.positions[type]!.size),
       child: Column(
         children: [
           AnimatedContainer(
@@ -173,7 +172,9 @@ class _TripConsoleDotState extends State<TripConsoleDot> {
           ),
           Padding(
             padding: const EdgeInsets.all(8.0),
-            child: Text(type, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+            child: Text(type,
+                style:
+                    const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
           )
         ],
       ),

@@ -72,7 +72,7 @@ class _EventsItineraryState extends State<EventsItinerary> {
       ),
 
       ...widget.trip.activities
-          .map((activity) => Builder(builder: (context) {
+          .map((activity) => LayoutBuilder(builder: (context, constraints) {
                 bool remove = widget.profiles.every(
                     (profile) => activity.participants.contains(profile.id));
                 return Card(
@@ -129,7 +129,7 @@ class _EventsItineraryState extends State<EventsItinerary> {
                             ),
                           ],
                         ),
-                        SizedBox(height: 3),
+                        SizedBox(height: 2),
                         FilterButton(
                           text: 'Participants',
                           icon: Icon(
@@ -180,8 +180,8 @@ class _EventsItineraryState extends State<EventsItinerary> {
                                     widget.participantsPopupKeys[activityId]!)
                                 .then((_) {
                               setState(() {
-                                widget.participantsPopupOpenState[activityId] =
-                                    false;
+                                widget.participantsPopupOpenState[
+                                    activityId] = false;
                               });
                             });
                           },

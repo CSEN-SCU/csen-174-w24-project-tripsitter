@@ -7,6 +7,8 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
+import 'package:intl_phone_field/intl_phone_field.dart';
 import 'package:provider/provider.dart';
 import 'package:tripsitter/classes/city.dart';
 import 'package:tripsitter/classes/profile.dart';
@@ -36,6 +38,8 @@ class _UpdateProfileState extends State<UpdateProfile> {
   }
 
   List<City> cities = [];
+
+  List<String> genders = <String>['Male', 'Female', 'Other'];
 
   void loadCities() async {
     cities = await getCities(context);
@@ -84,12 +88,19 @@ class _UpdateProfileState extends State<UpdateProfile> {
             id: user.uid,
             name: user.displayName!,
             email: user.email!,
+            countryCode: "1",
+            countryISO: "US",
+            phoneNumber: "",
             hometown: null,
             numberTrips: 0,
+            gender: "Other",
+            birthDate: DateTime(2000, 1, 1),
             joinDate: DateTime.now());
       }
     });
   }
+  String? initialCountry;
+  String? initialPhone;
 
   // Future getImageFromGallery() async {
   //   User? user = FirebaseAuth.instance.currentUser;
@@ -178,6 +189,11 @@ class _UpdateProfileState extends State<UpdateProfile> {
       });
     }
 
+    if(initialCountry == null) {
+      initialCountry = profile!.countryISO;
+      initialPhone = "+${profile!.countryCode}${profile!.phoneNumber}";
+    }
+
     return Scaffold(
         appBar: AppBar(
           title: Text(user!.uid),
@@ -206,18 +222,22 @@ class _UpdateProfileState extends State<UpdateProfile> {
               ),
               Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: TextField(
-                  controller: emailController,
-                  onChanged: (value) {
-                    profile!.updateEmail(value);
+                child: InkWell(
+                  onTap: () async {
+                    DateTime? date = await showDatePicker(
+                        context: context,
+                        initialDate: profile!.birthDate,
+                        firstDate: DateTime(1900),
+                        lastDate: DateTime.now());
+                    if (date != null) {
+                      profile!.updateBirthDate(date);
+                      if(mounted) setState(() {});
+                    }
                   },
-                  decoration: InputDecoration(
-                    filled: true,
-                    fillColor: Colors.grey[300],
-                    border: InputBorder.none,
-                    labelText: 'Email',
-                  ),
-                ),
+                  child: Text(
+                    DateFormat('yyyy-MM-dd').format(profile!.birthDate),
+                  )
+                )
               ),
               Padding(
                 padding: const EdgeInsets.all(8.0),
@@ -254,6 +274,56 @@ class _UpdateProfileState extends State<UpdateProfile> {
                   onSelected: (selected) {
                     profile!.updateHometown(selected);
                   },
+                ),
+              ),
+              Text("Gender:"),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: DropdownButton<String>(
+                  value: profile!.gender,
+                  icon: const Icon(Icons.arrow_downward),
+                  elevation: 16,
+                  style: const TextStyle(color: Colors.deepPurple),
+                  underline: Container(
+                    height: 2,
+                    color: Colors.deepPurpleAccent,
+                  ),
+                  onChanged: (String? value) {
+                    // This is called when the user selects an item.
+                    if(value == null) return;
+                    setState(() {
+                      profile!.updateGender(value);
+                    });
+                  },
+                  items: genders.map<DropdownMenuItem<String>>((String value) {
+                    return DropdownMenuItem<String>(
+                      value: value,
+                      child: Text(value),
+                    );
+                  }).toList(),
+                )
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: IntlPhoneField(
+                    decoration: InputDecoration(
+                      filled: true,
+                      fillColor: Colors.grey[300],
+                      border: InputBorder.none,
+                      labelText: 'Phone Number',
+                    ),
+                    initialCountryCode: initialCountry,
+                    initialValue: initialPhone,
+                    onChanged: (phone) {
+                      try {if(phone.isValidNumber()) {
+                        profile!.updateCountryCode(phone.countryCode.substring(1));
+                        profile!.updatePhoneNumber(phone.number);
+                        profile!.updateCountryISO(phone.countryISOCode);
+                      }
+                      } catch(e) {
+                        print(e);
+                      }
+                    },
                 ),
               ),
               ListTile(

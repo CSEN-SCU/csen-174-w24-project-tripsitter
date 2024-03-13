@@ -30,7 +30,6 @@ class ConfirmationPage extends StatelessWidget {
             Text("Your trip is confirmed!"),
             TripSummary(
               trip: trip,
-              split: split,
               uid: uid,
               profiles: profiles,
             ),

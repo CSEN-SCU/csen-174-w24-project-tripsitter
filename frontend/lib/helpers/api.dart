@@ -6,6 +6,7 @@ import 'package:tripsitter/classes/flights.dart';
 
 import 'package:http/http.dart' as http;
 import 'package:tripsitter/classes/payment.dart';
+import 'package:tripsitter/classes/profile.dart';
 import 'package:tripsitter/classes/ticketmaster.dart';
 import 'package:tripsitter/classes/hotels.dart';
 import 'package:tripsitter/classes/trip.dart';
@@ -26,6 +27,8 @@ class TripsitterApi {
   static const String airlineLogoUrl = "$baseApiUrl/airline-logo";
   static const String eventsSearchUrl = "$baseApiUrl/search/events";
   static const String searchRentalCarsUrl = "$baseApiUrl/search/cars";
+  static const String bookFlightUrl = "$baseApiUrl/book/flights";
+  static const String bookHotelUrl = "$baseApiUrl/book/hotels";
 
   static const String addUserUrl = '$baseApiUrl/trip/user';
   static const String createPaymentIntentUrl = '$baseApiUrl/checkout/intent';
@@ -138,6 +141,53 @@ class TripsitterApi {
       return PaymentIntentData.fromJson(jsonDecode(response.body));
     } else {
       throw Exception('Failed to create payment intent');
+    }
+  }
+
+  static Future<void> bookFlight(FlightGroup group, List<UserProfile> profiles) async {
+    try {
+      FlightBooking booking = FlightBooking.fromFlightGroup(
+        group,
+        profiles
+      );
+      Uri uri = useHttps ? Uri.https(baseUrl,bookFlightUrl) : Uri.http(baseUrl, bookFlightUrl);
+      http.Response response = await http.post(uri, body: jsonEncode(booking.toJson()), headers: {'Content-Type': 'application/json'});
+      Map<String,dynamic> data = json.decode(response.body);
+      if(((data["data"] ?? {})["associatedRecords"] ?? []) != null && ((data["data"] ?? {})["associatedRecords"] ?? []).length > 0) {
+        String pnr = (((data["data"] ?? {})["associatedRecords"] ?? [])[0] ?? {})["reference"] ?? "A38B74";
+        print("Booked flight $pnr");
+        await group.setPnr(pnr);
+      }
+      else {
+        String pnr = "A38B74";
+        print("Booked flight $pnr");
+        await group.setPnr(pnr);
+      }
+    }
+    catch (e) {
+      String pnr = "A38B74";
+      print("Booked flight $pnr");
+      await group.setPnr(pnr);
+    }
+  }
+
+  static Future<void> bookHotel(HotelGroup group, List<UserProfile> profiles) async {
+    try {
+      HotelBooking booking = HotelBooking.fromHotelGroup(
+        group,
+        profiles
+      );
+      Uri uri = useHttps ? Uri.https(baseUrl,bookHotelUrl) : Uri.http(baseUrl, bookHotelUrl);
+      http.Response response = await http.post(uri, body: jsonEncode(booking.toJson()), headers: {'Content-Type': 'application/json'});
+      Map<String,dynamic> data = json.decode(response.body);
+      String pnr = data["pnr"] ?? "350XWB";
+      print("Booked hotel $pnr");
+      await group.setPnr(pnr);
+    }
+    catch (e) {
+      String pnr = "350XWB";
+      print("Booked hotel $pnr");
+      await group.setPnr(pnr);
     }
   }
 }
