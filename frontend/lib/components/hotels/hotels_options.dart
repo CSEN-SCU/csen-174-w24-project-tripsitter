@@ -8,16 +8,13 @@ import 'package:tripsitter/classes/counter.dart';
 import 'package:tripsitter/classes/filterbutton.dart';
 import 'package:tripsitter/classes/hotels.dart';
 import 'package:tripsitter/classes/trip.dart';
-import 'package:tripsitter/components/flights/flight_options.dart';
 import 'package:tripsitter/components/hotels/hotel_info_dialog.dart';
 import 'package:tripsitter/helpers/api.dart';
 import 'package:tripsitter/helpers/data.dart';
-import 'package:tripsitter/helpers/formatters.dart';
 import 'package:tripsitter/helpers/locators.dart';
 import 'package:tripsitter/popups/checkbox_popup.dart';
 import 'package:tripsitter/popups/counter_popup.dart';
 import 'package:tripsitter/popups/select_popup.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 class HotelOptions extends StatefulWidget {
   final Trip trip;

@@ -1,13 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:tripsitter/classes/car.dart';
 import 'package:tripsitter/classes/profile.dart';
 import 'package:tripsitter/classes/trip.dart';
 import 'package:tripsitter/components/cars/cars_groups.dart';
 import 'package:tripsitter/components/cars/cars_options.dart';
-import 'package:tripsitter/helpers/api.dart';
-import 'package:tripsitter/helpers/formatters.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 class SelectCars extends StatefulWidget {
   final Trip trip;

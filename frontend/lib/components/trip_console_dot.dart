@@ -1,4 +1,3 @@
-import "dart:math";
 
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
@@ -10,7 +9,6 @@ import 'package:tripsitter/components/events/select_events.dart';
 import "package:tripsitter/components/hotels/select_hotels.dart";
 import 'package:tripsitter/components/flights/select_flight.dart';
 import "package:tripsitter/components/trip_center_console.dart";
-import 'package:google_fonts/google_fonts.dart';
 
 class PageType {
   static const String Hotel = "Hotels";

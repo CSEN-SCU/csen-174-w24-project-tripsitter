@@ -1,16 +1,9 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:tripsitter/classes/profile.dart';
 import 'package:tripsitter/classes/trip.dart';
-import 'package:tripsitter/components/new_trip_popup.dart';
-import 'package:tripsitter/components/payment.dart';
-import 'package:tripsitter/helpers/locators.dart';
-import 'package:tripsitter/pages/login.dart';
 import 'package:tripsitter/pages/update_profile.dart';
 
 //TODO: pull and populate user info. have fallbacks for photo

@@ -1,14 +1,10 @@
-import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:tripsitter/classes/profile.dart';
-import 'package:tripsitter/classes/ticketmaster.dart';
 import 'package:tripsitter/classes/trip.dart';
 import 'package:tripsitter/components/events/events_itinerary.dart';
 import 'package:tripsitter/components/events/events_options.dart';
-import 'package:tripsitter/helpers/api.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 class SelectEvents extends StatefulWidget {
   final Trip trip;

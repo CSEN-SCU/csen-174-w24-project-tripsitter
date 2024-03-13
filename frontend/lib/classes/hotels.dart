@@ -1,4 +1,3 @@
-import 'package:tripsitter/classes/flights.dart';
 import 'package:tripsitter/classes/profile.dart';
 import 'package:tripsitter/classes/trip.dart';
 

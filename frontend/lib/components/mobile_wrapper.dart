@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:tripsitter/classes/profile.dart';
 import 'package:tripsitter/classes/trip.dart';
-import 'package:tripsitter/components/navbar.dart';
 
 class MobileWrapper extends StatelessWidget {
   final Widget child;

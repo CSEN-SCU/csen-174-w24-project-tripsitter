@@ -3,7 +3,6 @@ import 'dart:math';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:intl/intl.dart';
 import 'package:tripsitter/classes/airport.dart';
 import 'package:tripsitter/classes/filterbutton.dart';
 import 'package:tripsitter/classes/profile.dart';
@@ -11,13 +10,11 @@ import 'package:tripsitter/classes/ticketmaster.dart';
 import 'package:tripsitter/classes/trip.dart';
 import 'package:tripsitter/components/events/event_info_dialog.dart';
 import 'package:tripsitter/components/events/events_map.dart';
-import 'package:tripsitter/components/events/select_events.dart';
 import 'package:tripsitter/helpers/api.dart';
 import 'package:tripsitter/helpers/data.dart';
 import 'package:tripsitter/helpers/locators.dart';
 import 'package:tripsitter/popups/checkbox_popup.dart';
 import 'package:tripsitter/popups/select_popup.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 class EventsOptions extends StatefulWidget {
   final Trip trip;

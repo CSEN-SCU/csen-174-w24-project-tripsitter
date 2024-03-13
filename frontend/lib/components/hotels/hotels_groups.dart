@@ -8,7 +8,6 @@ import 'package:tripsitter/components/comments_popup.dart';
 import 'package:tripsitter/components/hotels/hotel_info_dialog.dart';
 import 'package:tripsitter/components/hotels/hotels_options.dart';
 import 'package:tripsitter/components/mobile_wrapper.dart';
-import 'package:tripsitter/helpers/formatters.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class HotelGroups extends StatefulWidget {

@@ -1,4 +1,3 @@
-import 'dart:convert';
 
 import 'package:intl/intl.dart';
 import 'package:tripsitter/classes/trip.dart';

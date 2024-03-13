@@ -6,7 +6,6 @@ import 'package:tripsitter/classes/profile.dart';
 import 'package:tripsitter/classes/trip.dart';
 import 'package:tripsitter/components/checkout/confirmation.dart';
 import 'package:tripsitter/components/navbar.dart';
-import 'package:tripsitter/components/payment.dart';
 import 'package:tripsitter/components/checkout/trip_summary.dart';
 import 'package:tripsitter/helpers/api.dart';
 

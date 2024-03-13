@@ -2,7 +2,6 @@
 
 import 'package:flutter/material.dart';
 import 'package:tripsitter/classes/flights.dart';
-import 'package:tripsitter/helpers/api.dart';
 
 FlightsQuery query = FlightsQuery(
     origin: 'LAX',

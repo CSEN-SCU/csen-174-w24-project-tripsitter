@@ -5,19 +5,13 @@ import 'package:csv/csv.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:intl_phone_field/intl_phone_field.dart';
 import 'package:provider/provider.dart';
 import 'package:tripsitter/classes/city.dart';
 import 'package:tripsitter/classes/profile.dart';
-import 'package:tripsitter/components/new_trip_popup.dart';
-import 'package:tripsitter/components/payment.dart';
 import 'package:tripsitter/helpers/data.dart';
-import 'package:tripsitter/pages/login.dart';
-import 'package:tripsitter/pages/profile_page.dart';
-import 'dart:io';
 
 class UpdateProfile extends StatefulWidget {
   const UpdateProfile({super.key});

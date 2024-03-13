@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:tripsitter/classes/hotels.dart';
-import 'package:tripsitter/helpers/formatters.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 class HotelInfoDialog extends StatelessWidget {
   final HotelInfo hotel;

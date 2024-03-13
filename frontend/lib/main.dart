@@ -4,7 +4,6 @@ import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:tripsitter/classes/flights.dart';
 import 'package:tripsitter/classes/profile.dart';
-import 'package:tripsitter/helpers/api.dart';
 import 'package:tripsitter/pages/create_trip.dart';
 import 'package:tripsitter/pages/profile_page.dart';
 import 'package:tripsitter/pages/update_Profile.dart';
@@ -15,7 +14,6 @@ import 'firebase_options.dart';
 import 'package:fluro/fluro.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:tripsitter/no_animation_page_route.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
