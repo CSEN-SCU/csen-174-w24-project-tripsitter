@@ -17,12 +17,17 @@ import 'package:tripsitter/helpers/locators.dart';
 import 'package:tripsitter/popups/checkbox_popup.dart';
 import 'package:tripsitter/popups/counter_popup.dart';
 import 'package:tripsitter/popups/select_popup.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class HotelOptions extends StatefulWidget {
   final Trip trip;
   final HotelGroup? currentGroup;
   final Function setState;
-  const HotelOptions({required this.currentGroup, required this.setState, required this.trip, super.key});
+  const HotelOptions(
+      {required this.currentGroup,
+      required this.setState,
+      required this.trip,
+      super.key});
 
   @override
   State<HotelOptions> createState() => _HotelOptionsState();
@@ -44,7 +49,6 @@ enum HotelSortOption {
 }
 
 class _HotelOptionsState extends State<HotelOptions> {
-
   @override
   void initState() {
     super.initState();
@@ -81,15 +85,18 @@ class _HotelOptionsState extends State<HotelOptions> {
     _selectedbedTypes = [...bedList];
     sortHotels();
     // for(HotelOption hotel in hotels) {
-      // print(hotel.offers.first.toJson());
+    // print(hotel.offers.first.toJson());
     // }
-    if(!mounted) return;
+    if (!mounted) return;
     setState(() {});
   }
 
   String? minPrice(List<HotelOffer> offers) {
-    List<String> prices = offers.map((o) => o.price.total).whereNotNull().toList();
-    return prices.isEmpty ? null : prices.map((p) => double.parse(p)).reduce(min).toString();
+    List<String> prices =
+        offers.map((o) => o.price.total).whereNotNull().toList();
+    return prices.isEmpty
+        ? null
+        : prices.map((p) => double.parse(p)).reduce(min).toString();
   }
 
   int minBeds = 1;
@@ -218,104 +225,210 @@ class _HotelOptionsState extends State<HotelOptions> {
     }).toList();
   }
   
+  // @override
+  // Widget build(BuildContext context) {
+  //   return widget.currentGroup == null ? Center(
+  //     child: Text("Select or create a group to choose a hotel")
+  //   ) : Padding(
+  //     padding: const EdgeInsets.all(8.0),
+  //     child: ListView(
+  //       children: [
+  //         Text("Hotels for ${widget.currentGroup!.name}", style: Theme.of(context).textTheme.displayMedium?.copyWith(decoration: TextDecoration.underline, fontWeight: FontWeight.bold)),
+  //         Row(
+  //           children: [
+  //             Expanded(
+  //               child: Wrap(
+  //                 spacing: 10,
+  //                 children: <Widget>[
+  //                   FilterButton(
+  //                       text: '# Beds',
+  //                       globalKey: _bedCountKey,
+  //                       onPressed: _showCountPopup,
+  //                       icon: Icon(
+  //                         _isBedCountOpen
+  //                             ? Icons.arrow_drop_up
+  //                             : Icons.arrow_drop_down,
+  //                       )),
+  //                   FilterButton(
+  //                       text: 'Bed Type',
+  //                       globalKey: _bedTypeKey,
+  //                       onPressed: _showTypePopup,
+  //                       icon: Icon(
+  //                         _isBedTypeOpen
+  //                             ? Icons.arrow_drop_up
+  //                             : Icons.arrow_drop_down,
+  //                       )),
+  //                 ],
+  //               ),
+  //             ),
+  //             FilterButton(
+  //               color: Colors.grey[100]!,
+  //               text: _selectedSort.toString(),
+  //               globalKey: _sortKey,
+  //               onPressed: _showSortPopup,
+  //               icon: IconButton(
+  //                 onPressed: () {
+  //                   setState(() {
+  //                     _sortDirection = !_sortDirection;
+  //                     sortHotels();
+  //                   });
+  //                 },
+  //                 icon: Icon(_sortDirection
+  //                     ? Icons.arrow_upward
+  //                     : Icons.arrow_downward),
+  //               )),
+  //           ],
+  //         ),
+  //         for (int i = 0; i < hotelsFiltered.length; i++)
+  //           ExpansionTile(
+  //             title: ListTile(
+  //               // leading: Image.network("https://logos.skyscnr.com/images/carhire/sippmaps/${car.group.img}", width: 80, height: 80),
+  //               title: Text("${hotelsFiltered[i].hotel.name}"),
+  //               trailing: Row(
+  //                 mainAxisSize: MainAxisSize.min,
+  //                 children: [
+  //                   IconButton(
+  //                     icon: Icon(Icons.info),
+  //                     onPressed: () {
+  //                       showDialog(
+  //                         context: context,
+  //                         builder: (BuildContext context) {
+  //                           return HotelInfoDialog(hotelsFiltered[i].hotel);
+  //                         }
+  //                       );
+  //                     },
+  //                   ),
+  //                 ]
+  //               ),
+  //               subtitle: Text(minPrice(hotelsFiltered[i].offers) != null ? "From \$${minPrice(hotelsFiltered[i].offers)}" : "No price available"),
+  //             ),
+  //             children: hotelsFiltered[i].offers.map((HotelOffer o) {
+  //               return ListTile(
+  //                 subtitle: Text(o.room?.description?.text ?? "No description available"),
+  //                 title: o.price.total == null ? null : Text("\$${o.price.total}"),
+  //                 trailing: ElevatedButton(
+  //                   onPressed: () async {
+  //                     if(widget.currentGroup!.infos.isNotEmpty && widget.currentGroup!.infos.map((c) => c.hotelId).contains(hotelsFiltered[i].hotel.hotelId)) {
+  //                       await widget.currentGroup!.removeOption(widget.currentGroup!.infos.indexWhere((element) => element.hotelId == hotelsFiltered[i].hotel.hotelId));
+  //                     } else {
+  //                       await widget.currentGroup!.addOption(hotelsFiltered[i].hotel, o);
+  //                     }
+  //                     setState(() {});
+  //                     widget.setState();
+  //                   },
+  //                   child: Text("Select${(widget.currentGroup!.infos.isNotEmpty && widget.currentGroup!.infos.map((c) => c.hotelId).contains(hotelsFiltered[i].hotel.hotelId)) ? "ed" : ""}"),
   @override
   Widget build(BuildContext context) {
-    return widget.currentGroup == null ? Center(
-      child: Text("Select or create a group to choose a hotel")
-    ) : Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: ListView(
-        children: [
-          Text("Hotels for ${widget.currentGroup!.name}", style: Theme.of(context).textTheme.displayMedium?.copyWith(decoration: TextDecoration.underline, fontWeight: FontWeight.bold)),
-          Row(
-            children: [
-              Expanded(
-                child: Wrap(
-                  spacing: 10,
-                  children: <Widget>[
+    return widget.currentGroup == null
+        ? Center(child: Text("Select or create a group to choose a hotel"))
+        : Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: ListView(
+              children: [
+                // Text("Hotels for ${widget.currentGroup!.name}",
+                //     style: Theme.of(context).textTheme.displayMedium?.copyWith(
+                //         decoration: TextDecoration.underline,
+                //         fontWeight: FontWeight.bold)),
+                Text("Hotels for ${widget.currentGroup!.name}", style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Wrap(
+                        spacing: 10,
+                        children: <Widget>[
+                          FilterButton(
+                              text: '# Beds',
+                              globalKey: _bedCountKey,
+                              onPressed: _showCountPopup,
+                              icon: Icon(
+                                _isBedCountOpen
+                                    ? Icons.arrow_drop_up
+                                    : Icons.arrow_drop_down,
+                              )),
+                          FilterButton(
+                              text: 'Bed Type',
+                              globalKey: _bedTypeKey,
+                              onPressed: _showTypePopup,
+                              icon: Icon(
+                                _isBedTypeOpen
+                                    ? Icons.arrow_drop_up
+                                    : Icons.arrow_drop_down,
+                              )),
+                        ],
+                      ),
+                    ),
                     FilterButton(
-                        text: '# Beds',
-                        globalKey: _bedCountKey,
-                        onPressed: _showCountPopup,
-                        icon: Icon(
-                          _isBedCountOpen
-                              ? Icons.arrow_drop_up
-                              : Icons.arrow_drop_down,
-                        )),
-                    FilterButton(
-                        text: 'Bed Type',
-                        globalKey: _bedTypeKey,
-                        onPressed: _showTypePopup,
-                        icon: Icon(
-                          _isBedTypeOpen
-                              ? Icons.arrow_drop_up
-                              : Icons.arrow_drop_down,
-                        )),
+                      color: Colors.grey[100]!,
+                      text: _selectedSort.toString(),
+                      globalKey: _sortKey,
+                      onPressed: _showSortPopup,
+                      icon: IconButton(
+                        onPressed: () {
+                          setState(() {
+                            _sortDirection = !_sortDirection;
+                            sortHotels();
+                          });
+                        },
+                        icon: Icon(_sortDirection
+                            ? Icons.arrow_upward
+                            : Icons.arrow_downward),
+                      )),
                   ],
                 ),
-              ),
-              FilterButton(
-                color: Colors.grey[100]!,
-                text: _selectedSort.toString(),
-                globalKey: _sortKey,
-                onPressed: _showSortPopup,
-                icon: IconButton(
-                  onPressed: () {
-                    setState(() {
-                      _sortDirection = !_sortDirection;
-                      sortHotels();
-                    });
-                  },
-                  icon: Icon(_sortDirection
-                      ? Icons.arrow_upward
-                      : Icons.arrow_downward),
-                )),
-            ],
-          ),
-          for (int i = 0; i < hotelsFiltered.length; i++)
-            ExpansionTile(
-              title: ListTile(
-                // leading: Image.network("https://logos.skyscnr.com/images/carhire/sippmaps/${car.group.img}", width: 80, height: 80),
-                title: Text("${hotelsFiltered[i].hotel.name}"),
-                trailing: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    IconButton(
-                      icon: Icon(Icons.info),
-                      onPressed: () {
-                        showDialog(
-                          context: context,
-                          builder: (BuildContext context) {
-                            return HotelInfoDialog(hotelsFiltered[i].hotel);
-                          }
-                        );
-                      },
+                for (int i = 0; i < hotelsFiltered.length; i++)
+                  ExpansionTile(
+                    title: ListTile(
+                      // leading: Image.network("https://logos.skyscnr.com/images/carhire/sippmaps/${car.group.img}", width: 80, height: 80),
+                      title: Text("${hotelsFiltered[i].hotel.name}"),
+                      trailing: Row(mainAxisSize: MainAxisSize.min, children: [
+                        IconButton(
+                          icon: Icon(Icons.info),
+                          onPressed: () {
+                            showDialog(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return HotelInfoDialog(hotelsFiltered[i].hotel);
+                                });
+                          },
+                        ),
+                      ]),
+                      subtitle: Text(minPrice(hotelsFiltered[i].offers) != null
+                          ? "From \$${minPrice(hotelsFiltered[i].offers)}"
+                          : "No price available"),
                     ),
-                  ]
-                ),
-                subtitle: Text(minPrice(hotelsFiltered[i].offers) != null ? "From \$${minPrice(hotelsFiltered[i].offers)}" : "No price available"),
-              ),
-              children: hotelsFiltered[i].offers.map((HotelOffer o) {
-                return ListTile(
-                  subtitle: Text(o.room?.description?.text ?? "No description available"),
-                  title: o.price.total == null ? null : Text("\$${o.price.total}"),
-                  trailing: ElevatedButton(
-                    onPressed: () async {
-                      if(widget.currentGroup!.infos.isNotEmpty && widget.currentGroup!.infos.map((c) => c.hotelId).contains(hotelsFiltered[i].hotel.hotelId)) {
-                        await widget.currentGroup!.removeOption(widget.currentGroup!.infos.indexWhere((element) => element.hotelId == hotelsFiltered[i].hotel.hotelId));
-                      } else {
-                        await widget.currentGroup!.addOption(hotelsFiltered[i].hotel, o);
-                      }
-                      setState(() {});
-                      widget.setState();
-                    },
-                    child: Text("Select${(widget.currentGroup!.infos.isNotEmpty && widget.currentGroup!.infos.map((c) => c.hotelId).contains(hotelsFiltered[i].hotel.hotelId)) ? "ed" : ""}"),
+                    children: hotelsFiltered[i].offers.map((HotelOffer o) {
+                      return ListTile(
+                        subtitle: Text(o.room?.description?.text ??
+                            "No description available"),
+                        title: o.price.total == null
+                            ? null
+                            : Text("\$${o.price.total}"),
+                        trailing: ElevatedButton(
+                          onPressed: () async {
+                            if (widget.currentGroup!.infos.isNotEmpty &&
+                                widget.currentGroup!.infos
+                                    .map((c) => c.hotelId)
+                                    .contains(hotelsFiltered[i].hotel.hotelId)) {
+                              await widget.currentGroup!.removeOption(widget
+                                  .currentGroup!.infos
+                                  .indexWhere((element) =>
+                                      element.hotelId ==
+                                      hotelsFiltered[i].hotel.hotelId));
+                            } else {
+                              await widget.currentGroup!
+                                  .addOption(hotelsFiltered[i].hotel, o);
+                            }
+                            setState(() {});
+                            widget.setState();
+                          },
+                          child: Text(
+                              "Select${(widget.currentGroup!.infos.isNotEmpty && widget.currentGroup!.infos.map((c) => c.hotelId).contains(hotels[i].hotel.hotelId)) ? "ed" : ""}"),
+                        ),
+                      );
+                    }).toList(),
                   ),
-                );
-              }).toList(),
+              ],
             ),
-        ],
-      ),
-    );
+          );
   }
 }

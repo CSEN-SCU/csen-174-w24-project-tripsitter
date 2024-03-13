@@ -30,28 +30,34 @@ class _TripSideColumnState extends State<TripSideColumn> {
   @override
   Widget build(BuildContext context) {
     bool isMobile = Provider.of<bool>(context);
-    User? user = Provider.of<User?>(context); 
-    if(trip == null || user == null) {
+    User? user = Provider.of<User?>(context);
+    if (trip == null || user == null) {
       return Container();
     }
     List<UserProfile> profiles = Provider.of<List<UserProfile>>(context);
-    return Column(
-      children: [
-        Text("Members: ${trip!.uids.length}", style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-        ...profiles.map((UserProfile profile) => ListTile(
-          leading: ProfilePicture(profile),
-          title: Text(profile.name),
-          subtitle: Text(profile.email),
-          trailing: trip!.frozen ? (trip!.usingSplitPayments ? Icon(
-            (trip!.paymentsComplete[profile.id] ?? false) ? Icons.credit_card : Icons.credit_card_off
-          ) : null) : IconButton(
-            icon: const Icon(Icons.remove),
-            onPressed: () async {
-              await TripsitterApi.removeUser(profile.id, trip!.id);
-            },
-          )
-        )).toList(),
-        TextButton.icon(
+    return Column(children: [
+      SizedBox(height: 10.0),
+      Text("Members: ${trip!.uids.length}",
+          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+      ...profiles
+          .map((UserProfile profile) => ListTile(
+              leading: ProfilePicture(profile),
+              title: Text(profile.name),
+              subtitle: Text(profile.email),
+              trailing: trip!.frozen
+                  ? (trip!.usingSplitPayments
+                      ? Icon((trip!.paymentsComplete[profile.id] ?? false)
+                          ? Icons.credit_card
+                          : Icons.credit_card_off)
+                      : null)
+                  : IconButton(
+                      icon: const Icon(Icons.remove),
+                      onPressed: () async {
+                        await TripsitterApi.removeUser(profile.id, trip!.id);
+                      },
+                    )))
+          .toList(),
+      TextButton.icon(
           onPressed: () async {
             String? email = await showDialog<String>(
                 context: context,
@@ -63,25 +69,32 @@ class _TripSideColumnState extends State<TripSideColumn> {
             }
           },
           icon: Icon(Icons.add),
-          label: Text("Add Member")
-        ),
-        Text("Discussion", style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-        ...trip!.comments.map((TripComment comment) => ListTile(
-          subtitle: Text(DateFormat('yyyy-MM-dd – kk:mm').format(comment.date)),
-          isThreeLine: true,
-          title: Text("${profiles.firstWhere((element) => element.id == comment.uid).name}\n${comment.comment}"),
-          // leading: ProfilePicture(profiles.firstWhere((element) => element.id == comment.uid)),
-          trailing: comment.uid == user!.uid ? IconButton(
-            icon: Icon(Icons.delete),
-            onPressed: () async {
-              await trip!.removeComment(comment);
-              if(!mounted) return;
-              setState(() {});
-            },
-          ) : null,
-        )).toList(),
-        ListTile(
-          title: TextField(
+          label: Text("Add Member")),
+      SizedBox(height: 20.0),
+      Text("Discussion",
+          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+      ...trip!.comments
+          .map((TripComment comment) => ListTile(
+                subtitle:
+                    Text(DateFormat('yyyy-MM-dd – kk:mm').format(comment.date)),
+                isThreeLine: true,
+                title: Text(
+                    "${profiles.firstWhere((element) => element.id == comment.uid).name}\n${comment.comment}"),
+                // leading: ProfilePicture(profiles.firstWhere((element) => element.id == comment.uid)),
+                trailing: comment.uid == user!.uid
+                    ? IconButton(
+                        icon: Icon(Icons.delete),
+                        onPressed: () async {
+                          await trip!.removeComment(comment);
+                          if (!mounted) return;
+                          setState(() {});
+                        },
+                      )
+                    : null,
+              ))
+          .toList(),
+      ListTile(
+        title: TextField(
             controller: commentController,
             decoration: InputDecoration(
               border: OutlineInputBorder(),
@@ -89,56 +102,62 @@ class _TripSideColumnState extends State<TripSideColumn> {
             ),
             onSubmitted: (String value) async {
               await trip!.addComment(TripComment(
-                comment: value,
-                uid: user.uid,
-                date: DateTime.now()
-              ));
+                  comment: value, uid: user.uid, date: DateTime.now()));
               commentController.clear();
-              if(!mounted) return;
-              setState(() {
-              });
-            }
-          ),
-          trailing: IconButton(
-            icon: const Icon(Icons.send),
-            onPressed: () async {
-              await trip!.addComment(TripComment(
+              if (!mounted) return;
+              setState(() {});
+            }),
+        trailing: IconButton(
+          icon: const Icon(Icons.send),
+          onPressed: () async {
+            await trip!.addComment(TripComment(
                 comment: commentController.text,
                 uid: user.uid,
-                date: DateTime.now()
-              ));
-              commentController.clear();
-              if(!mounted) return;
-              setState(() {
-              });
-            },
-          ),
+                date: DateTime.now()));
+            commentController.clear();
+            if (!mounted) return;
+            setState(() {});
+          },
         ),
-        if(!isMobile)
-          ...[
-            Container(height: 10),
-            CheckboxListTile(
-              value: trip!.usingSplitPayments,
-              title: Text("Split payments"), 
-              onChanged: (bool? value) {
-                trip!.toggleSplitPayments();
-              },
+      ),
+      if (!isMobile) ...[
+        Container(height: 10),
+        CheckboxListTile(
+          value: trip!.usingSplitPayments,
+          title: Text("Split Payments"),
+          onChanged: (bool? value) {
+            trip!.toggleSplitPayments();
+          },
+        ),
+        if ((trip!.usingSplitPayments
+            ? trip!.paymentsComplete[user.uid] != true
+            : !trip!.isConfirmed))
+          ElevatedButton.icon(
+            icon: Icon(Icons.credit_card),
+            onPressed: () {
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) =>
+                          CheckoutPage(trip: trip!, profiles: profiles)));
+            },
+            label: Text("Checkout"),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Color.fromARGB(255, 125, 175, 220),
+              foregroundColor: Colors.black,
             ),
-            if((trip!.usingSplitPayments ? trip!.paymentsComplete[user.uid] != true : !trip!.isConfirmed))
-              ElevatedButton.icon(
-                icon: Icon(Icons.credit_card),
-                onPressed: () {
-                  Navigator.push(context, MaterialPageRoute(builder: (context) => CheckoutPage(trip: trip!, profiles: profiles)));
-                },
-                label: Text("Checkout"),
-              ),
-            if((!trip!.isConfirmed && trip!.usingSplitPayments && trip!.paymentsComplete[user.uid] == true))
-               Text("Awaiting payment from all members", style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-            if(trip!.isConfirmed)
-              Text("Trip is confirmed", style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold))
-          ]
+          ),
+        if ((!trip!.isConfirmed &&
+            trip!.usingSplitPayments &&
+            trip!.paymentsComplete[user.uid] == true))
+          Text("Awaiting payment from all members",
+              style:
+                  const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+        if (trip!.isConfirmed)
+          Text("Trip is confirmed",
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold))
       ]
-    );
+    ]);
   }
 }
 
@@ -161,11 +180,13 @@ class _AddMemberDialogState extends State<AddMemberDialog> {
           controller: _emailController,
           decoration: InputDecoration(labelText: "Email"),
         ),
+        SizedBox(height: 10.0),
         ElevatedButton(
             onPressed: () {
               Navigator.pop(context, _emailController.text);
             },
             child: Text("Add")),
+        SizedBox(height: 10.0),
         ElevatedButton(
             onPressed: () {
               Navigator.pop(context);

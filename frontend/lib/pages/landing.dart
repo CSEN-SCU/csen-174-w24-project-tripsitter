@@ -18,12 +18,13 @@ class LandingPage extends StatelessWidget {
         backgroundColor: Color.fromRGBO(196, 53, 53, 1),
       ),
       body: Center(
-          child: ElevatedButton(
+            child: ElevatedButton(
               onPressed: () {
                 // Don't allow the user to go back to the login page
                 Navigator.pushReplacementNamed(context, "/");
               },
-              child: const Text("Sign in"))),
+              child: const Text("Sign in")),
+              ),
     );
   }
 }

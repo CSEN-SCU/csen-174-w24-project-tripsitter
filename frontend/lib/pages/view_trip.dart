@@ -70,7 +70,7 @@ class ViewTrip extends StatelessWidget {
                                 color: Colors.black,
                                 fontWeight: FontWeight.w800,
                                 fontSize: 40,
-                                decoration: TextDecoration.underline,
+                                // decoration: TextDecoration.underline,
                                 decorationColor: Colors.black,
                                 decorationThickness: 1.2,
                               )
@@ -130,7 +130,7 @@ class ViewTrip extends StatelessWidget {
                             width: constraints.maxWidth * 0.7,
                           ),
                           Container(
-                            color: Color.fromARGB(255, 127, 166, 198),
+                            color: Color.fromARGB(255, 239, 239, 239),
                             width: constraints.maxWidth * 0.3,
                             child: TripSideColumn(trip)
                           ),

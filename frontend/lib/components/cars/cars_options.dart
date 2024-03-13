@@ -270,7 +270,7 @@ class _CarOptionsState extends State<CarOptions> {
       padding: const EdgeInsets.all(8.0),
       child: Column(
         children: [
-          Text("Rental Cars for ${widget.currentGroup!.name}", style: Theme.of(context).textTheme.displayMedium?.copyWith(decoration: TextDecoration.underline, fontWeight: FontWeight.bold)),
+          Text("Rental Cars for ${widget.currentGroup!.name}", style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
           Row(
             children: [
               Expanded(
