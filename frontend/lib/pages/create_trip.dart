@@ -143,7 +143,7 @@ class _CreateTripState extends State<CreateTrip> {
                       context: context,
                       initialDate: startDate ?? DateTime.now(),
                       firstDate: DateTime(2024, 1, 1),
-                      lastDate: DateTime(2100),
+                      lastDate: endDate ?? DateTime(2100),
                     );
                     if (d != null) {
                       setState(() => startDate = d);
@@ -171,8 +171,8 @@ class _CreateTripState extends State<CreateTrip> {
                   onTap: () async {
                     DateTime? d = await showDatePicker(
                       context: context,
-                      initialDate: endDate ?? DateTime.now(),
-                      firstDate: DateTime(2024, 1, 1),
+                      initialDate: endDate ?? startDate ?? DateTime.now(),
+                      firstDate: startDate ?? DateTime(2024, 1, 1),
                       lastDate: DateTime(2100),
                     );
                     if (d != null) {
