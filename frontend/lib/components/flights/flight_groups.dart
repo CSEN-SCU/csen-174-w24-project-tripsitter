@@ -147,7 +147,7 @@ class _FlightGroupsState extends State<FlightGroups> {
                               addComment: (String comment) async {
                                 offer.addComment(TripComment(
                                     comment: comment,
-                                    uid: user!.uid,
+                                    uid: user.uid,
                                     date: DateTime.now())
                                   );
                                 await trip.save();

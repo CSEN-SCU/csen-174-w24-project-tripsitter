@@ -13,7 +13,7 @@ Future<List<CounterVariable>> showCounterPopup({
 
   final RenderBox button = key.currentContext!.findRenderObject() as RenderBox;
   final RenderBox overlay =
-      Overlay.of(key.currentContext!)!.context.findRenderObject() as RenderBox;
+      Overlay.of(key.currentContext!).context.findRenderObject() as RenderBox;
   final RelativeRect position = RelativeRect.fromRect(
     Rect.fromPoints(
       button.localToGlobal(Offset.zero + Offset(0, button.size.height)),

@@ -172,7 +172,7 @@ class _HotelGroupsState extends State<HotelGroups> {
                             addComment: (String comment) async {
                               group.infos[i].addComment(TripComment(
                                   comment: comment,
-                                  uid: user!.uid,
+                                  uid: user.uid,
                                   date: DateTime.now()));
                               await trip.save();
                               if (mounted) {

@@ -90,7 +90,7 @@ class _EventsItineraryState extends State<EventsItinerary> {
                       addComment: (String comment) async {
                         await activity.addComment(TripComment(
                             comment: comment,
-                            uid: user!.uid,
+                            uid: user.uid,
                             date: DateTime.now()));
                         if (mounted) {
                           setState(() {});

@@ -103,15 +103,15 @@ class ViewTrip extends StatelessWidget {
                                 trip.toggleSplitPayments();
                               },
                             ),
-                            if((trip.usingSplitPayments ? trip!.paymentsComplete[user.uid] != true : !trip!.isConfirmed))
+                            if((trip.usingSplitPayments ? trip.paymentsComplete[user.uid] != true : !trip.isConfirmed))
                               ListTile(
                                 leading: Icon(Icons.credit_card),
                                 onTap: () {
-                                  Navigator.push(context, MaterialPageRoute(builder: (context) => CheckoutPage(trip: trip!, profiles: profiles)));
+                                  Navigator.push(context, MaterialPageRoute(builder: (context) => CheckoutPage(trip: trip, profiles: profiles)));
                                 }, 
                                 title: Text("Checkout"),
                               ),
-                            if((!trip.isConfirmed && trip.usingSplitPayments && trip!.paymentsComplete[user.uid] == true))
+                            if((!trip.isConfirmed && trip.usingSplitPayments && trip.paymentsComplete[user.uid] == true))
                               Text("Awaiting payment from all members", style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
                             if(trip.isConfirmed)
                               Text("Trip is confirmed", style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold))

@@ -196,7 +196,7 @@ class _CreateTripState extends State<CreateTrip> {
 
               Container(height: 50),
               ElevatedButton(
-                onPressed: () => createTrip(user!.uid),
+                onPressed: () => createTrip(user.uid),
                 child: const Text('Create Trip'),
               ),
               // time input field

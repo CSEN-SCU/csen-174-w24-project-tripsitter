@@ -169,7 +169,7 @@ class _CarGroupsState extends State<CarGroups> {
                               addComment: (String comment) async {
                                 car.addComment(TripComment(
                                     comment: comment,
-                                    uid: user!.uid,
+                                    uid: user.uid,
                                     date: DateTime.now()));
                                 await trip.save();
                                 if (mounted) {

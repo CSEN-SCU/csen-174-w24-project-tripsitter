@@ -76,7 +76,7 @@ class _TripSideColumnState extends State<TripSideColumn> {
                 title: Text(
                     "${profiles.firstWhere((element) => element.id == comment.uid).name}\n${comment.comment}"),
                 // leading: ProfilePicture(profiles.firstWhere((element) => element.id == comment.uid)),
-                trailing: comment.uid == user!.uid
+                trailing: comment.uid == user.uid
                     ? IconButton(
                         icon: Icon(Icons.delete),
                         onPressed: () async {
