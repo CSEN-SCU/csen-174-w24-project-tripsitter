@@ -8,7 +8,6 @@ import 'package:tripsitter/components/comments_popup.dart';
 import 'package:tripsitter/components/hotels/hotel_info_dialog.dart';
 import 'package:tripsitter/components/hotels/hotels_options.dart';
 import 'package:tripsitter/components/mobile_wrapper.dart';
-import 'package:tripsitter/helpers/formatters.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class HotelGroups extends StatefulWidget {
@@ -63,7 +62,7 @@ class _HotelGroupsState extends State<HotelGroups> {
                   ListTile(
                     title: TextFormField(
                       initialValue: group.name,
-                      decoration: InputDecoration(
+                      decoration: const InputDecoration(
                         labelText: "Group Name",
                       ),
                       onChanged: (String value) {
@@ -97,17 +96,17 @@ class _HotelGroupsState extends State<HotelGroups> {
                                       child: Row(
                                         children: [
                                           group.members.contains(profile.id)
-                                              ? Icon(Icons.check)
-                                              : Icon(Icons.add),
+                                              ? const Icon(Icons.check)
+                                              : const Icon(Icons.add),
                                           Text(profile.name),
                                         ],
                                       ),
                                     ))
                                 .toList();
                           },
-                          child: Icon(Icons.add),
+                          child: const Icon(Icons.add),
                           onSelected: (UserProfile profile) async {
-                            print("Toggling ${profile.name}");
+                            debugPrint("Toggling ${profile.name}");
                             if (group.members.contains(profile.id)) {
                               await group.removeMember(profile.id);
                             } else {
@@ -124,7 +123,7 @@ class _HotelGroupsState extends State<HotelGroups> {
                               });
                               widget.setState();
                             },
-                            icon: Icon(Icons.hotel)),
+                            icon: const Icon(Icons.hotel)),
                         IconButton(
                             onPressed: () async {
                               await widget.trip.removeHotelGroup(group);
@@ -134,7 +133,7 @@ class _HotelGroupsState extends State<HotelGroups> {
                               setState(() {});
                               widget.setState();
                             },
-                            icon: Icon(Icons.delete)),
+                            icon: const Icon(Icons.delete)),
                       ],
                     ),
                   ),
@@ -155,7 +154,7 @@ class _HotelGroupsState extends State<HotelGroups> {
                       title: Text(
                           "${group.infos[i].name} (\$${group.offers[i].price.total})"),
                       subtitle: Text(
-                          "${group.offers[i].room?.description?.text ?? 'No description available'}"),
+                          group.offers[i].room?.description?.text ?? 'No description available'),
                       trailing: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
@@ -173,7 +172,7 @@ class _HotelGroupsState extends State<HotelGroups> {
                             addComment: (String comment) async {
                               group.infos[i].addComment(TripComment(
                                   comment: comment,
-                                  uid: user!.uid,
+                                  uid: user.uid,
                                   date: DateTime.now()));
                               await trip.save();
                               if (mounted) {
@@ -204,7 +203,7 @@ class _HotelGroupsState extends State<HotelGroups> {
                     ),
                   if (isMobile)
                     ElevatedButton.icon(
-                        icon: Icon(Icons.add),
+                        icon: const Icon(Icons.add),
                         onPressed: () {
                           Navigator.push(
                               context,
@@ -217,16 +216,16 @@ class _HotelGroupsState extends State<HotelGroups> {
                                         setState: () => setState(() {}),
                                       ))));
                         },
-                        label: Text("Add Options")),
-                  Divider(),
+                        label: const Text("Add Options")),
+                  const Divider(),
                 ],
               )),
         // check if all profiles are in a group
-        if (!(widget.profiles.length > 0 &&
-            widget.trip.hotels.length > 0 &&
+        if (!(widget.profiles.isNotEmpty &&
+            widget.trip.hotels.isNotEmpty &&
             widget.profiles.every((profile) => widget.trip.hotels
                 .any((group) => group.members.contains(profile.id))) &&
-            widget.trip.hotels.every((group) => group.members.length > 0)))
+            widget.trip.hotels.every((group) => group.members.isNotEmpty)))
           ElevatedButton(
             onPressed: () async {
               HotelGroup newGroup = await widget.trip.createHotelGroup(
@@ -239,7 +238,7 @@ class _HotelGroupsState extends State<HotelGroups> {
                 setState(() {});
               }
             },
-            child: Text("Create New Group"),
+            child: const Text("Create New Group"),
           ),
       ]),
     );

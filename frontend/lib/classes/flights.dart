@@ -2,7 +2,6 @@ import 'dart:convert';
 
 import 'package:flutter/widgets.dart';
 import 'package:collection/collection.dart';
-import 'package:intl/intl.dart';
 import 'package:tripsitter/classes/profile.dart';
 import 'package:tripsitter/classes/trip.dart';
 
@@ -306,20 +305,20 @@ class FlightOffer {
   }
 
   @override
-  bool operator ==(that) {
-    if(identical(this, that)) {
+  bool operator ==(other) {
+    if(identical(this, other)) {
       return true;
     }
-    if(that is! FlightOffer) {
+    if(other is! FlightOffer) {
       return false;
     }
     // if(id == that.id) {
     //   return true;
     // }
-    if(oneWay != that.oneWay) {
+    if(oneWay != other.oneWay) {
       return false;
     }
-    if(itineraries.length != that.itineraries.length) {
+    if(itineraries.length != other.itineraries.length) {
       return false;
     }
     // bool itinerariesEqual = true;
@@ -330,12 +329,12 @@ class FlightOffer {
     // }
     // if(itinerariesEqual) {return true;}
     for(int i = 0; i < itineraries.length; i++) {
-      if(itineraries[i].segments.length != that.itineraries[i].segments.length) {
+      if(itineraries[i].segments.length != other.itineraries[i].segments.length) {
         return false;
       }
       for(int j = 0; j < itineraries[i].segments.length; j++) {
         FlightSegment s1 = itineraries[i].segments[j];
-        FlightSegment s2 = that.itineraries[i].segments[j];
+        FlightSegment s2 = other.itineraries[i].segments[j];
         if(
           s1.departure.iataCode != s2.departure.iataCode ||
           s1.arrival.iataCode != s2.arrival.iataCode ||
@@ -817,7 +816,7 @@ class AirlineInfo {
 }
 
 class Airline {
-  static Map<String, Airline> _airlineCache = {};
+  static final Map<String, Airline> _airlineCache = {};
 
   static Future<void> cacheAirlines(BuildContext context) async {
     if (_airlineCache.isNotEmpty) return;

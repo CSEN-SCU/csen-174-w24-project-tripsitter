@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
@@ -6,7 +8,6 @@ import 'package:tripsitter/classes/profile.dart';
 import 'package:tripsitter/classes/trip.dart';
 import 'package:tripsitter/components/checkout/confirmation.dart';
 import 'package:tripsitter/components/navbar.dart';
-import 'package:tripsitter/components/payment.dart';
 import 'package:tripsitter/components/checkout/trip_summary.dart';
 import 'package:tripsitter/helpers/api.dart';
 
@@ -87,7 +88,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                   ),
                   child: ListView(
                     children: [
-                      Text("Checkout Page"),
+                      const Text("Checkout Page"),
                       TripSummary(
                         trip: trip,
                         uid: uid,
@@ -97,7 +98,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                       if((split ? trip.rentalCars.where((r) => r.members.contains(uid)) : trip.rentalCars).isNotEmpty || (split ? trip.activities.where((a) => a.participants.contains(uid)) : trip.activities).isNotEmpty)
                         ...[
                           Container(height: 50),
-                          Text("Note: Only flights and hotels can be paid directly through TripSitter. After purchasing, you will be directed to the rental car and activity websites to complete your purchase."),
+                          const Text("Note: Only flights and hotels can be paid directly through TripSitter. After purchasing, you will be directed to the rental car and activity websites to complete your purchase."),
                           Text("Amount owed to TripSitter: \$${split ? trip.userStripePrice(uid) : trip.stripePrice}")
                         ],
                       ConstrainedBox(
@@ -123,7 +124,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                               status = "Processing payment...";
                             });
                             PaymentIntentData data = await TripsitterApi.createPaymentIntent(user.uid, trip);
-                            print("Payment intent data created ${data.clientSecret}");
+                            debugPrint("Payment intent data created ${data.clientSecret}");
                             try {
                               PaymentIntent intent = await Stripe.instance.confirmPayment(
                                 paymentIntentClientSecret: data.clientSecret,
@@ -134,10 +135,10 @@ class _CheckoutPageState extends State<CheckoutPage> {
                                   ),
                                 )),
                               );
-                              print("Intent processed");
-                              print(intent.amount);
-                              print(intent.receiptEmail);
-                              print(intent.status);
+                              debugPrint("Intent processed");
+                              debugPrint(intent.amount.toString());
+                              debugPrint(intent.receiptEmail);
+                              debugPrint(intent.status.toString());
               
                               if(intent.status == PaymentIntentsStatus.Succeeded) {
                                 trip.freeze();
@@ -193,8 +194,8 @@ class _CheckoutPageState extends State<CheckoutPage> {
                                 }
                               }
                             } catch (e) {
-                              print("Error creating payment intent");
-                              print(e);
+                              debugPrint("Error creating payment intent");
+                              debugPrint(e.toString());
                               await showDialog(
                                 context: context, 
                                 builder: (context) => AlertDialog(
@@ -236,12 +237,12 @@ class _CheckoutPageState extends State<CheckoutPage> {
                   color: Colors.black.withOpacity(0.5),
                   child: Center(
                     child: ConstrainedBox(
-                      constraints: BoxConstraints(maxWidth: 600,),
+                      constraints: const BoxConstraints(maxWidth: 600,),
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Text(status, style: TextStyle(color: Colors.white, fontSize: 20)),
-                          Center(
+                          Text(status, style: const TextStyle(color: Colors.white, fontSize: 20)),
+                          const Center(
                             child: LinearProgressIndicator(minHeight: 10),
                           ),
                         ],

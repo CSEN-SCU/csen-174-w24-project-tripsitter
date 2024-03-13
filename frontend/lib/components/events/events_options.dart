@@ -2,8 +2,6 @@ import 'dart:math';
 
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
-import 'package:intl/intl.dart';
 import 'package:tripsitter/classes/airport.dart';
 import 'package:tripsitter/classes/filterbutton.dart';
 import 'package:tripsitter/classes/profile.dart';
@@ -11,13 +9,11 @@ import 'package:tripsitter/classes/ticketmaster.dart';
 import 'package:tripsitter/classes/trip.dart';
 import 'package:tripsitter/components/events/event_info_dialog.dart';
 import 'package:tripsitter/components/events/events_map.dart';
-import 'package:tripsitter/components/events/select_events.dart';
 import 'package:tripsitter/helpers/api.dart';
 import 'package:tripsitter/helpers/data.dart';
 import 'package:tripsitter/helpers/locators.dart';
 import 'package:tripsitter/popups/checkbox_popup.dart';
 import 'package:tripsitter/popups/select_popup.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 class EventsOptions extends StatefulWidget {
   final Trip trip;
@@ -72,7 +68,6 @@ class _EventsOptionsState extends State<EventsOptions>
 
   @override
   void initState() {
-    // TODO: implement initState
     isLoaded = false;
     controller = AnimationController(
       /// [AnimationController]s can be created with `vsync: this` because of
@@ -100,14 +95,13 @@ class _EventsOptionsState extends State<EventsOptions>
 
   List<String> selectedGenres = [];
   bool _sortDirection = true;
-  bool _isSortOpen = false;
   bool _isGenreOpen = false;
   final GlobalKey _sortKey = GlobalKey();
   final GlobalKey _genreKey = GlobalKey();
   EventSortOption _selectedSort = EventSortOption.price;
 
   Future<void> getEvents() async {
-    print("Getting events for trip ${trip.id}");
+    debugPrint("Getting events for trip ${trip.id}");
     List<TicketmasterEvent> call =
         await TripsitterApi.getEvents(TicketmasterQuery(
       lat: trip.destination.lat,
@@ -125,7 +119,7 @@ class _EventsOptionsState extends State<EventsOptions>
         }
       }
     }
-    print(genres.toList());
+    debugPrint(genres.toList().toString());
     // After fetching events, initialize GlobalKeys for each
     setState(() {
       selectedGenres = genres.toList();
@@ -226,7 +220,6 @@ class _EventsOptionsState extends State<EventsOptions>
 
   void _showSortPopup() {
     setState(() {
-      _isSortOpen = true;
     });
 
     final popup = SelectOnePopup<EventSortOption>(
@@ -235,7 +228,6 @@ class _EventsOptionsState extends State<EventsOptions>
       onSelected: (EventSortOption value) {
         setState(() {
           _selectedSort = value;
-          _isSortOpen = false;
           events.sort(compareEvents);
         });
       },
@@ -243,7 +235,6 @@ class _EventsOptionsState extends State<EventsOptions>
 
     popup.showPopup(context, _sortKey).then((_) {
       setState(() {
-        _isSortOpen = false;
       });
     });
   }
@@ -251,8 +242,6 @@ class _EventsOptionsState extends State<EventsOptions>
   @override
   Widget build(BuildContext context) {
     // Initialize a counter variable before mapping the events to TableRows
-    int rowIndex = 0;
-
     return ListView(
       children: [
         // Text("Choose Activities",
@@ -262,7 +251,7 @@ class _EventsOptionsState extends State<EventsOptions>
         //         ?.copyWith(fontWeight: FontWeight.bold)),
         Wrap(
           children: [
-            Text("Choose Activities", style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+            const Text("Choose Activities", style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
             Padding(
               padding: const EdgeInsets.fromLTRB(80, 10, 0, 0),
               child: Text("Toggle Map Mode",
@@ -358,7 +347,7 @@ class _EventsOptionsState extends State<EventsOptions>
                                   child: Padding(
                                 padding: const EdgeInsets.all(8.0),
                                 child: event.images.isEmpty
-                                    ? Icon(Icons.star)
+                                    ? const Icon(Icons.star)
                                     : Image.network(event.images.first.url,
                                         height: 50),
                               )),
@@ -379,7 +368,7 @@ class _EventsOptionsState extends State<EventsOptions>
                                   child: Padding(
                                 padding: const EdgeInsets.all(8.0),
                                 child: IconButton(
-                                    icon: Icon(Icons.info),
+                                    icon: const Icon(Icons.info),
                                     onPressed: () {
                                       showDialog(
                                         context: context,
@@ -414,13 +403,13 @@ class _EventsOptionsState extends State<EventsOptions>
                                           backgroundColor:
                                               MaterialStateProperty.all<Color>(
                                                   selected
-                                                      ? Color.fromARGB(
+                                                      ? const Color.fromARGB(
                                                           255, 127, 166, 198)
                                                       : Colors.grey[300]!)),
                                       child: Text(
                                           'Select${selected ? 'ed' : ''}',
                                           style:
-                                              TextStyle(color: Colors.black)),
+                                              const TextStyle(color: Colors.black)),
                                     );
                                   }),
                                 ),

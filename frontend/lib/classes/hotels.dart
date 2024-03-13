@@ -1,4 +1,3 @@
-import 'package:tripsitter/classes/flights.dart';
 import 'package:tripsitter/classes/profile.dart';
 import 'package:tripsitter/classes/trip.dart';
 
@@ -141,6 +140,7 @@ class HotelOffer {
   final HotelPolicies? policies;
   final String self;
 
+  @override
   bool operator ==(other) {
     return identical(this, other) || (other is HotelOffer && other.id == id);
   }

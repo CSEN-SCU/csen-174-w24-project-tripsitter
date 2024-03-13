@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'dart:typed_data';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -5,19 +7,13 @@ import 'package:csv/csv.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:intl_phone_field/intl_phone_field.dart';
 import 'package:provider/provider.dart';
 import 'package:tripsitter/classes/city.dart';
 import 'package:tripsitter/classes/profile.dart';
-import 'package:tripsitter/components/new_trip_popup.dart';
-import 'package:tripsitter/components/payment.dart';
 import 'package:tripsitter/helpers/data.dart';
-import 'package:tripsitter/pages/login.dart';
-import 'package:tripsitter/pages/profile_page.dart';
-import 'dart:io';
 
 class UpdateProfile extends StatefulWidget {
   const UpdateProfile({super.key});
@@ -48,7 +44,7 @@ class _UpdateProfileState extends State<UpdateProfile> {
         "assets/worldcities.csv",
       );
       List<List<dynamic>> list =
-          CsvToListConverter().convert(result, eol: "\n");
+          const CsvToListConverter().convert(result, eol: "\n");
       list.removeAt(0);
       if (!mounted) {
         return;
@@ -80,7 +76,7 @@ class _UpdateProfileState extends State<UpdateProfile> {
         nameController.text = profile!.name;
         emailController.text = profile!.email;
       } else {
-        print("NEW PROFILE");
+        debugPrint("NEW PROFILE");
         nameController.text = user.displayName!;
         emailController.text = user.email!;
         newProfile = true;
@@ -121,9 +117,9 @@ class _UpdateProfileState extends State<UpdateProfile> {
   //   await uploadTask.whenComplete(() async {
   //     var url = await ref.getDownloadURL();
   //     image_url = url.toString();
-  //     print(image_url);
+  //     debugPrint(image_url);
   //   }).catchError((onError) {
-  //     print(onError);
+  //     debugPrint(onError);
   //   });
   //   if (!mounted) {
   //     return;
@@ -132,8 +128,8 @@ class _UpdateProfileState extends State<UpdateProfile> {
   // }
   Future<void> uploadImage() async {
     User? user = FirebaseAuth.instance.currentUser;
-    final ImagePicker _picker = ImagePicker();
-    final XFile? img = await _picker.pickImage(source: ImageSource.gallery);
+    final ImagePicker picker = ImagePicker();
+    final XFile? img = await picker.pickImage(source: ImageSource.gallery);
     if (img == null) {
       return;
     }
@@ -156,7 +152,7 @@ class _UpdateProfileState extends State<UpdateProfile> {
         ),
       );
     } on FirebaseException catch (e) {
-      print(e);
+      debugPrint(e.toString());
     }
     if(mounted) {
       setState(() {
@@ -165,7 +161,7 @@ class _UpdateProfileState extends State<UpdateProfile> {
     }
   }
 
-  String? image = null;
+  String? image;
 
 //text field widgit
   @override
@@ -175,9 +171,9 @@ class _UpdateProfileState extends State<UpdateProfile> {
     if (profile == null) {
       return Center(
           child: ConstrainedBox(
+        constraints: const BoxConstraints(maxHeight: 200, maxWidth: 200),
         child:
-            AspectRatio(aspectRatio: 1.0, child: CircularProgressIndicator()),
-        constraints: BoxConstraints(maxHeight: 200, maxWidth: 200),
+            const AspectRatio(aspectRatio: 1.0, child: CircularProgressIndicator()),
       ));
     }
     if (image == null && profile!.hasPhoto) {
@@ -198,11 +194,10 @@ class _UpdateProfileState extends State<UpdateProfile> {
         appBar: AppBar(
           title: Text(user!.uid),
         ),
-        //TODO: pull ID, Prompt for name, Pull Email, Prompt for hometown, initialize number of trips to 0, populate join date, prompt for user photo, default stripe ID
         //store all of that info into the db
         body: Center(
           child: ConstrainedBox(
-            constraints: BoxConstraints(maxWidth: 600),
+            constraints: const BoxConstraints(maxWidth: 600),
             child: Column(children: [
               Text(newProfile ? "Create Profile" : "Update Profile"),
               Padding(
@@ -276,7 +271,7 @@ class _UpdateProfileState extends State<UpdateProfile> {
                   },
                 ),
               ),
-              Text("Gender:"),
+              const Text("Gender:"),
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: DropdownButton<String>(
@@ -321,28 +316,28 @@ class _UpdateProfileState extends State<UpdateProfile> {
                         profile!.updateCountryISO(phone.countryISOCode);
                       }
                       } catch(e) {
-                        print(e);
+                        debugPrint(e.toString());
                       }
                     },
                 ),
               ),
               ListTile(
-                leading: loadingPic ? CircularProgressIndicator() : CircleAvatar(
+                leading: loadingPic ? const CircularProgressIndicator() : CircleAvatar(
                   backgroundImage:
                       (profile!.hasPhoto && image != null)
                           ? NetworkImage(image!)
                           : null,
                   child: !(profile!.hasPhoto && image != null)
-                      ? Icon(Icons.person)
+                      ? const Icon(Icons.person)
                       : null),
-                title: ElevatedButton(onPressed: () => uploadImage(), child: Text("Select Image")),
+                title: ElevatedButton(onPressed: () => uploadImage(), child: const Text("Select Image")),
               ),
-              SizedBox(height: 10),
+              const SizedBox(height: 10),
               ElevatedButton(
                   onPressed: () async {
                     if (profile!.hometown == null) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text("Please select a hometown")));
+                          const SnackBar(content: Text("Please select a hometown")));
                       return;
                     }
                     await profile?.save();
@@ -350,12 +345,12 @@ class _UpdateProfileState extends State<UpdateProfile> {
                       Navigator.pushReplacementNamed(context, "/");
                     }
                   },
-                  child: Text("Save Profile"),
                               style: ElevatedButton.styleFrom(
                                 backgroundColor:
-                                    Color.fromARGB(255, 125, 175, 220),
+                                    const Color.fromARGB(255, 125, 175, 220),
                                 foregroundColor: Colors.black,
                               ),
+                  child: const Text("Save Profile"),
               )
                   
             ]),

@@ -13,6 +13,7 @@ class FilterButton extends StatelessWidget {
     required this.globalKey,
     required this.icon, // Add this line
     this.color = const Color.fromRGBO(224, 224, 224, 1),
+    super.key
   });
 
   @override
@@ -20,16 +21,16 @@ class FilterButton extends StatelessWidget {
     return ElevatedButton(
       key: globalKey,
       onPressed: onPressed,
+      style: ElevatedButton.styleFrom(
+        backgroundColor: color,
+        foregroundColor: Colors.black,
+      ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
           Text(text),
           icon, // Update this line
         ],
-      ),
-      style: ElevatedButton.styleFrom(
-        backgroundColor: color,
-        foregroundColor: Colors.black,
       ),
     );
   }

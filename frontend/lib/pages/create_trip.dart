@@ -1,7 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:csv/csv.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -83,9 +81,11 @@ class _CreateTripState extends State<CreateTrip> {
       activities: List.empty(growable: true)
     );
     await newTrip.save();
+    // ignore: use_build_context_synchronously
     UserProfile? profile = Provider.of<UserProfile?>(context, listen: false); 
     profile?.addTrip();
     await profile?.save();
+    // ignore: use_build_context_synchronously
     Navigator.pushNamed(context, "/trip/${newTrip.id}");
   }
 
@@ -93,19 +93,19 @@ class _CreateTripState extends State<CreateTrip> {
   Widget build(BuildContext context) {
     User? user = Provider.of<User?>(context);
     if(user == null) {
-      return LoginPage();
+      return const LoginPage();
     }
     return Scaffold(
       appBar: const TripSitterNavbar(),
       body: Center(
         child: ConstrainedBox(
-          constraints: BoxConstraints(maxWidth: 600),
+          constraints: const BoxConstraints(maxWidth: 600),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Text('Let\'s get started', style: Theme.of(context).textTheme.displayMedium),
-              Text("Tell me some basic details about your dream trip"),
+              const Text("Tell me some basic details about your dream trip"),
               // address input field
               Padding(
                 padding: const EdgeInsets.all(8.0),
@@ -198,7 +198,7 @@ class _CreateTripState extends State<CreateTrip> {
 
               Container(height: 50),
               ElevatedButton(
-                onPressed: () => createTrip(user!.uid),
+                onPressed: () => createTrip(user.uid),
                 child: const Text('Create Trip'),
               ),
               // time input field

@@ -41,10 +41,10 @@ class _EventsItineraryState extends State<EventsItinerary> {
       widget.participantsPopupKeys[activity.event.id] = GlobalKey();
       widget.participantsPopupOpenState[activity.event.id] = false;
     }
-    widget.trip.activities.forEach((activity) {
+    for (var activity in widget.trip.activities) {
       widget.selectedParticipantsMap[activity.event.id] =
           List.from(activity.participants);
-    });
+    }
   }
 
 // If your events can change, update popupKeys accordingly
@@ -73,8 +73,6 @@ class _EventsItineraryState extends State<EventsItinerary> {
 
       ...widget.trip.activities
           .map((activity) => LayoutBuilder(builder: (context, constraints) {
-                bool remove = widget.profiles.every(
-                    (profile) => activity.participants.contains(profile.id));
                 return Card(
                   child: ListTile(
                     leading: CommentsPopup(
@@ -90,7 +88,7 @@ class _EventsItineraryState extends State<EventsItinerary> {
                       addComment: (String comment) async {
                         await activity.addComment(TripComment(
                             comment: comment,
-                            uid: user!.uid,
+                            uid: user.uid,
                             date: DateTime.now()));
                         if (mounted) {
                           setState(() {});
@@ -99,7 +97,7 @@ class _EventsItineraryState extends State<EventsItinerary> {
                     ),
                     title: Text(activity.event.name),
                     isThreeLine: true,
-                    visualDensity: VisualDensity(vertical: 4), // to expand
+                    visualDensity: const VisualDensity(vertical: 4), // to expand
                     subtitle: Text(
                         '${activity.event.venues.firstOrNull?.name}\n${activity.event.startTime.getFormattedDate()}'),
                     trailing: Column(
@@ -108,7 +106,7 @@ class _EventsItineraryState extends State<EventsItinerary> {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             IconButton(
-                                icon: Icon(Icons.info),
+                                icon: const Icon(Icons.info),
                                 onPressed: () {
                                   showDialog(
                                     context: context,
@@ -129,7 +127,7 @@ class _EventsItineraryState extends State<EventsItinerary> {
                             ),
                           ],
                         ),
-                        SizedBox(height: 2),
+                        const SizedBox(height: 2),
                         FilterButton(
                           text: 'Participants',
                           icon: Icon(

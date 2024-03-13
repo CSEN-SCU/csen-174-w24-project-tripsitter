@@ -30,7 +30,7 @@ class _CommentsPopupState extends State<CommentsPopup> {
       isLabelVisible: widget.comments.isNotEmpty,
       label: Text(widget.comments.length.toString()),
       child: PopupMenuButton(
-        child: Icon(Icons.comment),
+        child: const Icon(Icons.comment),
         itemBuilder: (BuildContext context) {
           return [
             PopupMenuItem(
@@ -46,7 +46,7 @@ class _CommentsPopupState extends State<CommentsPopup> {
                           title: Text("${widget.profiles.firstWhere((element) => element.id == comment.uid).name}\n${comment.comment}"),
                           leading: ProfilePicture(widget.profiles.firstWhere((element) => element.id == comment.uid)),
                           trailing: comment.uid == widget.myUid ? IconButton(
-                            icon: Icon(Icons.delete),
+                            icon: const Icon(Icons.delete),
                             onPressed: () async {
                               await widget.removeComment(comment);
                               if(!mounted) return;
@@ -58,7 +58,7 @@ class _CommentsPopupState extends State<CommentsPopup> {
                         ListTile(
                           title: TextField(
                             controller: commentController,
-                            decoration: InputDecoration(
+                            decoration: const InputDecoration(
                               border: OutlineInputBorder(),
                               labelText: 'Add Comment',
                             ),

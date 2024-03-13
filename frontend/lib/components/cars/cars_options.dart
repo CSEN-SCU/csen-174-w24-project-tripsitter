@@ -168,7 +168,7 @@ class _CarOptionsState extends State<CarOptions> {
     });
 
     final popup = CheckboxPopup(
-      options: ["M","A"],
+      options: const ["M","A"],
       format: (String option) => option == "M" ? "Manual" : "Automatic",
       selected: _selectedDrive,
       onSelected: (List<String> newSelected) {
@@ -264,13 +264,13 @@ class _CarOptionsState extends State<CarOptions> {
   
   @override
   Widget build(BuildContext context) {
-    return widget.currentGroup == null ? Center(
+    return widget.currentGroup == null ? const Center(
       child: Text("Select or create a group to choose a rental car")
     ) : Padding(
       padding: const EdgeInsets.all(8.0),
       child: Column(
         children: [
-          Text("Rental Cars for ${widget.currentGroup!.name}", style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+          Text("Rental Cars for ${widget.currentGroup!.name}", style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
           Row(
             children: [
               Expanded(
@@ -352,7 +352,7 @@ class _CarOptionsState extends State<CarOptions> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       IconButton(
-                        icon: Icon(Icons.info),
+                        icon: const Icon(Icons.info),
                         onPressed: () {
                           showDialog(
                             context: context,

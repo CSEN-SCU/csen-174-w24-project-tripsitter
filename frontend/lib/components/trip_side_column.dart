@@ -1,18 +1,13 @@
-import 'dart:html';
 
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-import 'package:tripsitter/classes/flights.dart';
-import 'package:tripsitter/classes/hotels.dart';
 import 'package:tripsitter/classes/profile.dart';
 import 'package:tripsitter/classes/trip.dart';
 import 'package:tripsitter/components/profile_pic.dart';
 import 'package:tripsitter/helpers/api.dart';
 import 'package:tripsitter/components/checkout/checkout.dart';
-import 'package:tripsitter/pages/profile_page.dart';
 
 class TripSideColumn extends StatefulWidget {
   final Trip? trip;
@@ -36,7 +31,7 @@ class _TripSideColumnState extends State<TripSideColumn> {
     }
     List<UserProfile> profiles = Provider.of<List<UserProfile>>(context);
     return Column(children: [
-      SizedBox(height: 10.0),
+      const SizedBox(height: 10.0),
       Text("Members: ${trip!.uids.length}",
           style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
       ...profiles
@@ -68,11 +63,11 @@ class _TripSideColumnState extends State<TripSideColumn> {
               await TripsitterApi.addUser(email, trip!.id);
             }
           },
-          icon: Icon(Icons.add),
-          label: Text("Add Member")),
-      SizedBox(height: 20.0),
-      Text("Discussion",
-          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+          icon: const Icon(Icons.add),
+          label: const Text("Add Member")),
+      const SizedBox(height: 20.0),
+      const Text("Discussion",
+          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
       ...trip!.comments
           .map((TripComment comment) => ListTile(
                 subtitle:
@@ -81,9 +76,9 @@ class _TripSideColumnState extends State<TripSideColumn> {
                 title: Text(
                     "${profiles.firstWhere((element) => element.id == comment.uid).name}\n${comment.comment}"),
                 // leading: ProfilePicture(profiles.firstWhere((element) => element.id == comment.uid)),
-                trailing: comment.uid == user!.uid
+                trailing: comment.uid == user.uid
                     ? IconButton(
-                        icon: Icon(Icons.delete),
+                        icon: const Icon(Icons.delete),
                         onPressed: () async {
                           await trip!.removeComment(comment);
                           if (!mounted) return;
@@ -96,7 +91,7 @@ class _TripSideColumnState extends State<TripSideColumn> {
       ListTile(
         title: TextField(
             controller: commentController,
-            decoration: InputDecoration(
+            decoration: const InputDecoration(
               border: OutlineInputBorder(),
               labelText: 'Add Comment',
             ),
@@ -124,7 +119,7 @@ class _TripSideColumnState extends State<TripSideColumn> {
         Container(height: 10),
         CheckboxListTile(
           value: trip!.usingSplitPayments,
-          title: Text("Split Payments"),
+          title: const Text("Split Payments"),
           onChanged: (bool? value) {
             trip!.toggleSplitPayments();
           },
@@ -133,7 +128,7 @@ class _TripSideColumnState extends State<TripSideColumn> {
             ? trip!.paymentsComplete[user.uid] != true
             : !trip!.isConfirmed))
           ElevatedButton.icon(
-            icon: Icon(Icons.credit_card),
+            icon: const Icon(Icons.credit_card),
             onPressed: () {
               Navigator.push(
                   context,
@@ -141,21 +136,21 @@ class _TripSideColumnState extends State<TripSideColumn> {
                       builder: (context) =>
                           CheckoutPage(trip: trip!, profiles: profiles)));
             },
-            label: Text("Checkout"),
+            label: const Text("Checkout"),
             style: ElevatedButton.styleFrom(
-              backgroundColor: Color.fromARGB(255, 125, 175, 220),
+              backgroundColor: const Color.fromARGB(255, 125, 175, 220),
               foregroundColor: Colors.black,
             ),
           ),
         if ((!trip!.isConfirmed &&
             trip!.usingSplitPayments &&
             trip!.paymentsComplete[user.uid] == true))
-          Text("Awaiting payment from all members",
+          const Text("Awaiting payment from all members",
               style:
-                  const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                  TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
         if (trip!.isConfirmed)
-          Text("Trip is confirmed",
-              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold))
+          const Text("Trip is confirmed",
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold))
       ]
     ]);
   }
@@ -169,29 +164,29 @@ class AddMemberDialog extends StatefulWidget {
 }
 
 class _AddMemberDialogState extends State<AddMemberDialog> {
-  TextEditingController _emailController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text("Add Member"),
+      title: const Text("Add Member"),
       content: Column(mainAxisSize: MainAxisSize.min, children: [
         TextField(
           controller: _emailController,
-          decoration: InputDecoration(labelText: "Email"),
+          decoration: const InputDecoration(labelText: "Email"),
         ),
-        SizedBox(height: 10.0),
+        const SizedBox(height: 10.0),
         ElevatedButton(
             onPressed: () {
               Navigator.pop(context, _emailController.text);
             },
-            child: Text("Add")),
-        SizedBox(height: 10.0),
+            child: const Text("Add")),
+        const SizedBox(height: 10.0),
         ElevatedButton(
             onPressed: () {
               Navigator.pop(context);
             },
-            child: Text("Cancel"))
+            child: const Text("Cancel"))
       ]),
     );
   }

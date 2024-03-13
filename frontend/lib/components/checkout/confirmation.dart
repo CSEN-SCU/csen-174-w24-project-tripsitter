@@ -19,15 +19,14 @@ class ConfirmationPage extends StatelessWidget {
         child: CircularProgressIndicator()
       );
     }
-    bool split = trip.usingSplitPayments;
     String uid = user.uid;
     return Scaffold(
-      appBar: TripSitterNavbar(),
+      appBar: const TripSitterNavbar(),
       body: Center(
         child: Column(
           children: [
-            Text("Thank you for your purchase!"),
-            Text("Your trip is confirmed!"),
+            const Text("Thank you for your purchase!"),
+            const Text("Your trip is confirmed!"),
             TripSummary(
               trip: trip,
               uid: uid,

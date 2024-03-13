@@ -60,7 +60,6 @@ class _FlightOptionsState extends State<FlightOptions> {
   bool _isAirlinesPopupOpen = false;
   bool _isBagsPopupOpen = false;
   bool _isClassPopupOpen = false;
-  bool _isSortPopupOpen = false;
 
   FlightSortOption _selectedSort = FlightSortOption.price;
   bool _sortDirection = true;
@@ -76,13 +75,13 @@ class _FlightOptionsState extends State<FlightOptions> {
   void selectFlight(FlightItineraryRecursive flight) {
     setState(() {
       selected.add(flight);
-      print("Select flight with ${flight.offers.length} offers");
+      debugPrint("Select flight with ${flight.offers.length} offers");
       FlightOffer offer = flight.offers.first;
       currentDepth++;
       flights = flight.next;
       flights?.sort(compareFlights);
       if((currentDepth == 2)) {
-        print("No more flights");
+        debugPrint("No more flights");
         currentGroup!.addOption(offer);
         flights = originalFlights;
         currentDepth = 0;
@@ -118,7 +117,7 @@ class _FlightOptionsState extends State<FlightOptions> {
         flights = null;
       });
     }
-    print("Getting flights...");
+    debugPrint("Getting flights...");
     FlightsQuery query = FlightsQuery(
       origin: currentGroup!.departureAirport,
       destination: currentGroup!.arrivalAirport,
@@ -129,7 +128,7 @@ class _FlightOptionsState extends State<FlightOptions> {
     );
     List<FlightItineraryRecursive> flightsList = await TripsitterApi.getFlights(query);
     flightsList.sort(compareFlights);
-    print("GOT ${flightsList.length} FLIGHTS");
+    debugPrint("GOT ${flightsList.length} FLIGHTS");
     if(reset) {
       final Set<String> airlineCodes = {};
       for (var flight in flightsList) {
@@ -196,20 +195,20 @@ class _FlightOptionsState extends State<FlightOptions> {
   @override
   Widget build(BuildContext context) {
     if(currentGroup == null) {
-      return Center(child: Text("Select a group to view flights"));
+      return const Center(child: Text("Select a group to view flights"));
     }
     if(flights == null) {
-      return Center(child: CircularProgressIndicator());
+      return const Center(child: CircularProgressIndicator());
     }
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: ListView(
         children: [
           if(currentDepth == 0)
-            Text("Select Flight for ${currentGroup!.departureAirport} - ${currentGroup!.arrivalAirport}", style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+            Text("Select Flight for ${currentGroup!.departureAirport} - ${currentGroup!.arrivalAirport}", style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
           if(currentDepth > 0)
-            Text("Select Flight for ${currentGroup!.arrivalAirport} - ${currentGroup!.departureAirport}", style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-          SizedBox(height: 16.0),
+            Text("Select Flight for ${currentGroup!.arrivalAirport} - ${currentGroup!.departureAirport}", style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+          const SizedBox(height: 16.0),
           Row(
             children: [
               Expanded(
@@ -311,11 +310,9 @@ class _FlightOptionsState extends State<FlightOptions> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Text(DateFormat.jm().format(
-                                    flight.segments.first.departure.at) +
-                                " - " +
-                                DateFormat.jm().format(
-                                    flight.segments.last.arrival.at)),
+                            Text("${DateFormat.jm().format(
+                                    flight.segments.first.departure.at)} - ${DateFormat.jm().format(
+                                    flight.segments.last.arrival.at)}"),
                             Text(flight.itineraries.first.duration
                                 .toDuration()
                                 .format())
@@ -332,17 +329,16 @@ class _FlightOptionsState extends State<FlightOptions> {
                               ? "Nonstop"
                               : "${(flight.segments.length - 1).toString()} stop${flight.segments.length > 2 ? "s" : ""}"),
                           flight.segments.length == 1
-                              ? Text("")
-                              : Text("Stops in " +
-                                  flight.segments
+                              ? const Text("")
+                              : Text("Stops in ${flight.segments
                                       .sublist(1)
                                       .map((s) => s.departure.iataCode)
-                                      .join(", ")),
+                                      .join(", ")}"),
                         ],
                       ),
                     ),
                     TableCell(child: IconButton(
-                      icon: Icon(Icons.info_outline),
+                      icon: const Icon(Icons.info_outline),
                       onPressed: () {
                         showDialog(
                           context: context,
@@ -495,7 +491,6 @@ class _FlightOptionsState extends State<FlightOptions> {
 
   void _showSortPopup() {
     setState(() {
-      _isSortPopupOpen = true;
     });
 
     final popup = SelectOnePopup<FlightSortOption>(
@@ -504,7 +499,6 @@ class _FlightOptionsState extends State<FlightOptions> {
       onSelected: (FlightSortOption value) {
         setState(() {
           _selectedSort = value;
-          _isSortPopupOpen = false;
           flights?.sort(compareFlights);
         });
       },
@@ -512,7 +506,6 @@ class _FlightOptionsState extends State<FlightOptions> {
 
     popup.showPopup(context, _classPopupKey).then((_) {
       setState(() {
-        _isSortPopupOpen = false;
       });
     });
   }

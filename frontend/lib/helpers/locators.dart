@@ -1,11 +1,8 @@
 import 'dart:math';
 
-import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:tripsitter/classes/airport.dart';
 import 'package:tripsitter/classes/city.dart';
-import 'package:tripsitter/classes/profile.dart';
-import 'package:tripsitter/classes/trip.dart';
 import 'package:tripsitter/helpers/data.dart';
 
 Future<String> getNearestAirport(City city, BuildContext context) async {
