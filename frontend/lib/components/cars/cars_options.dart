@@ -24,6 +24,8 @@ class _CarOptionsState extends State<CarOptions> {
     getCars();
   }
 
+  bool _selectedSort = true;
+
   List<RentalCarOffer> cars = [];
 
   void getCars() async {
@@ -35,6 +37,7 @@ class _CarOptionsState extends State<CarOptions> {
       dropOff: DateTime(2024, 4, 3, 10, 0),
     );
     cars = await TripsitterApi.searchRentalCars(query);
+    cars.sort((a, b) => a.price.compareTo(b.price));
     final Set<String> rentalCompanies = {};
     for (RentalCarOffer car in cars) {
       rentalCompanies.add(car.provider.providerName);
@@ -55,6 +58,7 @@ class _CarOptionsState extends State<CarOptions> {
   final GlobalKey _sizeKey = GlobalKey();
   final GlobalKey _driveKey = GlobalKey();
   final GlobalKey _fuelKey = GlobalKey();
+  final GlobalKey _sortKey = GlobalKey();
 
   void _showCompanyPopup(){
     if(cars.isEmpty) return;
@@ -265,48 +269,70 @@ class _CarOptionsState extends State<CarOptions> {
       child: ListView(
         children: [
           Text("Rental Cars for ${widget.currentGroup!.name}", style: Theme.of(context).textTheme.displayMedium?.copyWith(decoration: TextDecoration.underline, fontWeight: FontWeight.bold)),
-          Wrap(
-            spacing: 10,
-            children: <Widget>[
+          Row(
+            children: [
+              Expanded(
+                child: Wrap(
+                  spacing: 10,
+                  children: <Widget>[
+                    FilterButton(
+                        text: 'Company',
+                        globalKey: _companyKey,
+                        onPressed: () => _showCompanyPopup(),
+                        icon: Icon(
+                          _isCompanyOpen
+                              ? Icons.arrow_drop_up
+                              : Icons.arrow_drop_down,
+                        )),
+                    FilterButton(
+                        text: 'Size',
+                        globalKey: _sizeKey,
+                        onPressed: _showSizePopup,
+                        icon: Icon(
+                          _isSizeOpen
+                              ? Icons.arrow_drop_up
+                              : Icons.arrow_drop_down,
+                        )),
+                    FilterButton(
+                        text: 'Drive',
+                        globalKey: _driveKey,
+                        onPressed: _showDrivePopup,
+                        icon: Icon(
+                          _isDriveOpen
+                              ? Icons.arrow_drop_up
+                              : Icons.arrow_drop_down,
+                        )),
+                    FilterButton(
+                        text: 'Fuel',
+                        globalKey: _fuelKey,
+                        onPressed: _showFuelPopup,
+                        icon: Icon(
+                          _isFuelOpen
+                              ? Icons.arrow_drop_up
+                              : Icons.arrow_drop_down,
+                        )),
+                    
+                  ],
+                ),
+              ),
               FilterButton(
-                  text: 'Company',
-                  globalKey: _companyKey,
-                  onPressed: () => _showCompanyPopup(),
-                  icon: Icon(
-                    _isCompanyOpen
-                        ? Icons.arrow_drop_up
-                        : Icons.arrow_drop_down,
-                  )),
-              FilterButton(
-                  text: 'Size',
-                  globalKey: _sizeKey,
-                  onPressed: () => _showSizePopup(),
-                  icon: Icon(
-                    _isSizeOpen
-                        ? Icons.arrow_drop_up
-                        : Icons.arrow_drop_down,
-                  )),
-              FilterButton(
-                  text: 'Drive',
-                  globalKey: _driveKey,
-                  onPressed: () => _showDrivePopup(),
-                  icon: Icon(
-                    _isDriveOpen
-                        ? Icons.arrow_drop_up
-                        : Icons.arrow_drop_down,
-                  )),
-              FilterButton(
-                  text: 'Fuel',
-                  globalKey: _fuelKey,
-                  onPressed: () => _showFuelPopup(),
-                  icon: Icon(
-                    _isFuelOpen
-                        ? Icons.arrow_drop_up
-                        : Icons.arrow_drop_down,
-                  )),
+                color: Colors.grey[50]!,
+                text: 'Sort by Price',
+                globalKey: _sortKey,
+                onPressed: () {},
+                icon: IconButton(
+                  onPressed: () {
+                    setState(() {
+                      _selectedSort = !_selectedSort;
+                    });
+                  },
+                  icon: Icon(_selectedSort
+                      ? Icons.arrow_upward
+                      : Icons.arrow_downward),
+                )),
             ],
           ),
-          for (RentalCarOffer car in cars.where(filterCar))
+          for (RentalCarOffer car in (_selectedSort ? cars : cars.reversed).where(filterCar))
             ListTile(
               leading: Image.network("https://logos.skyscnr.com/images/carhire/sippmaps/${car.group.img}", width: 80, height: 80),
               title: Text("${car.sipp.fromSipp()} (${car.carName} or similar)"),
