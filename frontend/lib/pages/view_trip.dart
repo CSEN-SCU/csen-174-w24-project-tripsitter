@@ -123,7 +123,7 @@ class ViewTrip extends StatelessWidget {
                         children: [
                           SizedBox(
                             width: constraints.maxWidth * 0.7,
-                            child: const TripDashBoard(),
+                            child: TripDashBoard(trip),
                           ),
                           Container(
                             color: const Color.fromARGB(255, 239, 239, 239),

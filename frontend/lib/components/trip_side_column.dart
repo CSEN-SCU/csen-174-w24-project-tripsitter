@@ -1,4 +1,6 @@
 
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -151,7 +153,34 @@ class _TripSideColumnState extends State<TripSideColumn> {
         if (trip!.isConfirmed)
           const Text("Trip is confirmed",
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold))
-      ]
+      ],
+      ElevatedButton.icon(
+        onPressed: () {
+          showDialog(context: context, builder: (context) => 
+            AlertDialog(
+              title: const Text("Delete Trip"),
+              content: const Text("Are you sure you want to delete this trip?"),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  }, 
+                  child: const Text("Cancel")
+                ),
+                TextButton(
+                  onPressed: () async {
+                    await trip?.delete();
+                    Navigator.pop(context);
+                    Navigator.pushNamed(context, "/");
+                  }, 
+                  child: const Text("Delete")
+                )
+              ]
+          ));
+        }, 
+        icon: Icon(Icons.delete), 
+        label: Text("Delete Trip")
+      )
     ]);
   }
 }

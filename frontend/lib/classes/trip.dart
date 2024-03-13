@@ -280,6 +280,41 @@ class Trip {
     await _save();
   }
 
+  Future<void> updateName(String name) async {
+    _name = name;
+    await _save();
+  }
+
+  Future<void> updateStartDate(DateTime date) async {
+    if(_startDate == date) return;
+    _startDate = date;
+    flights.clear();
+    hotels.clear();
+    rentalCars.clear();
+    _activities = activities.where((e) => e.event.startTime.dateTimeUtc != null && e.event.startTime.dateTimeUtc!.isAfter(date)).toList();
+    await _save();
+  }
+
+  Future<void> updateEndDate(DateTime date) async {
+    if(_endDate == date) return;
+    _endDate = date;
+    flights.clear();
+    hotels.clear();
+    rentalCars.clear();
+    _activities = activities.where((e) => e.event.startTime.dateTimeUtc != null && e.event.startTime.dateTimeUtc!.isBefore(date)).toList();
+    await _save();
+  }
+
+  Future<void> updateDestination(City newDest) async {
+    if(newDest.lat == _destination.lat && newDest.lon == _destination.lon) return;
+    _destination = newDest;
+    flights.clear();
+    hotels.clear();
+    rentalCars.clear();
+    activities.clear();
+    await _save();
+  }
+
   Future<void> addActivity(TicketmasterEvent event, List<String> uids) async {
     _activities.add(Activity(
       comments: List<TripComment>.empty(growable: true),
@@ -344,6 +379,10 @@ class Trip {
   Future<void> removeComment(TripComment comment) async {
     _comments.remove(comment);
     await _save();
+  }
+
+  delete() {
+    FirebaseFirestore.instance.collection("trips").doc(_id).delete();
   }
 
 }
