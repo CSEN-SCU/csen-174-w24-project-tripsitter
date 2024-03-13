@@ -62,7 +62,7 @@ class ViewTrip extends StatelessWidget {
                         return Column(
                           children: [
                             Text("${trip.name}", 
-                              style: TextStyle(
+                              style: const TextStyle(
                                 color: Colors.black,
                                 fontWeight: FontWeight.w800,
                                 fontSize: 40,
@@ -72,49 +72,49 @@ class ViewTrip extends StatelessWidget {
                               )
                             ),
                             ListTile(
-                              leading: Icon(Icons.people),
-                              title: Text("Manage Participants"),
+                              leading: const Icon(Icons.people),
+                              title: const Text("Manage Participants"),
                               onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => MobileWrapper(trip: trip, profiles: profiles, title: "Manage Participants", child: TripSideColumn(trip)))),
                             ),
                             ListTile(
                               leading: const Icon(Icons.flight_takeoff_rounded),
-                              title: Text("Flights"),
+                              title: const Text("Flights"),
                               onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => MobileWrapper(trip: trip, profiles: profiles, title: "Select Flights", child: SelectFlight(trip, profiles)))),
                             ),
                             ListTile(
                               leading: const Icon(Icons.hotel),
-                              title: Text("Hotels"),
+                              title: const Text("Hotels"),
                               onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => MobileWrapper(trip: trip, profiles: profiles, title: "Select Hotels", child: SelectHotels(trip, profiles)))),
                             ),
                             ListTile(
                               leading: const Icon(Icons.directions_car),
-                              title: Text("Rental Cars"),
+                              title: const Text("Rental Cars"),
                               onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => MobileWrapper(title: "Select Rental Cars", child: SelectCars(trip, profiles)))),
                             ),
                             ListTile(
                               leading: const Icon(Icons.stadium),
-                              title: Text("Activities"),
+                              title: const Text("Activities"),
                               onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => MobileWrapper(title: "Select Activites", child: SelectEvents(trip, profiles)))),
                             ),
                             CheckboxListTile(
                               value: trip.usingSplitPayments,
-                              title: Text("Split payments"), 
+                              title: const Text("Split payments"), 
                               onChanged: (bool? value) {
                                 trip.toggleSplitPayments();
                               },
                             ),
                             if((trip.usingSplitPayments ? trip.paymentsComplete[user.uid] != true : !trip.isConfirmed))
                               ListTile(
-                                leading: Icon(Icons.credit_card),
+                                leading: const Icon(Icons.credit_card),
                                 onTap: () {
                                   Navigator.push(context, MaterialPageRoute(builder: (context) => CheckoutPage(trip: trip, profiles: profiles)));
                                 }, 
-                                title: Text("Checkout"),
+                                title: const Text("Checkout"),
                               ),
                             if((!trip.isConfirmed && trip.usingSplitPayments && trip.paymentsComplete[user.uid] == true))
-                              Text("Awaiting payment from all members", style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                              const Text("Awaiting payment from all members", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
                             if(trip.isConfirmed)
-                              Text("Trip is confirmed", style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold))
+                              const Text("Trip is confirmed", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold))
                           ],
                         );
                       }
@@ -122,11 +122,11 @@ class ViewTrip extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Container(
-                            child: TripDashBoard(),
+                            child: const TripDashBoard(),
                             width: constraints.maxWidth * 0.7,
                           ),
                           Container(
-                            color: Color.fromARGB(255, 239, 239, 239),
+                            color: const Color.fromARGB(255, 239, 239, 239),
                             width: constraints.maxWidth * 0.3,
                             child: TripSideColumn(trip)
                           ),

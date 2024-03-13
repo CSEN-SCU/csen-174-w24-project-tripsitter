@@ -317,7 +317,7 @@ class _HotelOptionsState extends State<HotelOptions> {
   @override
   Widget build(BuildContext context) {
     return widget.currentGroup == null
-        ? Center(child: Text("Select or create a group to choose a hotel"))
+        ? const Center(child: Text("Select or create a group to choose a hotel"))
         : Padding(
             padding: const EdgeInsets.all(8.0),
             child: ListView(
@@ -326,7 +326,7 @@ class _HotelOptionsState extends State<HotelOptions> {
                 //     style: Theme.of(context).textTheme.displayMedium?.copyWith(
                 //         decoration: TextDecoration.underline,
                 //         fontWeight: FontWeight.bold)),
-                Text("Hotels for ${widget.currentGroup!.name}", style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+                Text("Hotels for ${widget.currentGroup!.name}", style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
                 Row(
                   children: [
                     Expanded(
@@ -379,7 +379,7 @@ class _HotelOptionsState extends State<HotelOptions> {
                       title: Text("${hotelsFiltered[i].hotel.name}"),
                       trailing: Row(mainAxisSize: MainAxisSize.min, children: [
                         IconButton(
-                          icon: Icon(Icons.info),
+                          icon: const Icon(Icons.info),
                           onPressed: () {
                             showDialog(
                                 context: context,

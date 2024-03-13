@@ -62,7 +62,7 @@ class _HotelGroupsState extends State<HotelGroups> {
                   ListTile(
                     title: TextFormField(
                       initialValue: group.name,
-                      decoration: InputDecoration(
+                      decoration: const InputDecoration(
                         labelText: "Group Name",
                       ),
                       onChanged: (String value) {
@@ -96,15 +96,15 @@ class _HotelGroupsState extends State<HotelGroups> {
                                       child: Row(
                                         children: [
                                           group.members.contains(profile.id)
-                                              ? Icon(Icons.check)
-                                              : Icon(Icons.add),
+                                              ? const Icon(Icons.check)
+                                              : const Icon(Icons.add),
                                           Text(profile.name),
                                         ],
                                       ),
                                     ))
                                 .toList();
                           },
-                          child: Icon(Icons.add),
+                          child: const Icon(Icons.add),
                           onSelected: (UserProfile profile) async {
                             print("Toggling ${profile.name}");
                             if (group.members.contains(profile.id)) {
@@ -123,7 +123,7 @@ class _HotelGroupsState extends State<HotelGroups> {
                               });
                               widget.setState();
                             },
-                            icon: Icon(Icons.hotel)),
+                            icon: const Icon(Icons.hotel)),
                         IconButton(
                             onPressed: () async {
                               await widget.trip.removeHotelGroup(group);
@@ -133,7 +133,7 @@ class _HotelGroupsState extends State<HotelGroups> {
                               setState(() {});
                               widget.setState();
                             },
-                            icon: Icon(Icons.delete)),
+                            icon: const Icon(Icons.delete)),
                       ],
                     ),
                   ),
@@ -203,7 +203,7 @@ class _HotelGroupsState extends State<HotelGroups> {
                     ),
                   if (isMobile)
                     ElevatedButton.icon(
-                        icon: Icon(Icons.add),
+                        icon: const Icon(Icons.add),
                         onPressed: () {
                           Navigator.push(
                               context,
@@ -216,8 +216,8 @@ class _HotelGroupsState extends State<HotelGroups> {
                                         setState: () => setState(() {}),
                                       ))));
                         },
-                        label: Text("Add Options")),
-                  Divider(),
+                        label: const Text("Add Options")),
+                  const Divider(),
                 ],
               )),
         // check if all profiles are in a group
@@ -238,7 +238,7 @@ class _HotelGroupsState extends State<HotelGroups> {
                 setState(() {});
               }
             },
-            child: Text("Create New Group"),
+            child: const Text("Create New Group"),
           ),
       ]),
     );

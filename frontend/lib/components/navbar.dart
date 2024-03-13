@@ -38,7 +38,7 @@ class TripSitterNavbar extends StatelessWidget implements PreferredSizeWidget {
       ),
       backgroundColor: HexColor("#C6D6FF"),
       bottom: PreferredSize(
-        preferredSize: Size.fromHeight(1.0), // Set the height of the border
+        preferredSize: const Size.fromHeight(1.0), // Set the height of the border
         child: Container(
           color: const Color.fromARGB(
               255, 128, 128, 128), // Set the color of the border

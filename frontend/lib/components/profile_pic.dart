@@ -27,7 +27,7 @@ class _ProfilePictureState extends State<ProfilePicture> {
                   ? NetworkImage(snapshot.data!)
                   : null,
           child: !(profile.hasPhoto && snapshot.hasData && snapshot.data != null)
-              ? Icon(Icons.person)
+              ? const Icon(Icons.person)
               : null);
       }
     );

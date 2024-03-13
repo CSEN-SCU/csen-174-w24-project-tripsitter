@@ -35,7 +35,7 @@ class _TripInfoState extends State<TripInfo> {
         },
         style: ElevatedButton.styleFrom(
           backgroundColor: widget.col,
-          textStyle: TextStyle(color: Colors.black),
+          textStyle: const TextStyle(color: Colors.black),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(0)),
         ),
         child: Row(
@@ -43,58 +43,58 @@ class _TripInfoState extends State<TripInfo> {
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                SizedBox(height: 10),
+                const SizedBox(height: 10),
                 Text(
                   name,
-                  style: TextStyle(color: Colors.black),
+                  style: const TextStyle(color: Colors.black),
                 ),
-                SizedBox(height: 5),
+                const SizedBox(height: 5),
                 Row(
                   children: [
-                    Icon(
+                    const Icon(
                       Icons.location_pin,
                       color: Colors.black,
                     ),
-                    SizedBox(width: 5),
+                    const SizedBox(width: 5),
                     Text(
                       city + ', ' + country,
-                      style: TextStyle(color: Colors.black),
+                      style: const TextStyle(color: Colors.black),
                     )
                   ],
                 ),
-                SizedBox(height: 5),
+                const SizedBox(height: 5),
                 Row(
                   children: [
-                    Icon(
+                    const Icon(
                       Icons.calendar_month,
                       color: Colors.black,
                     ),
-                    SizedBox(width: 5),
+                    const SizedBox(width: 5),
                     Text(
                       start,
-                      style: TextStyle(color: Colors.black),
+                      style: const TextStyle(color: Colors.black),
                     ),
-                    SizedBox(width: 5),
-                    Icon(
+                    const SizedBox(width: 5),
+                    const Icon(
                       Icons.arrow_forward,
                       size: 15,
                       color: Colors.black,
                     ),
-                    SizedBox(width: 5),
+                    const SizedBox(width: 5),
                     Text(
                       end,
-                      style: TextStyle(color: Colors.black),
+                      style: const TextStyle(color: Colors.black),
                     )
                   ],
                 ),
-                SizedBox(height: 10),
+                const SizedBox(height: 10),
               ],
             ),
-            SizedBox(width: 300),
+            const SizedBox(width: 300),
             Center(
               child: Text(
                 '\$' + price,
-                style: TextStyle(color: Colors.black),
+                style: const TextStyle(color: Colors.black),
               ),
             )
           ],
@@ -115,7 +115,7 @@ class _ProfilePageState extends State<ProfilePage> {
   Widget build(BuildContext context) {
     UserProfile? profile = Provider.of<UserProfile?>(context);
     if (profile == null) {
-      return UpdateProfile();
+      return const UpdateProfile();
     }
     if (image == null && profile.hasPhoto) {
       FirebaseStorage.instance
@@ -146,8 +146,8 @@ class _ProfilePageState extends State<ProfilePage> {
       child: Scaffold(
         appBar: AppBar(
           //contains the logo and trip sitter name
-          title: Text('My Profile'),
-          backgroundColor: Color.fromARGB(255, 238, 238, 238),
+          title: const Text('My Profile'),
+          backgroundColor: const Color.fromARGB(255, 238, 238, 238),
         ),
         //contains two columns to contain the user info in one and the trip info in the other
         body: Padding(
@@ -161,11 +161,11 @@ class _ProfilePageState extends State<ProfilePage> {
                         //profile info
                         Column(
                       children: [
-                        Text("About Me", style: TextStyle(fontSize: 20)),
+                        const Text("About Me", style: TextStyle(fontSize: 20)),
                         Row(
                           //profile part
                           children: [
-                            SizedBox(width: 25),
+                            const SizedBox(width: 25),
                             Container(
                               //width: MediaQuery.of(context).size.width*.45 ,
                               child: Column(
@@ -178,24 +178,24 @@ class _ProfilePageState extends State<ProfilePage> {
                                               : null,
                                       child:
                                           !(profile.hasPhoto && image != null)
-                                              ? Icon(Icons.person)
+                                              ? const Icon(Icons.person)
                                               : null),
-                                  SizedBox(height: 10),
+                                  const SizedBox(height: 10),
                                   ElevatedButton(
                                       onPressed: () {
                                         Navigator.pushNamed(
                                             context, "/profile");
                                       },
-                                      child: Text("Edit Profile"),
+                                      child: const Text("Edit Profile"),
                                       style: ElevatedButton.styleFrom(
                                         backgroundColor:
-                                            Color.fromARGB(255, 238, 238, 238),
+                                            const Color.fromARGB(255, 238, 238, 238),
                                         foregroundColor: Colors.black,
                                       )),
                                 ],
                               ),
                             ),
-                            SizedBox(width: 111),
+                            const SizedBox(width: 111),
                             Container(
                               //width: MediaQuery.of(context).size.width*.55 ,
                               child: Column(
@@ -212,15 +212,15 @@ class _ProfilePageState extends State<ProfilePage> {
                         ),
                         Column(
                           children: [
-                            SizedBox(height: 20),
+                            const SizedBox(height: 20),
                             ElevatedButton(
                               onPressed: () {
                                 Navigator.pushNamed(context, "/new");
                               },
-                              child: Text("Create New Trip"),
+                              child: const Text("Create New Trip"),
                               style: ElevatedButton.styleFrom(
                                 backgroundColor:
-                                    Color.fromARGB(255, 125, 175, 220),
+                                    const Color.fromARGB(255, 125, 175, 220),
                                 foregroundColor: Colors.black,
                               ),
                             ),
@@ -236,8 +236,8 @@ class _ProfilePageState extends State<ProfilePage> {
                     child: Center(
                       child: Column(
                         children: [
-                          Text("My Trips", style: TextStyle(fontSize: 20)),
-                          Center(
+                          const Text("My Trips", style: TextStyle(fontSize: 20)),
+                          const Center(
                             child: Row(
                               children: [
                                 Text("Upcoming"),
@@ -259,7 +259,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                     return TripInfo(
                                         trip: trips[index],
                                         col:
-                                            Color.fromARGB(255, 148, 148, 148));
+                                            const Color.fromARGB(255, 148, 148, 148));
                                   }),
                             );
                           }),

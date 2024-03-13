@@ -155,7 +155,7 @@ class _FlightGroupsState extends State<FlightGroups> {
                               },
                             ),
                             IconButton(
-                              icon: Icon(Icons.delete),
+                              icon: const Icon(Icons.delete),
                               onPressed: () async {
                                 await group.removeOption(offer);
                                 widget.setState();
@@ -187,7 +187,7 @@ class _FlightGroupsState extends State<FlightGroups> {
                             );
                           }));
                         },
-                        child: Text("Add flight options"),
+                        child: const Text("Add flight options"),
                       )
                   ],
                 ),

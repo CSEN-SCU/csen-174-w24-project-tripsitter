@@ -99,7 +99,7 @@ class _EventsItineraryState extends State<EventsItinerary> {
                     ),
                     title: Text(activity.event.name),
                     isThreeLine: true,
-                    visualDensity: VisualDensity(vertical: 4), // to expand
+                    visualDensity: const VisualDensity(vertical: 4), // to expand
                     subtitle: Text(
                         '${activity.event.venues.firstOrNull?.name}\n${activity.event.startTime.getFormattedDate()}'),
                     trailing: Column(
@@ -108,7 +108,7 @@ class _EventsItineraryState extends State<EventsItinerary> {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             IconButton(
-                                icon: Icon(Icons.info),
+                                icon: const Icon(Icons.info),
                                 onPressed: () {
                                   showDialog(
                                     context: context,
@@ -129,7 +129,7 @@ class _EventsItineraryState extends State<EventsItinerary> {
                             ),
                           ],
                         ),
-                        SizedBox(height: 2),
+                        const SizedBox(height: 2),
                         FilterButton(
                           text: 'Participants',
                           icon: Icon(

@@ -9,7 +9,7 @@ Future<void> _loadCities(BuildContext context) async {
     var result = await DefaultAssetBundle.of(context).loadString(
     "assets/worldcities.csv",
     );
-    List<List<dynamic>> list = CsvToListConverter().convert(result, eol: "\n");
+    List<List<dynamic>> list = const CsvToListConverter().convert(result, eol: "\n");
     list.removeAt(0);
     _citiesCache = list.map((e) => City.fromArray(e)).toList();
 }
@@ -27,7 +27,7 @@ Future<void> _loadAmadeusAirports(BuildContext context) async {
   var result = await DefaultAssetBundle.of(context).loadString(
     "assets/airports.csv",
   );
-  List<List<dynamic>> list = CsvToListConverter().convert(result, eol: "\n");
+  List<List<dynamic>> list = const CsvToListConverter().convert(result, eol: "\n");
   list.removeAt(0);
   _airportsCache = list.map((e) => Airport.fromArray(e)).toList();
 }

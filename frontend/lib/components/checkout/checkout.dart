@@ -86,7 +86,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                   ),
                   child: ListView(
                     children: [
-                      Text("Checkout Page"),
+                      const Text("Checkout Page"),
                       TripSummary(
                         trip: trip,
                         uid: uid,
@@ -96,7 +96,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                       if((split ? trip.rentalCars.where((r) => r.members.contains(uid)) : trip.rentalCars).isNotEmpty || (split ? trip.activities.where((a) => a.participants.contains(uid)) : trip.activities).isNotEmpty)
                         ...[
                           Container(height: 50),
-                          Text("Note: Only flights and hotels can be paid directly through TripSitter. After purchasing, you will be directed to the rental car and activity websites to complete your purchase."),
+                          const Text("Note: Only flights and hotels can be paid directly through TripSitter. After purchasing, you will be directed to the rental car and activity websites to complete your purchase."),
                           Text("Amount owed to TripSitter: \$${split ? trip.userStripePrice(uid) : trip.stripePrice}")
                         ],
                       ConstrainedBox(
@@ -235,12 +235,12 @@ class _CheckoutPageState extends State<CheckoutPage> {
                   color: Colors.black.withOpacity(0.5),
                   child: Center(
                     child: ConstrainedBox(
-                      constraints: BoxConstraints(maxWidth: 600,),
+                      constraints: const BoxConstraints(maxWidth: 600,),
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Text(status, style: TextStyle(color: Colors.white, fontSize: 20)),
-                          Center(
+                          Text(status, style: const TextStyle(color: Colors.white, fontSize: 20)),
+                          const Center(
                             child: LinearProgressIndicator(minHeight: 10),
                           ),
                         ],

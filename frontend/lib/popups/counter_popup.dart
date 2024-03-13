@@ -32,7 +32,7 @@ Future<List<CounterVariable>> showCounterPopup({
         child: StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
             return DefaultTextStyle(
-              style: TextStyle(color: Colors.black),
+              style: const TextStyle(color: Colors.black),
               child: Column(
                 children: tempVariables.map((variable) {
                   return Row(
@@ -40,7 +40,7 @@ Future<List<CounterVariable>> showCounterPopup({
                     children: [
                       Text(variable.name),
                       IconButton(
-                        icon: Icon(Icons.remove, color: Colors.black),
+                        icon: const Icon(Icons.remove, color: Colors.black),
                         onPressed: () {
                           if (variable.value > 0) {
                             setState(() => variable.value--);
@@ -49,7 +49,7 @@ Future<List<CounterVariable>> showCounterPopup({
                       ),
                       Text('${variable.value}'),
                       IconButton(
-                        icon: Icon(Icons.add, color: Colors.black),
+                        icon: const Icon(Icons.add, color: Colors.black),
                         onPressed: () => setState(() => variable.value++),
                       ),
                     ],

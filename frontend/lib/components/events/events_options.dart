@@ -259,7 +259,7 @@ class _EventsOptionsState extends State<EventsOptions>
         //         ?.copyWith(fontWeight: FontWeight.bold)),
         Wrap(
           children: [
-            Text("Choose Activities", style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+            const Text("Choose Activities", style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
             Padding(
               padding: const EdgeInsets.fromLTRB(80, 10, 0, 0),
               child: Text("Toggle Map Mode",
@@ -355,7 +355,7 @@ class _EventsOptionsState extends State<EventsOptions>
                                   child: Padding(
                                 padding: const EdgeInsets.all(8.0),
                                 child: event.images.isEmpty
-                                    ? Icon(Icons.star)
+                                    ? const Icon(Icons.star)
                                     : Image.network(event.images.first.url,
                                         height: 50),
                               )),
@@ -376,7 +376,7 @@ class _EventsOptionsState extends State<EventsOptions>
                                   child: Padding(
                                 padding: const EdgeInsets.all(8.0),
                                 child: IconButton(
-                                    icon: Icon(Icons.info),
+                                    icon: const Icon(Icons.info),
                                     onPressed: () {
                                       showDialog(
                                         context: context,
@@ -411,13 +411,13 @@ class _EventsOptionsState extends State<EventsOptions>
                                           backgroundColor:
                                               MaterialStateProperty.all<Color>(
                                                   selected
-                                                      ? Color.fromARGB(
+                                                      ? const Color.fromARGB(
                                                           255, 127, 166, 198)
                                                       : Colors.grey[300]!)),
                                       child: Text(
                                           'Select${selected ? 'ed' : ''}',
                                           style:
-                                              TextStyle(color: Colors.black)),
+                                              const TextStyle(color: Colors.black)),
                                     );
                                   }),
                                 ),

@@ -33,7 +33,7 @@ void main() async {
   });
   Handler updateProfileHandler = Handler(
       handlerFunc: (BuildContext? context, Map<String, dynamic> params) {
-    return UpdateProfile();
+    return const UpdateProfile();
   });
   Handler viewTrip = Handler(
     handlerFunc: (BuildContext? context, Map<String, dynamic> params) {
@@ -50,7 +50,7 @@ void main() async {
       handler: newTripHandler, transitionType: TransitionType.none);
   router.notFoundHandler = Handler(
       handlerFunc: (BuildContext? context, Map<String, dynamic> params) {
-    return ProfilePage();
+    return const ProfilePage();
   });
 
   runApp(const MyApp());

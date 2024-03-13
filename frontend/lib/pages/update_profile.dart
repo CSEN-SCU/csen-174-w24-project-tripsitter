@@ -42,7 +42,7 @@ class _UpdateProfileState extends State<UpdateProfile> {
         "assets/worldcities.csv",
       );
       List<List<dynamic>> list =
-          CsvToListConverter().convert(result, eol: "\n");
+          const CsvToListConverter().convert(result, eol: "\n");
       list.removeAt(0);
       if (!mounted) {
         return;
@@ -170,8 +170,8 @@ class _UpdateProfileState extends State<UpdateProfile> {
       return Center(
           child: ConstrainedBox(
         child:
-            AspectRatio(aspectRatio: 1.0, child: CircularProgressIndicator()),
-        constraints: BoxConstraints(maxHeight: 200, maxWidth: 200),
+            const AspectRatio(aspectRatio: 1.0, child: CircularProgressIndicator()),
+        constraints: const BoxConstraints(maxHeight: 200, maxWidth: 200),
       ));
     }
     if (image == null && profile!.hasPhoto) {
@@ -196,7 +196,7 @@ class _UpdateProfileState extends State<UpdateProfile> {
         //store all of that info into the db
         body: Center(
           child: ConstrainedBox(
-            constraints: BoxConstraints(maxWidth: 600),
+            constraints: const BoxConstraints(maxWidth: 600),
             child: Column(children: [
               Text(newProfile ? "Create Profile" : "Update Profile"),
               Padding(
@@ -270,7 +270,7 @@ class _UpdateProfileState extends State<UpdateProfile> {
                   },
                 ),
               ),
-              Text("Gender:"),
+              const Text("Gender:"),
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: DropdownButton<String>(
@@ -321,22 +321,22 @@ class _UpdateProfileState extends State<UpdateProfile> {
                 ),
               ),
               ListTile(
-                leading: loadingPic ? CircularProgressIndicator() : CircleAvatar(
+                leading: loadingPic ? const CircularProgressIndicator() : CircleAvatar(
                   backgroundImage:
                       (profile!.hasPhoto && image != null)
                           ? NetworkImage(image!)
                           : null,
                   child: !(profile!.hasPhoto && image != null)
-                      ? Icon(Icons.person)
+                      ? const Icon(Icons.person)
                       : null),
-                title: ElevatedButton(onPressed: () => uploadImage(), child: Text("Select Image")),
+                title: ElevatedButton(onPressed: () => uploadImage(), child: const Text("Select Image")),
               ),
-              SizedBox(height: 10),
+              const SizedBox(height: 10),
               ElevatedButton(
                   onPressed: () async {
                     if (profile!.hometown == null) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text("Please select a hometown")));
+                          const SnackBar(content: Text("Please select a hometown")));
                       return;
                     }
                     await profile?.save();
@@ -344,10 +344,10 @@ class _UpdateProfileState extends State<UpdateProfile> {
                       Navigator.pushReplacementNamed(context, "/");
                     }
                   },
-                  child: Text("Save Profile"),
+                  child: const Text("Save Profile"),
                               style: ElevatedButton.styleFrom(
                                 backgroundColor:
-                                    Color.fromARGB(255, 125, 175, 220),
+                                    const Color.fromARGB(255, 125, 175, 220),
                                 foregroundColor: Colors.black,
                               ),
               )

@@ -196,20 +196,20 @@ class _FlightOptionsState extends State<FlightOptions> {
   @override
   Widget build(BuildContext context) {
     if(currentGroup == null) {
-      return Center(child: Text("Select a group to view flights"));
+      return const Center(child: Text("Select a group to view flights"));
     }
     if(flights == null) {
-      return Center(child: CircularProgressIndicator());
+      return const Center(child: CircularProgressIndicator());
     }
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: ListView(
         children: [
           if(currentDepth == 0)
-            Text("Select Flight for ${currentGroup!.departureAirport} - ${currentGroup!.arrivalAirport}", style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+            Text("Select Flight for ${currentGroup!.departureAirport} - ${currentGroup!.arrivalAirport}", style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
           if(currentDepth > 0)
-            Text("Select Flight for ${currentGroup!.arrivalAirport} - ${currentGroup!.departureAirport}", style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-          SizedBox(height: 16.0),
+            Text("Select Flight for ${currentGroup!.arrivalAirport} - ${currentGroup!.departureAirport}", style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+          const SizedBox(height: 16.0),
           Row(
             children: [
               Expanded(
@@ -332,7 +332,7 @@ class _FlightOptionsState extends State<FlightOptions> {
                               ? "Nonstop"
                               : "${(flight.segments.length - 1).toString()} stop${flight.segments.length > 2 ? "s" : ""}"),
                           flight.segments.length == 1
-                              ? Text("")
+                              ? const Text("")
                               : Text("Stops in " +
                                   flight.segments
                                       .sublist(1)
@@ -342,7 +342,7 @@ class _FlightOptionsState extends State<FlightOptions> {
                       ),
                     ),
                     TableCell(child: IconButton(
-                      icon: Icon(Icons.info_outline),
+                      icon: const Icon(Icons.info_outline),
                       onPressed: () {
                         showDialog(
                           context: context,
