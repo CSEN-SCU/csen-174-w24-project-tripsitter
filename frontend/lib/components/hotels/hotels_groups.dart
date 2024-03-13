@@ -106,7 +106,7 @@ class _HotelGroupsState extends State<HotelGroups> {
                           },
                           child: const Icon(Icons.add),
                           onSelected: (UserProfile profile) async {
-                            print("Toggling ${profile.name}");
+                            debugPrint("Toggling ${profile.name}");
                             if (group.members.contains(profile.id)) {
                               await group.removeMember(profile.id);
                             } else {

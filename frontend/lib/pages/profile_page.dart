@@ -125,7 +125,7 @@ class _ProfilePageState extends State<ProfilePage> {
         if (mounted) setState(() => image = a);
       });
     }
-    // print(profile.id);
+    // debugPrint(profile.id);
     // FirebaseFirestore.instance
     //     .collection('trips')
     //     .where('uids', arrayContains: profile.id)
@@ -139,7 +139,7 @@ class _ProfilePageState extends State<ProfilePage> {
             value: Trip.getTripsByProfile(profile.id),
             initialData: List<Trip>.empty(growable: true),
             catchError: (_, err) {
-              print(err);
+              debugPrint(err.toString());
               return List<Trip>.empty(growable: true);
             })
       ],

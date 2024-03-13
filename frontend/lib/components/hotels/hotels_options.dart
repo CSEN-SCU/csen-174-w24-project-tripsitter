@@ -82,7 +82,7 @@ class _HotelOptionsState extends State<HotelOptions> {
     _selectedbedTypes = [...bedList];
     sortHotels();
     // for(HotelOption hotel in hotels) {
-    // print(hotel.offers.first.toJson());
+    // debugPrint(hotel.offers.first.toJson());
     // }
     if (!mounted) return;
     setState(() {});

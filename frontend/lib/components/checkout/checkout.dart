@@ -122,7 +122,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                               status = "Processing payment...";
                             });
                             PaymentIntentData data = await TripsitterApi.createPaymentIntent(user.uid, trip);
-                            print("Payment intent data created ${data.clientSecret}");
+                            debugPrint("Payment intent data created ${data.clientSecret}");
                             try {
                               PaymentIntent intent = await Stripe.instance.confirmPayment(
                                 paymentIntentClientSecret: data.clientSecret,
@@ -133,10 +133,10 @@ class _CheckoutPageState extends State<CheckoutPage> {
                                   ),
                                 )),
                               );
-                              print("Intent processed");
-                              print(intent.amount);
-                              print(intent.receiptEmail);
-                              print(intent.status);
+                              debugPrint("Intent processed");
+                              debugPrint(intent.amount.toString());
+                              debugPrint(intent.receiptEmail);
+                              debugPrint(intent.status.toString());
               
                               if(intent.status == PaymentIntentsStatus.Succeeded) {
                                 trip.freeze();
@@ -192,8 +192,8 @@ class _CheckoutPageState extends State<CheckoutPage> {
                                 }
                               }
                             } catch (e) {
-                              print("Error creating payment intent");
-                              print(e);
+                              debugPrint("Error creating payment intent");
+                              debugPrint(e.toString());
                               await showDialog(
                                 context: context, 
                                 builder: (context) => AlertDialog(

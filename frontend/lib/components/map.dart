@@ -91,15 +91,15 @@ class TripsitterMapState extends State<TripsitterMap> {
       });
       // var selectionLists =
       //     widget.trip.flights.where((s) => s.arrivalAirport != null).toList();
-      // print("Selected Hotel Groups:");
-      // print(selectionLists);
+      // debugPrint("Selected Hotel Groups:");
+      // debugPrint(selectionLists);
       // selectionLists.forEach((element) {
-      //   print(element);
+      //   debugPrint(element);
       //   controller
       //       .toScreenLocation(LatLng(element.selectedInfo?.latitude ?? 0.0,
       //           element.selectedInfo?.longitude ?? 0.0))
       //       .then((value) {
-      //     print(element.selectedInfo);
+      //     debugPrint(element.selectedInfo);
       //     _addHotelMarker(
       //         Point<double>(value.x as double, value.y as double),
       //         LatLng(element.selectedInfo?.latitude ?? 0.0,

@@ -155,18 +155,18 @@ class TripsitterApi {
       Map<String,dynamic> data = json.decode(response.body);
       if(((data["data"] ?? {})["associatedRecords"] ?? []) != null && ((data["data"] ?? {})["associatedRecords"] ?? []).length > 0) {
         String pnr = (((data["data"] ?? {})["associatedRecords"] ?? [])[0] ?? {})["reference"] ?? "A38B74";
-        print("Booked flight $pnr");
+        debugPrint("Booked flight $pnr");
         await group.setPnr(pnr);
       }
       else {
         String pnr = "A38B74";
-        print("Booked flight $pnr");
+        debugPrint("Booked flight $pnr");
         await group.setPnr(pnr);
       }
     }
     catch (e) {
       String pnr = "A38B74";
-      print("Booked flight $pnr");
+      debugPrint("Booked flight $pnr");
       await group.setPnr(pnr);
     }
   }
@@ -181,12 +181,12 @@ class TripsitterApi {
       http.Response response = await http.post(uri, body: jsonEncode(booking.toJson()), headers: {'Content-Type': 'application/json'});
       Map<String,dynamic> data = json.decode(response.body);
       String pnr = data["pnr"] ?? "350XWB";
-      print("Booked hotel $pnr");
+      debugPrint("Booked hotel $pnr");
       await group.setPnr(pnr);
     }
     catch (e) {
       String pnr = "350XWB";
-      print("Booked hotel $pnr");
+      debugPrint("Booked hotel $pnr");
       await group.setPnr(pnr);
     }
   }

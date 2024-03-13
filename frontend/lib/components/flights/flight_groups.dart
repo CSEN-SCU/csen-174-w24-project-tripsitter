@@ -53,10 +53,10 @@ class _FlightGroupsState extends State<FlightGroups> {
         (element) => element.departureAirport == nearestAirport,
       );
       if (existing != null) {
-        print("Adding ${profile.name} to existing flight group");
+        debugPrint("Adding ${profile.name} to existing flight group");
         await existing.addMember(profile.id);
       } else {
-        print("Creating new flight group for ${profile.name}");
+        debugPrint("Creating new flight group for ${profile.name}");
         await trip.addFlightGroup(nearestAirport, destinationAirport, [profile.id]);
       }
     }

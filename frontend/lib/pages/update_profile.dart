@@ -74,7 +74,7 @@ class _UpdateProfileState extends State<UpdateProfile> {
         nameController.text = profile!.name;
         emailController.text = profile!.email;
       } else {
-        print("NEW PROFILE");
+        debugPrint("NEW PROFILE");
         nameController.text = user.displayName!;
         emailController.text = user.email!;
         newProfile = true;
@@ -115,9 +115,9 @@ class _UpdateProfileState extends State<UpdateProfile> {
   //   await uploadTask.whenComplete(() async {
   //     var url = await ref.getDownloadURL();
   //     image_url = url.toString();
-  //     print(image_url);
+  //     debugPrint(image_url);
   //   }).catchError((onError) {
-  //     print(onError);
+  //     debugPrint(onError);
   //   });
   //   if (!mounted) {
   //     return;
@@ -150,7 +150,7 @@ class _UpdateProfileState extends State<UpdateProfile> {
         ),
       );
     } on FirebaseException catch (e) {
-      print(e);
+      debugPrint(e.toString());
     }
     if(mounted) {
       setState(() {
@@ -315,7 +315,7 @@ class _UpdateProfileState extends State<UpdateProfile> {
                         profile!.updateCountryISO(phone.countryISOCode);
                       }
                       } catch(e) {
-                        print(e);
+                        debugPrint(e.toString());
                       }
                     },
                 ),

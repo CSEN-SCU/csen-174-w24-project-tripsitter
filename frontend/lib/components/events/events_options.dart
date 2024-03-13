@@ -104,7 +104,7 @@ class _EventsOptionsState extends State<EventsOptions>
   EventSortOption _selectedSort = EventSortOption.price;
 
   Future<void> getEvents() async {
-    print("Getting events for trip ${trip.id}");
+    debugPrint("Getting events for trip ${trip.id}");
     List<TicketmasterEvent> call =
         await TripsitterApi.getEvents(TicketmasterQuery(
       lat: trip.destination.lat,
@@ -122,7 +122,7 @@ class _EventsOptionsState extends State<EventsOptions>
         }
       }
     }
-    print(genres.toList());
+    debugPrint(genres.toList().toString());
     // After fetching events, initialize GlobalKeys for each
     setState(() {
       selectedGenres = genres.toList();

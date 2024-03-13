@@ -76,13 +76,13 @@ class _FlightOptionsState extends State<FlightOptions> {
   void selectFlight(FlightItineraryRecursive flight) {
     setState(() {
       selected.add(flight);
-      print("Select flight with ${flight.offers.length} offers");
+      debugPrint("Select flight with ${flight.offers.length} offers");
       FlightOffer offer = flight.offers.first;
       currentDepth++;
       flights = flight.next;
       flights?.sort(compareFlights);
       if((currentDepth == 2)) {
-        print("No more flights");
+        debugPrint("No more flights");
         currentGroup!.addOption(offer);
         flights = originalFlights;
         currentDepth = 0;
@@ -118,7 +118,7 @@ class _FlightOptionsState extends State<FlightOptions> {
         flights = null;
       });
     }
-    print("Getting flights...");
+    debugPrint("Getting flights...");
     FlightsQuery query = FlightsQuery(
       origin: currentGroup!.departureAirport,
       destination: currentGroup!.arrivalAirport,
@@ -129,7 +129,7 @@ class _FlightOptionsState extends State<FlightOptions> {
     );
     List<FlightItineraryRecursive> flightsList = await TripsitterApi.getFlights(query);
     flightsList.sort(compareFlights);
-    print("GOT ${flightsList.length} FLIGHTS");
+    debugPrint("GOT ${flightsList.length} FLIGHTS");
     if(reset) {
       final Set<String> airlineCodes = {};
       for (var flight in flightsList) {
