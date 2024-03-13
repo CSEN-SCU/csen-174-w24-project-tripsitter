@@ -192,14 +192,13 @@ class _UpdateProfileState extends State<UpdateProfile> {
 
     return Scaffold(
         appBar: AppBar(
-          title: Text(user!.uid),
+          title: Text(newProfile ? "Create Profile" : "Update Profile"),
         ),
         //store all of that info into the db
         body: Center(
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 600),
             child: Column(children: [
-              Text(newProfile ? "Create Profile" : "Update Profile"),
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: TextField(
@@ -217,7 +216,7 @@ class _UpdateProfileState extends State<UpdateProfile> {
               ),
               Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: InkWell(
+                child: TextField(
                   onTap: () async {
                     DateTime? date = await showDatePicker(
                         context: context,
@@ -229,10 +228,15 @@ class _UpdateProfileState extends State<UpdateProfile> {
                       if(mounted) setState(() {});
                     }
                   },
-                  child: Text(
-                    DateFormat('yyyy-MM-dd').format(profile!.birthDate),
-                  )
-                )
+                  readOnly: true,
+                  controller: TextEditingController(text: DateFormat('yyyy-MM-dd').format(profile!.birthDate)),
+                  decoration: InputDecoration(
+                    filled: true,
+                    fillColor: Colors.grey[300],
+                    border: InputBorder.none,
+                    labelText: 'Birth Date',
+                  ),
+                ),
               ),
               Padding(
                 padding: const EdgeInsets.all(8.0),
@@ -271,18 +275,18 @@ class _UpdateProfileState extends State<UpdateProfile> {
                   },
                 ),
               ),
-              const Text("Gender:"),
               Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: DropdownButton<String>(
+                child: DropdownButtonFormField<String>(
+                  decoration: InputDecoration(
+                      filled: true,
+                      fillColor: Colors.grey[300],
+                      border: InputBorder.none,
+                      labelText: 'Gender',
+                    ),
                   value: profile!.gender,
                   icon: const Icon(Icons.arrow_downward),
                   elevation: 16,
-                  style: const TextStyle(color: Colors.deepPurple),
-                  underline: Container(
-                    height: 2,
-                    color: Colors.deepPurpleAccent,
-                  ),
                   onChanged: (String? value) {
                     // This is called when the user selects an item.
                     if(value == null) return;
