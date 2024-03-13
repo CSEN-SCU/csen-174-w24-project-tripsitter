@@ -1,3 +1,5 @@
+import 'package:tripsitter/classes/flights.dart';
+import 'package:tripsitter/classes/profile.dart';
 import 'package:tripsitter/classes/trip.dart';
 
 class HotelQuery {
@@ -71,8 +73,8 @@ class HotelInfo {
   final String dupeId;
   final String name;
   final String cityCode;
-  final double latitude;
-  final double longitude;
+  final double? latitude;
+  final double? longitude;
   final List<TripComment> comments;
 
   const HotelInfo({
@@ -95,8 +97,8 @@ class HotelInfo {
       dupeId: json['dupeId'],
       name: json['name'],
       cityCode: json['cityCode'],
-      latitude: json['latitude'].toDouble(),
-      longitude: json['longitude'].toDouble(),
+      latitude: json['latitude']?.toDouble(),
+      longitude: json['longitude']?.toDouble(),
       comments: json["comments"] != null ? List<TripComment>.from(json["comments"].map((x) => TripComment.fromJson(x))) : List.empty(growable: true),
     );
   }
@@ -458,4 +460,35 @@ class HotelCancellations {
     }
     return json;
   }
+}
+
+class HotelBooking {
+  final String offerId;
+  final List<TravelerInfo> guests;
+
+  HotelBooking({
+    required this.offerId,
+    required this.guests,
+  });
+
+  factory HotelBooking.fromHotelGroup(HotelGroup group, List<UserProfile> profiles) {
+    List<TravelerInfo> guests = [];
+    for(int i = 0; i < group.members.length; i++) {
+      guests.add(TravelerInfo.fromUserProfile(profiles.firstWhere((profile) => profile.id == group.members[i]), i));
+    }
+    return HotelBooking(
+      offerId: group.selectedOffer!.id,
+      guests: guests,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'data': {
+        'offerId': offerId,
+        'guests': guests.map((guest) => guest.toHotelJson()).toList(),
+      }
+    };
+  }
+  
 }

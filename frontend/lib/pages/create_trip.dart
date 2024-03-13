@@ -72,7 +72,7 @@ class _CreateTripState extends State<CreateTrip> {
       paymentsComplete: {uid: false},
       frozen: false,
       usingSplitPayments: false,
-      name: "My trip to ${selectedCity!.name}",
+      name: "My Trip to ${selectedCity!.name}",
       startDate: startDate!, 
       endDate: endDate!, 
       destination: selectedCity!, 

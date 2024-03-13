@@ -2,15 +2,17 @@ import 'package:flutter/material.dart';
 
 class FilterButton extends StatelessWidget {
   final String text;
-  final VoidCallback onPressed;
+  final VoidCallback? onPressed;
   final GlobalKey globalKey;
-  final Icon icon; // Add this line
+  final Widget icon; // Add this line
+  final Color color;
 
   const FilterButton({
     required this.text,
     required this.onPressed,
     required this.globalKey,
     required this.icon, // Add this line
+    this.color = const Color.fromRGBO(224, 224, 224, 1),
   });
 
   @override
@@ -26,7 +28,7 @@ class FilterButton extends StatelessWidget {
         ],
       ),
       style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.grey[300],
+        backgroundColor: color,
         foregroundColor: Colors.black,
       ),
     );

@@ -70,7 +70,7 @@ class ViewTrip extends StatelessWidget {
                                 color: Colors.black,
                                 fontWeight: FontWeight.w800,
                                 fontSize: 40,
-                                decoration: TextDecoration.underline,
+                                // decoration: TextDecoration.underline,
                                 decorationColor: Colors.black,
                                 decorationThickness: 1.2,
                               )
@@ -107,11 +107,18 @@ class ViewTrip extends StatelessWidget {
                                 trip.toggleSplitPayments();
                               },
                             ),
-                            ListTile(
-                              leading: const Icon(Icons.credit_card),
-                              title: Text("Checkout"),
-                              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => MobileWrapper(trip: trip, profiles: profiles, title: "Checkout", child: CheckoutPage(trip: trip, profiles: profiles)))),
-                            ),
+                            if((trip.usingSplitPayments ? trip!.paymentsComplete[user.uid] != true : !trip!.isConfirmed))
+                              ListTile(
+                                leading: Icon(Icons.credit_card),
+                                onTap: () {
+                                  Navigator.push(context, MaterialPageRoute(builder: (context) => CheckoutPage(trip: trip!, profiles: profiles)));
+                                }, 
+                                title: Text("Checkout"),
+                              ),
+                            if((!trip.isConfirmed && trip.usingSplitPayments && trip!.paymentsComplete[user.uid] == true))
+                              Text("Awaiting payment from all members", style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                            if(trip.isConfirmed)
+                              Text("Trip is confirmed", style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold))
                           ],
                         );
                       }
@@ -123,7 +130,7 @@ class ViewTrip extends StatelessWidget {
                             width: constraints.maxWidth * 0.7,
                           ),
                           Container(
-                            color: Color.fromARGB(255, 127, 166, 198),
+                            color: Color.fromARGB(255, 239, 239, 239),
                             width: constraints.maxWidth * 0.3,
                             child: TripSideColumn(trip)
                           ),
