@@ -146,6 +146,7 @@ class _ProfilePageState extends State<ProfilePage> {
             children: [
               Container(
                   width: MediaQuery.of(context).size.width * .55,
+                  height: MediaQuery.of(context).size.height,
                   child:
 
                       //profile info
@@ -203,10 +204,11 @@ class _ProfilePageState extends State<ProfilePage> {
                           child: Text("Create New Trip")),
                       Container(
                           alignment: Alignment.bottomLeft,
-                          child: Image.asset("cityscape.png"))
+                          child: Image.asset("cityscape.png")),
                       //button and possible picture/video
                     ],
                   )),
+
               //the trip info
               Container(
                   width: MediaQuery.of(context).size.width * .45,
