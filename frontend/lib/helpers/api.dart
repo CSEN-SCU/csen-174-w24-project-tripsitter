@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:tripsitter/classes/car.dart';
+import 'package:tripsitter/classes/city.dart';
 import 'package:tripsitter/classes/flights.dart';
 
 import 'package:http/http.dart' as http;
@@ -12,13 +13,13 @@ import 'package:tripsitter/classes/hotels.dart';
 import 'package:tripsitter/classes/trip.dart';
 
 class TripsitterApi {
-  // static const String baseUrl = '127.0.0.1:5001';
-  // static const String baseApiUrl = '/tripsitter-coen-174/us-central1/api';
-  // static const bool useHttps = false;
+  static const String baseUrl = '127.0.0.1:5001';
+  static const String baseApiUrl = '/tripsitter-coen-174/us-central1/api';
+  static const bool useHttps = false;
   
-  static const String baseUrl = 'us-central1-tripsitter-coen-174.cloudfunctions.net';
-  static const String baseApiUrl = '/api';
-  static const bool useHttps = true;
+  // static const String baseUrl = 'us-central1-tripsitter-coen-174.cloudfunctions.net';
+  // static const String baseApiUrl = '/api';
+  // static const bool useHttps = true;
 
   static const String searchFlightsUrl = '$baseApiUrl/search/flights';
   static const String searchAirlinesUrl = '$baseApiUrl/search/airlines';
@@ -29,6 +30,7 @@ class TripsitterApi {
   static const String searchRentalCarsUrl = "$baseApiUrl/search/cars";
   static const String bookFlightUrl = "$baseApiUrl/book/flights";
   static const String bookHotelUrl = "$baseApiUrl/book/hotels";
+  static const String cityImageUrl = "$baseApiUrl/image/city";
 
   static const String addUserUrl = '$baseApiUrl/trip/user';
   static const String createPaymentIntentUrl = '$baseApiUrl/checkout/intent';
@@ -188,6 +190,17 @@ class TripsitterApi {
       String pnr = "350XWB";
       debugPrint("Booked hotel $pnr");
       await group.setPnr(pnr);
+    }
+  }
+
+  static Future<String> getCityImage(City city) async {
+    Uri uri = useHttps ? Uri.https(baseUrl,cityImageUrl, {'city': "${city.name}, ${city.country}"}) : Uri.http(baseUrl, cityImageUrl, {'city': "${city.name}, ${city.country}"});
+    http.Response response = await http.get(uri);
+    if (response.statusCode == 200) {
+      dynamic data = jsonDecode(response.body);
+      return data['src'];
+    } else {
+      throw Exception('Failed to load hotels');
     }
   }
 }

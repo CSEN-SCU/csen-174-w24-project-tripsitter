@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:tripsitter/classes/airport.dart';
 import 'package:tripsitter/classes/city.dart';
@@ -14,6 +15,14 @@ Future<String> getNearestAirport(City city, BuildContext context) async {
     return aDist.compareTo(bDist);
   });
   return airports.first.iataCode;
+}
+
+Future<List<Airport>> getNearbyAirports(String code, BuildContext context) async {
+  List<Airport> airports = await getAirports(context);
+
+  Airport? a = airports.firstWhereOrNull((element) => element.iataCode == code);
+  if(a == null) {return [];}
+  return airports.where((b) => distance(a.lat, a.lon, b.lat, b.lon) < 100).toList();
 }
 
 // returns distance in miles
