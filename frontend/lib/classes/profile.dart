@@ -157,13 +157,12 @@ class UserProfile {
     return UserProfile.fromFirestore(doc);
   }
 
-  static Stream<List<UserProfile>> getTripProfiles(List<String> uids) {
-    return FirebaseFirestore.instance
+  static Future<List<UserProfile>> getTripProfiles(List<String> uids) async {
+    return (await FirebaseFirestore.instance
         .collection('users')
         .where(FieldPath.documentId, whereIn: uids)
-        .snapshots()
-        .map((snapshot) => snapshot.docs
-            .map((doc) => UserProfile.fromFirestore(doc))
-            .toList());
+        .get()).docs
+        .map((doc) => UserProfile.fromFirestore(doc))
+            .toList();
   }
 }
