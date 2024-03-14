@@ -22,10 +22,8 @@ class MobileWrapper extends StatelessWidget {
           Provider<List<UserProfile>>.value(value: profiles!),
       ],
       child: Scaffold(
-        appBar: AppBar(
-          title: Text(title),
-        ),
-        body: child,
+        appBar: TripSitterNavbar(title: title, backButton: true, homeButton: false),
+        body: Container(color: Colors.white, child: child),
       ),
     );
   }

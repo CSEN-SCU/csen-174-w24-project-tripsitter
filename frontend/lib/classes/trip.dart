@@ -2,7 +2,6 @@ import 'dart:math';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:collection/collection.dart';
-import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:tripsitter/classes/car.dart';
 import 'package:tripsitter/classes/city.dart';
@@ -281,6 +280,41 @@ class Trip {
     await _save();
   }
 
+  Future<void> updateName(String name) async {
+    _name = name;
+    await _save();
+  }
+
+  Future<void> updateStartDate(DateTime date) async {
+    if(_startDate == date) return;
+    _startDate = date;
+    flights.clear();
+    hotels.clear();
+    rentalCars.clear();
+    _activities = activities.where((e) => e.event.startTime.dateTimeUtc != null && e.event.startTime.dateTimeUtc!.isAfter(date)).toList();
+    await _save();
+  }
+
+  Future<void> updateEndDate(DateTime date) async {
+    if(_endDate == date) return;
+    _endDate = date;
+    flights.clear();
+    hotels.clear();
+    rentalCars.clear();
+    _activities = activities.where((e) => e.event.startTime.dateTimeUtc != null && e.event.startTime.dateTimeUtc!.isBefore(date)).toList();
+    await _save();
+  }
+
+  Future<void> updateDestination(City newDest) async {
+    if(newDest.lat == _destination.lat && newDest.lon == _destination.lon) return;
+    _destination = newDest;
+    flights.clear();
+    hotels.clear();
+    rentalCars.clear();
+    activities.clear();
+    await _save();
+  }
+
   Future<void> addActivity(TicketmasterEvent event, List<String> uids) async {
     _activities.add(Activity(
       comments: List<TripComment>.empty(growable: true),
@@ -345,6 +379,10 @@ class Trip {
   Future<void> removeComment(TripComment comment) async {
     _comments.remove(comment);
     await _save();
+  }
+
+  delete() {
+    FirebaseFirestore.instance.collection("trips").doc(_id).delete();
   }
 
 }
@@ -432,7 +470,9 @@ class FlightGroup {
   }
 
   Future<void> removeOption(FlightOffer option) async {
-    int index = _options.indexOf(option);
+    if(option == _selected) {
+      _selected = null;
+    }
     _options.remove(option);
     await _save();
   }
@@ -544,6 +584,9 @@ class HotelGroup {
   }
   Future<void> removeOption(int i) async {
     if(i < 0 || i > _offers.length) return;
+    if(_selectedOffer == _offers[i]) {
+      _selectedOffer = null;
+    }
     _offers.removeAt(i);
     _infos.removeAt(i);
     await _save();
@@ -630,10 +673,16 @@ class RentalCarGroup {
     await _save();
   }
   Future<void> removeOption(RentalCarOffer option) async {
+    if(option == _selected) {
+      _selected = null;
+    }
     _options.remove(option);
     await _save();
   }
   Future<void> removeOptionById(String id) async {
+    if(_selected?.guid == id) {
+      _selected = null;
+    }
     _options.removeWhere((element) => element.guid == id);
     await _save();
   }

@@ -12,13 +12,13 @@ import 'package:tripsitter/classes/hotels.dart';
 import 'package:tripsitter/classes/trip.dart';
 
 class TripsitterApi {
-  static const String baseUrl = '127.0.0.1:5001';
-  static const String baseApiUrl = '/tripsitter-coen-174/us-central1/api';
-  static const bool useHttps = false;
+  // static const String baseUrl = '127.0.0.1:5001';
+  // static const String baseApiUrl = '/tripsitter-coen-174/us-central1/api';
+  // static const bool useHttps = false;
   
-  // static const String baseUrl = 'us-central1-tripsitter-coen-174.cloudfunctions.net';
-  // static const String baseApiUrl = '/api';
-  // static const bool useHttps = true;
+  static const String baseUrl = 'us-central1-tripsitter-coen-174.cloudfunctions.net';
+  static const String baseApiUrl = '/api';
+  static const bool useHttps = true;
 
   static const String searchFlightsUrl = '$baseApiUrl/search/flights';
   static const String searchAirlinesUrl = '$baseApiUrl/search/airlines';
@@ -155,18 +155,18 @@ class TripsitterApi {
       Map<String,dynamic> data = json.decode(response.body);
       if(((data["data"] ?? {})["associatedRecords"] ?? []) != null && ((data["data"] ?? {})["associatedRecords"] ?? []).length > 0) {
         String pnr = (((data["data"] ?? {})["associatedRecords"] ?? [])[0] ?? {})["reference"] ?? "A38B74";
-        print("Booked flight $pnr");
+        debugPrint("Booked flight $pnr");
         await group.setPnr(pnr);
       }
       else {
         String pnr = "A38B74";
-        print("Booked flight $pnr");
+        debugPrint("Booked flight $pnr");
         await group.setPnr(pnr);
       }
     }
     catch (e) {
       String pnr = "A38B74";
-      print("Booked flight $pnr");
+      debugPrint("Booked flight $pnr");
       await group.setPnr(pnr);
     }
   }
@@ -181,12 +181,12 @@ class TripsitterApi {
       http.Response response = await http.post(uri, body: jsonEncode(booking.toJson()), headers: {'Content-Type': 'application/json'});
       Map<String,dynamic> data = json.decode(response.body);
       String pnr = data["pnr"] ?? "350XWB";
-      print("Booked hotel $pnr");
+      debugPrint("Booked hotel $pnr");
       await group.setPnr(pnr);
     }
     catch (e) {
       String pnr = "350XWB";
-      print("Booked hotel $pnr");
+      debugPrint("Booked hotel $pnr");
       await group.setPnr(pnr);
     }
   }

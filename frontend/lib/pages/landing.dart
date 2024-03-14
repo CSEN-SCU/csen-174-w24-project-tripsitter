@@ -10,12 +10,12 @@ class LandingPage extends StatelessWidget {
   Widget build(BuildContext context) {
     User? user = Provider.of<User?>(context);
     if(user == null) {
-      return LoginPage();
+      return const LoginPage();
     }
     return Scaffold(
       appBar: AppBar(
         title: const Text('Sign In to TripSitter'),
-        backgroundColor: Color.fromRGBO(196, 53, 53, 1),
+        backgroundColor: const Color.fromRGBO(196, 53, 53, 1),
       ),
       body: Center(
             child: ElevatedButton(

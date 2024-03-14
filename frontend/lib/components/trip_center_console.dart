@@ -1,7 +1,6 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:tripsitter/classes/trip.dart';
 import 'package:tripsitter/components/trip_console_dot.dart';
 
@@ -160,7 +159,7 @@ class _MyStatefulWidgetState extends State<TripCenterConsole>
       children: [
         TripConsoleDot(
             trip: widget.trip,
-            type: PageType.Hotel,
+            type: PageType.hotel,
             positions: positions,
             iconAnimationControllers: _iconAnimationControllers,
             iconAnimations: _iconAnimations,
@@ -196,7 +195,7 @@ class _MyStatefulWidgetState extends State<TripCenterConsole>
         // Rental Cars
         TripConsoleDot(
             trip: widget.trip,
-          type: PageType.RentalCar, 
+          type: PageType.rentalCar, 
           positions: positions, 
           iconAnimationControllers: _iconAnimationControllers, 
           iconAnimations: _iconAnimations, 
@@ -232,7 +231,7 @@ class _MyStatefulWidgetState extends State<TripCenterConsole>
         // Flights
         TripConsoleDot(
             trip: widget.trip,
-          type: PageType.Flights, 
+          type: PageType.flights, 
           positions: positions, 
           iconAnimationControllers: _iconAnimationControllers, 
           iconAnimations: _iconAnimations, 
@@ -267,7 +266,7 @@ class _MyStatefulWidgetState extends State<TripCenterConsole>
         // Activities
         TripConsoleDot(
           trip: widget.trip,
-          type: PageType.Activities, 
+          type: PageType.activities, 
           positions: positions, 
           iconAnimationControllers: _iconAnimationControllers, 
           iconAnimations: _iconAnimations, 

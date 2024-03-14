@@ -4,6 +4,7 @@ import 'package:tripsitter/classes/profile.dart';
 import 'package:tripsitter/classes/trip.dart';
 import 'package:tripsitter/components/checkout/trip_summary.dart';
 import 'package:tripsitter/components/navbar.dart';
+import 'package:tripsitter/helpers/styles.dart';
 
 class ConfirmationPage extends StatelessWidget {
   final Trip trip;
@@ -19,19 +20,20 @@ class ConfirmationPage extends StatelessWidget {
         child: CircularProgressIndicator()
       );
     }
-    bool split = trip.usingSplitPayments;
     String uid = user.uid;
     return Scaffold(
-      appBar: TripSitterNavbar(),
+      appBar: const TripSitterNavbar(),
       body: Center(
-        child: Column(
+        child: ListView(
           children: [
-            Text("Thank you for your purchase!"),
-            Text("Your trip is confirmed!"),
+            Center(child: Text("Your trip is confirmed!", style: sectionHeaderStyle.copyWith(fontSize: 30))),
+            const Text(""),
             TripSummary(
               trip: trip,
               uid: uid,
               profiles: profiles,
+              showSplit: false,
+              showBooking: true,
             ),
             ElevatedButton(
               onPressed: () {

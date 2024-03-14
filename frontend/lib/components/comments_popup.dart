@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:tripsitter/classes/profile.dart';
@@ -30,7 +31,7 @@ class _CommentsPopupState extends State<CommentsPopup> {
       isLabelVisible: widget.comments.isNotEmpty,
       label: Text(widget.comments.length.toString()),
       child: PopupMenuButton(
-        child: Icon(Icons.comment),
+        child: const Icon(Icons.comment),
         itemBuilder: (BuildContext context) {
           return [
             PopupMenuItem(
@@ -43,10 +44,10 @@ class _CommentsPopupState extends State<CommentsPopup> {
                         ...widget.comments.map((TripComment comment) => ListTile(
                           subtitle: Text(DateFormat('yyyy-MM-dd – kk:mm').format(comment.date)),
                           isThreeLine: true,
-                          title: Text("${widget.profiles.firstWhere((element) => element.id == comment.uid).name}\n${comment.comment}"),
-                          leading: ProfilePicture(widget.profiles.firstWhere((element) => element.id == comment.uid)),
+                          title: Text("${widget.profiles.firstWhereOrNull((element) => element.id == comment.uid)?.name ?? ""}\n${comment.comment}"),
+                          leading: widget.profiles.firstWhereOrNull((element) => element.id == comment.uid) == null ?  ProfilePicture(widget.profiles.firstWhere((element) => element.id == comment.uid)) : null,
                           trailing: comment.uid == widget.myUid ? IconButton(
-                            icon: Icon(Icons.delete),
+                            icon: const Icon(Icons.delete),
                             onPressed: () async {
                               await widget.removeComment(comment);
                               if(!mounted) return;
@@ -58,7 +59,7 @@ class _CommentsPopupState extends State<CommentsPopup> {
                         ListTile(
                           title: TextField(
                             controller: commentController,
-                            decoration: InputDecoration(
+                            decoration: const InputDecoration(
                               border: OutlineInputBorder(),
                               labelText: 'Add Comment',
                             ),

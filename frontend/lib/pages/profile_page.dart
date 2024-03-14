@@ -1,24 +1,18 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:collection/collection.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:tripsitter/classes/profile.dart';
 import 'package:tripsitter/classes/trip.dart';
-import 'package:tripsitter/components/new_trip_popup.dart';
-import 'package:tripsitter/components/payment.dart';
-import 'package:tripsitter/helpers/locators.dart';
-import 'package:tripsitter/pages/login.dart';
+import 'package:tripsitter/components/navbar.dart';
 import 'package:tripsitter/pages/update_profile.dart';
 
-//TODO: pull and populate user info. have fallbacks for photo
 class TripInfo extends StatefulWidget {
   final Trip trip;
   final Color col;
 
-  TripInfo({
+  const TripInfo({
     required this.trip,
     required this.col,
   });
@@ -42,66 +36,67 @@ class _TripInfoState extends State<TripInfo> {
         },
         style: ElevatedButton.styleFrom(
           backgroundColor: widget.col,
-          textStyle: TextStyle(color: Colors.black),
+          textStyle: const TextStyle(color: Colors.black, fontSize: 20, height: 2),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(0)),
         ),
         child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                SizedBox(height: 10),
+                const SizedBox(height: 10),
                 Text(
                   name,
-                  style: TextStyle(color: Colors.black),
+                  style: const TextStyle(color: Colors.black),
                 ),
-                SizedBox(height: 5),
+                const SizedBox(height: 5),
                 Row(
                   children: [
-                    Icon(
+                    const Icon(
                       Icons.location_pin,
                       color: Colors.black,
                     ),
-                    SizedBox(width: 5),
+                    const SizedBox(width: 5),
                     Text(
-                      city + ', ' + country,
-                      style: TextStyle(color: Colors.black),
+                      '$city, $country',
+                      style: const TextStyle(color: Colors.black),
                     )
                   ],
                 ),
-                SizedBox(height: 5),
+                const SizedBox(height: 5),
                 Row(
                   children: [
-                    Icon(
+                    const Icon(
                       Icons.calendar_month,
                       color: Colors.black,
                     ),
-                    SizedBox(width: 5),
+                    const SizedBox(width: 5),
                     Text(
                       start,
-                      style: TextStyle(color: Colors.black),
+                      style: const TextStyle(color: Colors.black),
                     ),
-                    SizedBox(width: 5),
-                    Icon(
+                    const SizedBox(width: 5),
+                    const Icon(
                       Icons.arrow_forward,
                       size: 15,
                       color: Colors.black,
                     ),
-                    SizedBox(width: 5),
+                    const SizedBox(width: 5),
                     Text(
                       end,
-                      style: TextStyle(color: Colors.black),
+                      style: const TextStyle(color: Colors.black),
                     )
                   ],
                 ),
-                SizedBox(height: 10),
+                const SizedBox(height: 10),
               ],
             ),
-            SizedBox(width: 300),
+            const SizedBox(width: 300),
             Center(
               child: Text(
-                '\$' + price,
-                style: TextStyle(color: Colors.black),
+                "     Price - \$$price",
+                style: const TextStyle(color: Colors.black),
               ),
             )
           ],
@@ -117,12 +112,13 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  String? image = null;
+  bool upcoming = true;
+  String? image;
   @override
   Widget build(BuildContext context) {
     UserProfile? profile = Provider.of<UserProfile?>(context);
     if (profile == null) {
-      return UpdateProfile();
+      return const UpdateProfile();
     }
     if (image == null && profile.hasPhoto) {
       FirebaseStorage.instance
@@ -132,149 +128,149 @@ class _ProfilePageState extends State<ProfilePage> {
         if (mounted) setState(() => image = a);
       });
     }
-    // print(profile.id);
-    // FirebaseFirestore.instance
-    //     .collection('trips')
-    //     .where('uids', arrayContains: profile.id)
-    //     .get()
-    //     .then((s) {
-    //       s.docs.map(((doc) => Trip.fromFirestore(doc)));
-    //     });
     return MultiProvider(
       providers: [
         StreamProvider.value(
             value: Trip.getTripsByProfile(profile.id),
             initialData: List<Trip>.empty(growable: true),
             catchError: (_, err) {
-              print(err);
+              debugPrint(err.toString());
               return List<Trip>.empty(growable: true);
             })
       ],
       child: Scaffold(
-        appBar: AppBar(
-          //contains the logo and trip sitter name
-          title: Text('My Profile'),
-          backgroundColor: Color.fromARGB(255, 238, 238, 238),
-        ),
-        //contains two columns to contain the user info in one and the trip info in the other
-        body: Padding(
-          padding: const EdgeInsets.only(top: 10.0),
-          child: Center(
-            child: Row(
-              children: [
-                Container(
-                    width: MediaQuery.of(context).size.width * .55,
-                    child:
-                        //profile info
-                        Column(
-                      children: [
-                        Text("About Me", style: TextStyle(fontSize: 20)),
-                        Row(
-                          //profile part
-                          children: [
-                            SizedBox(width: 25),
-                            Container(
-                              //width: MediaQuery.of(context).size.width*.45 ,
-                              child: Column(
-                                //the icon and change button
-                                children: [
-                                  CircleAvatar(
-                                      backgroundImage:
-                                          (profile.hasPhoto && image != null)
-                                              ? NetworkImage(image!)
-                                              : null,
-                                      child:
-                                          !(profile.hasPhoto && image != null)
-                                              ? Icon(Icons.person)
-                                              : null),
-                                  SizedBox(height: 10),
-                                  ElevatedButton(
-                                      onPressed: () {
-                                        Navigator.pushNamed(
-                                            context, "/profile");
-                                      },
-                                      child: Text("Edit Profile"),
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor:
-                                            Color.fromARGB(255, 238, 238, 238),
-                                        foregroundColor: Colors.black,
-                                      )),
-                                ],
-                              ),
-                            ),
-                            SizedBox(width: 111),
-                            Container(
-                              //width: MediaQuery.of(context).size.width*.55 ,
-                              child: Column(
-                                children: [
-                                  Text(profile.name),
-                                  Text(
-                                      "Tripping since ${DateFormat.yMMM().format(profile.joinDate)}"),
-                                  Text(
-                                      "Number of Trips: ${profile.numberTrips}"),
-                                ],
-                              ),
-                            )
-                          ],
-                        ),
-                        Column(
-                          children: [
-                            SizedBox(height: 20),
-                            ElevatedButton(
-                              onPressed: () {
-                                Navigator.pushNamed(context, "/new");
-                              },
-                              child: Text("Create New Trip"),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor:
-                                    Color.fromARGB(255, 125, 175, 220),
-                                foregroundColor: Colors.black,
-                              ),
-                            ),
-                          ],
-                        ),
+        appBar:
+            const TripSitterNavbar(), //contains two columns to contain the user info in one and the trip info in the other
 
-                        //button and possible picture/video
-                      ],
-                    )),
-                //the trip info
-                Container(
-                    width: MediaQuery.of(context).size.width * .45,
-                    child: Center(
-                      child: Column(
+        body: Center(
+          child: Row(
+            children: [
+              SizedBox(
+                  width: MediaQuery.of(context).size.width * .55,
+                  height: MediaQuery.of(context).size.height,
+                  child:
+
+                      //profile info
+                      Column(
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        //profile part
                         children: [
-                          Text("My Trips", style: TextStyle(fontSize: 20)),
-                          Center(
-                            child: Row(
-                              children: [
-                                Text("Upcoming"),
-                                SizedBox(width: 10),
-                                Icon(Icons.compare_arrows),
-                                SizedBox(width: 10),
-                                Text("Past")
-                              ],
-                            ),
+                          Column(
+                            //the icon and change button
+                            children: [
+                              CircleAvatar(
+                                  radius: 100,
+                                  backgroundImage:
+                                      (profile.hasPhoto && image != null)
+                                          ? NetworkImage(image!)
+                                          : null,
+                                  child:
+                                      !(profile.hasPhoto && image != null)
+                                          ? const Icon(Icons.person)
+                                          : null),
+                              const SizedBox(height: 10),
+                              ElevatedButton(
+                                  onPressed: () {
+                                    Navigator.pushNamed(
+                                        context, "/profile");
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor:
+                                        const Color.fromARGB(255, 238, 238, 238),
+                                    foregroundColor: Colors.black,
+                                  ),
+                                  child: const Text("Edit Profile")),
+                            ],
                           ),
-                          Builder(builder: (context) {
-                            List<Trip> trips = Provider.of<List<Trip>>(context);
-                            return Expanded(
-                              child: ListView.builder(
-                                  itemCount: trips.length,
-                                  itemBuilder:
-                                      (BuildContext context, int index) {
-                                    // Generate a widget for each item in the list
-                                    return TripInfo(
-                                        trip: trips[index],
-                                        col:
-                                            Color.fromARGB(255, 148, 148, 148));
-                                  }),
-                            );
-                          }),
-                        ],
-                      ),
-                    ))
-              ],
-            ),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                profile.name,
+                                style: const TextStyle(
+                                    fontSize: 30, decorationThickness: 2),
+                              ),
+                              Text(
+                                  "Tripping since ${DateFormat.yMMM().format(profile.joinDate)}"),
+                              Text(
+                                  "Number of Trips: ${profile.numberTrips}"),
+                            ],
+                          )
+                          ],
+                        ),
+                      ElevatedButton(
+                          onPressed: () {
+                            Navigator.pushNamed(context, "/new");
+                          },
+                          child: const Text("Create New Trip")),
+                      Container(
+                          alignment: Alignment.bottomLeft,
+                          child: Image.asset("assets/cityscape.png")),
+                      //button and possible picture/video
+                    ],
+                  )),
+
+              //the trip info
+              SizedBox(
+                  width: MediaQuery.of(context).size.width * .45,
+                  child: Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Text("My Trips"),
+                        Center(
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              ElevatedButton(
+                                  onPressed: () {
+                                    upcoming = true;
+                                    setState(() {});
+                                  },
+                                  child: const Text("Upcoming")),
+                              const Icon(Icons.swap_horiz_sharp),
+                              ElevatedButton(
+                                  onPressed: () {
+                                    upcoming = false;
+                                    setState(() {});
+                                  },
+                                  child: const Text("Past"))
+                            ],
+                          ),
+                        ),
+                        Builder(builder: (context) {
+                          List<Trip> trips = Provider.of<List<Trip>>(context);
+                          if (upcoming) {
+                            trips = trips
+                                .where((element) =>
+                                    element.endDate.isAfter(DateTime.now()))
+                                .sortedBy((element) => element.startDate)
+                                .toList();
+                          } else {
+                            trips = trips
+                                .where((element) =>
+                                    element.endDate.isBefore(DateTime.now()))
+                                .sortedBy((element) => element.startDate)
+                                .toList();
+                          }
+                          return Expanded(
+                            child: ListView.builder(
+                                itemCount: trips.length,
+                                itemBuilder: (BuildContext context, int index) {
+                                  // Generate a widget for each item in the list
+                                  return TripInfo(
+                                    trip: trips[index],
+                                    col: index % 2 == 0 ? Color.fromARGB(255, 245, 245, 245) : Color.fromARGB(255, 217, 217, 217)
+                                  );
+                                }),
+                          );
+                        }),
+                      ],
+                    ),
+                  ))
+            ],
           ),
         ),
       ),

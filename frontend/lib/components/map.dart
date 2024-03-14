@@ -1,13 +1,10 @@
-import 'dart:html';
+import 'dart:math';
 
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_map/flutter_map.dart';
-import 'package:flutter_map_cancellable_tile_provider/flutter_map_cancellable_tile_provider.dart';
 import 'package:mapbox_gl/mapbox_gl.dart';
 import 'package:tripsitter/classes/ticketmaster.dart';
 import 'package:tripsitter/classes/trip.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:tripsitter/helpers/locators.dart';
 import 'package:tripsitter/helpers/data.dart';
 
@@ -27,8 +24,8 @@ class TripsitterMapState extends State<TripsitterMap> {
   var isLight = true;
   int markersCount = 0;
 
-  List<Marker> _markers = [];
-  List<_MarkerState> _markerStates = [];
+  final List<Marker> _markers = [];
+  final List<_MarkerState> _markerStates = [];
 
   void _addMarkerStates(_MarkerState markerState) {
     _markerStates.add(markerState);
@@ -65,7 +62,7 @@ class TripsitterMapState extends State<TripsitterMap> {
     if (widget.trip.hotels.isNotEmpty) {
       var selectionLists =
           widget.trip.hotels.where((s) => s.selectedInfo != null).toList();
-      selectionLists.forEach((element) {
+      for (var element in selectionLists) {
         controller
             .toScreenLocation(LatLng(element.selectedInfo?.latitude ?? 0.0,
                 element.selectedInfo?.longitude ?? 0.0))
@@ -75,12 +72,12 @@ class TripsitterMapState extends State<TripsitterMap> {
               LatLng(element.selectedInfo?.latitude ?? 0.0,
                   element.selectedInfo?.longitude ?? 0.0));
         });
-      });
+      }
     }
     if (widget.trip.flights.isNotEmpty) {
       var airports = await getAirports(context);
-      widget.trip.flights.forEach((element) {
-        airports.forEach((airport) {
+      for (var element in widget.trip.flights) {
+        for (var airport in airports) {
           if (airport.iataCode == element.arrivalAirport) {
             controller
                 .toScreenLocation(LatLng(airport.lat, airport.lon))
@@ -90,19 +87,19 @@ class TripsitterMapState extends State<TripsitterMap> {
                   LatLng(airport.lat, airport.lon));
             });
           }
-        });
-      });
+        }
+      }
       // var selectionLists =
       //     widget.trip.flights.where((s) => s.arrivalAirport != null).toList();
-      // print("Selected Hotel Groups:");
-      // print(selectionLists);
+      // debugPrint("Selected Hotel Groups:");
+      // debugPrint(selectionLists);
       // selectionLists.forEach((element) {
-      //   print(element);
+      //   debugPrint(element);
       //   controller
       //       .toScreenLocation(LatLng(element.selectedInfo?.latitude ?? 0.0,
       //           element.selectedInfo?.longitude ?? 0.0))
       //       .then((value) {
-      //     print(element.selectedInfo);
+      //     debugPrint(element.selectedInfo);
       //     _addHotelMarker(
       //         Point<double>(value.x as double, value.y as double),
       //         LatLng(element.selectedInfo?.latitude ?? 0.0,
@@ -241,16 +238,6 @@ class _MarkerState extends State with TickerProviderStateMixin {
     this.isHotel,
     this.isAirport,
   );
-
-  @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {

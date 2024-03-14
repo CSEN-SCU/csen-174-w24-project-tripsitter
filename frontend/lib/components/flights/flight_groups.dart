@@ -48,15 +48,16 @@ class _FlightGroupsState extends State<FlightGroups> {
       continue;
     }
     if (profile.hometown != null) {
+      // ignore: use_build_context_synchronously
       var nearestAirport = await getNearestAirport(profile.hometown!, context);
       FlightGroup? existing = trip.flights.firstWhereOrNull(
         (element) => element.departureAirport == nearestAirport,
       );
       if (existing != null) {
-        print("Adding ${profile.name} to existing flight group");
+        debugPrint("Adding ${profile.name} to existing flight group");
         await existing.addMember(profile.id);
       } else {
-        print("Creating new flight group for ${profile.name}");
+        debugPrint("Creating new flight group for ${profile.name}");
         await trip.addFlightGroup(nearestAirport, destinationAirport, [profile.id]);
       }
     }
@@ -96,7 +97,7 @@ class _FlightGroupsState extends State<FlightGroups> {
                   children: [
                     ListTile(
                       title: Text("${group.departureAirport} - ${group.arrivalAirport}"),
-                      subtitle: Text(group.members.map((e) => profiles.firstWhere((profile) => profile.id == e).name ).join(', ')),
+                      subtitle: Text(group.members.map((e) => profiles.firstWhereOrNull((profile) => profile.id == e)?.name ?? "").join(', ')),
                       onTap: () {
                         widget.setCurrentGroup(group);
                         widget.setState();
@@ -147,7 +148,7 @@ class _FlightGroupsState extends State<FlightGroups> {
                               addComment: (String comment) async {
                                 offer.addComment(TripComment(
                                     comment: comment,
-                                    uid: user!.uid,
+                                    uid: user.uid,
                                     date: DateTime.now())
                                   );
                                 await trip.save();
@@ -155,7 +156,7 @@ class _FlightGroupsState extends State<FlightGroups> {
                               },
                             ),
                             IconButton(
-                              icon: Icon(Icons.delete),
+                              icon: const Icon(Icons.delete),
                               onPressed: () async {
                                 await group.removeOption(offer);
                                 widget.setState();
@@ -187,7 +188,7 @@ class _FlightGroupsState extends State<FlightGroups> {
                             );
                           }));
                         },
-                        child: Text("Add flight options"),
+                        child: const Text("Add flight options"),
                       )
                   ],
                 ),

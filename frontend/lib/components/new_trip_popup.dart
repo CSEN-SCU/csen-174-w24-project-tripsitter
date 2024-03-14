@@ -6,20 +6,20 @@ class NewTrip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text("New Trip"),
-      content: Text("Create a new trip?"),
+      title: const Text("New Trip"),
+      content: const Text("Create a new trip?"),
       actions: [
         TextButton(
           onPressed: () {
             Navigator.pop(context);
           }, 
-          child: Text("Cancel")
+          child: const Text("Cancel")
         ),
         TextButton(
           onPressed: () {
             Navigator.pop(context);
           }, 
-          child: Text("Create")
+          child: const Text("Create")
         )
       ]
     );

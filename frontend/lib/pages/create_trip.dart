@@ -1,7 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:csv/csv.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -83,9 +81,11 @@ class _CreateTripState extends State<CreateTrip> {
       activities: List.empty(growable: true)
     );
     await newTrip.save();
+    // ignore: use_build_context_synchronously
     UserProfile? profile = Provider.of<UserProfile?>(context, listen: false); 
     profile?.addTrip();
     await profile?.save();
+    // ignore: use_build_context_synchronously
     Navigator.pushNamed(context, "/trip/${newTrip.id}");
   }
 
@@ -93,116 +93,120 @@ class _CreateTripState extends State<CreateTrip> {
   Widget build(BuildContext context) {
     User? user = Provider.of<User?>(context);
     if(user == null) {
-      return LoginPage();
+      return const LoginPage();
     }
     return Scaffold(
       appBar: const TripSitterNavbar(),
       body: Center(
         child: ConstrainedBox(
-          constraints: BoxConstraints(maxWidth: 600),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Text('Let\'s get started', style: Theme.of(context).textTheme.displayMedium),
-              Text("Tell me some basic details about your dream trip"),
-              // address input field
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Autocomplete<City>(
-                  fieldViewBuilder: (context, textEditingController, focusNode, onFieldSubmitted) => TextFormField(
-                    controller: textEditingController,
-                    focusNode: focusNode,
-                    onFieldSubmitted: (_) {},
+          constraints: const BoxConstraints(maxWidth: 600),
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: ListView(
+              children: [
+                Center(child: Text('Let\'s get started', style: Theme.of(context).textTheme.displayMedium)),
+                const Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: Text("Tell me some basic details about your dream trip"),
+                ),
+                // address input field
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Autocomplete<City>(
+                    fieldViewBuilder: (context, textEditingController, focusNode, onFieldSubmitted) => TextFormField(
+                      controller: textEditingController,
+                      focusNode: focusNode,
+                      onFieldSubmitted: (_) {},
+                      decoration: InputDecoration(
+                        filled: true,
+                        fillColor: Colors.grey[300],
+                        border: InputBorder.none,
+                        labelText: 'Location',
+                      ),
+                    ),
+                    displayStringForOption: (option) => "${option.name}, ${option.country}",
+                    optionsBuilder: (TextEditingValue value) {
+                      if(value.text == '') {
+                        return const Iterable<City>.empty();
+                      }
+                      return cities.where((t){
+                        return t.name.toLowerCase().contains(value.text.toLowerCase());
+                      });
+                    },
+                    onSelected: (selected) {
+                      selectedCity = selected;
+                    },
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: TextFormField(
+                    onTap: () async {
+                      DateTime? d = await showDatePicker(
+                        context: context,
+                        initialDate: startDate ?? DateTime.now(),
+                        firstDate: DateTime(2024, 1, 1),
+                        lastDate: endDate ?? DateTime(2100),
+                      );
+                      if (d != null) {
+                        setState(() => startDate = d);
+                      }
+                    },
+                    readOnly: true,
+                    controller: TextEditingController.fromValue(
+                      TextEditingValue(
+                        text: startDate == null
+                          ? ''
+                          : DateFormat(DateFormat.YEAR_MONTH_DAY).format(startDate!),
+                      ),
+                    ),
                     decoration: InputDecoration(
                       filled: true,
                       fillColor: Colors.grey[300],
                       border: InputBorder.none,
-                      labelText: 'Location',
+                      labelText: 'Start Date',
                     ),
                   ),
-                  displayStringForOption: (option) => "${option.name}, ${option.country}",
-                  optionsBuilder: (TextEditingValue value) {
-                    if(value.text == '') {
-                      return const Iterable<City>.empty();
-                    }
-                    return cities.where((t){
-                      return t.name.toLowerCase().contains(value.text.toLowerCase());
-                    });
-                  },
-                  onSelected: (selected) {
-                    selectedCity = selected;
-                  },
                 ),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: TextFormField(
-                  onTap: () async {
-                    DateTime? d = await showDatePicker(
-                      context: context,
-                      initialDate: startDate ?? DateTime.now(),
-                      firstDate: DateTime(2024, 1, 1),
-                      lastDate: DateTime(2100),
-                    );
-                    if (d != null) {
-                      setState(() => startDate = d);
-                    }
-                  },
-                  readOnly: true,
-                  controller: TextEditingController.fromValue(
-                    TextEditingValue(
-                      text: startDate == null
-                        ? ''
-                        : DateFormat(DateFormat.YEAR_MONTH_DAY).format(startDate!),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: TextFormField(
+                    onTap: () async {
+                      DateTime? d = await showDatePicker(
+                        context: context,
+                        initialDate: endDate ?? startDate ?? DateTime.now(),
+                        firstDate: startDate ?? DateTime(2024, 1, 1),
+                        lastDate: DateTime(2100),
+                      );
+                      if (d != null) {
+                        setState(() => endDate = d);
+                      }
+                    },
+                    readOnly: true,
+                    controller: TextEditingController.fromValue(
+                      TextEditingValue(
+                        text: endDate == null
+                          ? ''
+                          : DateFormat(DateFormat.YEAR_MONTH_DAY).format(endDate!),
+                      ),
+                    ),
+                    decoration: InputDecoration(
+                      filled: true,
+                      fillColor: Colors.grey[300],
+                      border: InputBorder.none,
+                      labelText: 'End Date',
                     ),
                   ),
-                  decoration: InputDecoration(
-                    filled: true,
-                    fillColor: Colors.grey[300],
-                    border: InputBorder.none,
-                    labelText: 'Start Date',
-                  ),
                 ),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: TextFormField(
-                  onTap: () async {
-                    DateTime? d = await showDatePicker(
-                      context: context,
-                      initialDate: endDate ?? DateTime.now(),
-                      firstDate: DateTime(2024, 1, 1),
-                      lastDate: DateTime(2100),
-                    );
-                    if (d != null) {
-                      setState(() => endDate = d);
-                    }
-                  },
-                  readOnly: true,
-                  controller: TextEditingController.fromValue(
-                    TextEditingValue(
-                      text: endDate == null
-                        ? ''
-                        : DateFormat(DateFormat.YEAR_MONTH_DAY).format(endDate!),
-                    ),
-                  ),
-                  decoration: InputDecoration(
-                    filled: true,
-                    fillColor: Colors.grey[300],
-                    border: InputBorder.none,
-                    labelText: 'End Date',
-                  ),
+            
+                Container(height: 50),
+                ElevatedButton(
+                  onPressed: () => createTrip(user.uid),
+                  child: const Text('Create Trip'),
                 ),
-              ),
-
-              Container(height: 50),
-              ElevatedButton(
-                onPressed: () => createTrip(user!.uid),
-                child: const Text('Create Trip'),
-              ),
-              // time input field
-            ],
+                // time input field
+              ],
+            ),
           ),
         ),
       ),

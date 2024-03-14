@@ -1,16 +1,14 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:tripsitter/classes/profile.dart';
 import 'package:tripsitter/classes/trip.dart';
 import 'package:tripsitter/components/cars/select_cars.dart';
+import 'package:tripsitter/components/checkout/trip_summary.dart';
+import 'package:tripsitter/components/comments.dart';
 import 'package:tripsitter/components/hotels/select_hotels.dart';
-import 'package:tripsitter/components/map.dart';
 import 'package:tripsitter/components/mobile_wrapper.dart';
 import 'package:tripsitter/components/events/select_events.dart';
 import 'package:tripsitter/components/flights/select_flight.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:hexcolor/hexcolor.dart';
 import 'package:provider/provider.dart';
 import 'package:tripsitter/components/navbar.dart';
 import 'package:tripsitter/components/trip_dash.dart';
@@ -48,7 +46,7 @@ class ViewTrip extends StatelessWidget {
           }
           return MultiProvider(
             providers: [
-              StreamProvider.value(
+              FutureProvider.value(
                 value: UserProfile.getTripProfiles(trip.uids),
                 initialData: List<UserProfile>.empty(growable: true),
               )
@@ -58,15 +56,15 @@ class ViewTrip extends StatelessWidget {
               body: ConstrainedBox(
                 constraints: const BoxConstraints.expand(),
                 child: Container(
-                  color: const Color.fromRGBO(232, 232, 232, 1),
+                  color: const Color.fromRGBO(255, 255, 255, 1),
                   child: LayoutBuilder(
                     builder: (BuildContext context, BoxConstraints constraints) {
                       if(isMobile) {
                         List<UserProfile> profiles = Provider.of<List<UserProfile>>(context);
                         return Column(
                           children: [
-                            Text("${trip.name}", 
-                              style: TextStyle(
+                            Text(trip.name, 
+                              style: const TextStyle(
                                 color: Colors.black,
                                 fontWeight: FontWeight.w800,
                                 fontSize: 40,
@@ -76,61 +74,126 @@ class ViewTrip extends StatelessWidget {
                               )
                             ),
                             ListTile(
-                              leading: Icon(Icons.people),
-                              title: Text("Manage Participants"),
+                              leading: const Icon(Icons.people),
+                              title: const Text("Manage Participants"),
                               onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => MobileWrapper(trip: trip, profiles: profiles, title: "Manage Participants", child: TripSideColumn(trip)))),
                             ),
                             ListTile(
-                              leading: const Icon(Icons.flight_takeoff_rounded),
-                              title: Text("Flights"),
-                              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => MobileWrapper(trip: trip, profiles: profiles, title: "Select Flights", child: SelectFlight(trip, profiles)))),
+                              leading: const Icon(Icons.message),
+                              title: const Text("Discussion"),
+                              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => MobileWrapper(trip: trip, profiles: profiles, title: "Discussion", child: CommentsSection(trip: trip, profiles: profiles, user: user)))),
                             ),
-                            ListTile(
-                              leading: const Icon(Icons.hotel),
-                              title: Text("Hotels"),
-                              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => MobileWrapper(trip: trip, profiles: profiles, title: "Select Hotels", child: SelectHotels(trip, profiles)))),
-                            ),
-                            ListTile(
-                              leading: const Icon(Icons.directions_car),
-                              title: Text("Rental Cars"),
-                              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => MobileWrapper(title: "Select Rental Cars", child: SelectCars(trip, profiles)))),
-                            ),
-                            ListTile(
-                              leading: const Icon(Icons.stadium),
-                              title: Text("Activities"),
-                              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => MobileWrapper(title: "Select Activites", child: SelectEvents(trip, profiles)))),
-                            ),
-                            CheckboxListTile(
-                              value: trip.usingSplitPayments,
-                              title: Text("Split payments"), 
-                              onChanged: (bool? value) {
-                                trip.toggleSplitPayments();
-                              },
-                            ),
-                            if((trip.usingSplitPayments ? trip!.paymentsComplete[user.uid] != true : !trip!.isConfirmed))
+                            if(!trip.frozen)
+                              ...[
+                                ListTile(
+                                  leading: const Icon(Icons.flight_takeoff_rounded),
+                                  title: const Text("Flights"),
+                                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => MobileWrapper(trip: trip, profiles: profiles, title: "Select Flights", child: SelectFlight(trip, profiles)))),
+                                ),
+                                ListTile(
+                                  leading: const Icon(Icons.hotel),
+                                  title: const Text("Hotels"),
+                                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => MobileWrapper(trip: trip, profiles: profiles, title: "Select Hotels", child: SelectHotels(trip, profiles)))),
+                                ),
+                                ListTile(
+                                  leading: const Icon(Icons.directions_car),
+                                  title: const Text("Rental Cars"),
+                                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => MobileWrapper(title: "Select Rental Cars", child: SelectCars(trip, profiles)))),
+                                ),
+                                ListTile(
+                                  leading: const Icon(Icons.stadium),
+                                  title: const Text("Activities"),
+                                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => MobileWrapper(title: "Select Activites", child: SelectEvents(trip, profiles)))),
+                                ),
+                              ],
+                            if(trip.frozen)
                               ListTile(
-                                leading: Icon(Icons.credit_card),
-                                onTap: () {
-                                  Navigator.push(context, MaterialPageRoute(builder: (context) => CheckoutPage(trip: trip!, profiles: profiles)));
-                                }, 
-                                title: Text("Checkout"),
+                                leading: Icon(Icons.list),
+                                title: const Text("Trip Itinerary"),
+                                onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => MobileWrapper(trip: trip, profiles: profiles, title: "Trip Itinerary", child: ListView(
+                                  children: [
+                                    TripSummary(trip: trip, uid: user.uid, profiles: profiles, showSplit: false, showBooking: true),
+                                  ],
+                                )))),
                               ),
-                            if((!trip.isConfirmed && trip.usingSplitPayments && trip!.paymentsComplete[user.uid] == true))
-                              Text("Awaiting payment from all members", style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                            if(!trip.frozen)
+                              CheckboxListTile(
+                                value: trip.usingSplitPayments,
+                                title: const Text("Split Payments"), 
+                                onChanged: (bool? value) {
+                                  trip.toggleSplitPayments();
+                                },
+                              ),
+                            if((trip.usingSplitPayments ? trip.paymentsComplete[user.uid] != true : !trip.isConfirmed))
+                              ListTile(
+                                leading: const Icon(Icons.credit_card),
+                                onTap: () {
+                                  Navigator.push(context, MaterialPageRoute(builder: (context) => CheckoutPage(trip: trip, profiles: profiles)));
+                                }, 
+                                title: const Text("Checkout"),
+                              ),
+                            if((!trip.isConfirmed && trip.usingSplitPayments && trip.paymentsComplete[user.uid] == true))
+                              const Text("Awaiting payment from all members", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
                             if(trip.isConfirmed)
-                              Text("Trip is confirmed", style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold))
+                              const Text("Trip is confirmed", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                            Container(width: 10),
+                            ElevatedButton.icon(
+                              onPressed: () {
+                                showDialog(context: context, builder: (context) => 
+                                  AlertDialog(
+                                    title: const Text("Delete Trip"),
+                                    content: const Text("Are you sure you want to delete this trip?"),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () {
+                                          Navigator.pop(context);
+                                        }, 
+                                        child: const Text("Cancel")
+                                      ),
+                                      TextButton(
+                                        onPressed: () async {
+                                          await trip?.delete();
+                                          Navigator.pop(context);
+                                          Navigator.pushNamed(context, "/");
+                                        }, 
+                                        child: const Text("Delete")
+                                      )
+                                    ]
+                                ));
+                              }, 
+                              icon: const Icon(Icons.delete), 
+                              label: const Text("Delete Trip")
+                            )
                           ],
                         );
                       }
                       return Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Container(
-                            child: TripDashBoard(),
-                            width: constraints.maxWidth * 0.7,
+                          Builder(
+                            builder: (context) {
+                              List<UserProfile> profiles = Provider.of<List<UserProfile>>(context);
+                              return SizedBox(
+                                width: constraints.maxWidth * 0.7,
+                                child: trip.frozen ? Container(color: const Color.fromARGB(255, 255, 255, 255), padding: const EdgeInsets.all(8), child: ListView(
+                                  children: [
+                                    Align(
+                                      alignment: Alignment.centerLeft,
+                                      child: TripSummary(
+                                        trip: trip, 
+                                        uid: Provider.of<User?>(context)?.uid ?? "", 
+                                        profiles: profiles,
+                                        showBooking: true,
+                                        showSplit: !trip.isConfirmed,
+                                      ),
+                                    ),
+                                  ],
+                                )) : TripDashBoard(trip),
+                              );
+                            }
                           ),
                           Container(
-                            color: Color.fromARGB(255, 239, 239, 239),
+                            color: const Color.fromARGB(255, 239, 239, 239),
                             width: constraints.maxWidth * 0.3,
                             child: TripSideColumn(trip)
                           ),

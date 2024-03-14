@@ -1,4 +1,3 @@
-import "dart:math";
 
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
@@ -10,14 +9,13 @@ import 'package:tripsitter/components/events/select_events.dart';
 import "package:tripsitter/components/hotels/select_hotels.dart";
 import 'package:tripsitter/components/flights/select_flight.dart';
 import "package:tripsitter/components/trip_center_console.dart";
-import 'package:google_fonts/google_fonts.dart';
 
 class PageType {
-  static const String Hotel = "Hotels";
-  static const String Flights = "Flights";
-  static const String RentalCar = "Rental Cars";
-  static const String Activities = "Activities";
-  static const String Cities = "Cities";
+  static const String hotel = "Hotels";
+  static const String flights = "Flights";
+  static const String rentalCar = "Rental Cars";
+  static const String activities = "Activities";
+  static const String cities = "Cities";
 }
 
 class TripConsoleDot extends StatefulWidget {
@@ -45,12 +43,7 @@ class TripConsoleDot extends StatefulWidget {
   // factor of the dot size that the icon inside should be
   final double iconSizeFactor = 0.6;
 
-  late Function setElementAngleDegrees;
-  late Function updateDotSize;
-  late Function updateDotX;
-  late Function updateDotY;
-
-  TripConsoleDot({
+  const TripConsoleDot({
     required this.trip,
     required this.type,
     required this.positions,
@@ -58,24 +51,25 @@ class TripConsoleDot extends StatefulWidget {
     required this.iconAnimations,
     required this.onEnter,
     required this.onExit,
+    super.key,
   });
 
   @override
-  _TripConsoleDotState createState() => _TripConsoleDotState();
+  TripConsoleDotState createState() => TripConsoleDotState();
 }
 
-class _TripConsoleDotState extends State<TripConsoleDot> {
+class TripConsoleDotState extends State<TripConsoleDot> {
   Widget popupPage(String page, List<UserProfile> profiles) {
     switch (page) {
-      case PageType.Hotel:
+      case PageType.hotel:
         return SelectHotels(widget.trip, profiles);
-      case PageType.Flights:
+      case PageType.flights:
         return SelectFlight(widget.trip, profiles);
-      case PageType.RentalCar:
+      case PageType.rentalCar:
         return SelectCars(widget.trip, profiles);
-      case PageType.Activities:
+      case PageType.activities:
         return SelectEvents(widget.trip, profiles);
-      case PageType.Cities:
+      case PageType.cities:
         return const Text("Change city");
     }
     return Container();
@@ -111,16 +105,16 @@ class _TripConsoleDotState extends State<TripConsoleDot> {
 
   IconData get icon {
     switch (widget.type) {
-      case PageType.Hotel:
-        return Icons.hotel;
-      case PageType.Flights:
+      case PageType.hotel:
+        return Icons.hotel_rounded;
+      case PageType.flights:
         return Icons.flight_takeoff_rounded;
-      case PageType.RentalCar:
-        return Icons.directions_car;
-      case PageType.Activities:
-        return Icons.stadium;
-      case PageType.Cities:
-        return Icons.location_city;
+      case PageType.rentalCar:
+        return Icons.directions_car_rounded;
+      case PageType.activities:
+        return Icons.stadium_rounded;
+      case PageType.cities:
+        return Icons.location_city_rounded;
     }
     return Icons.error;
   }

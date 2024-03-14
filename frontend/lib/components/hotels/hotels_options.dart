@@ -3,21 +3,19 @@ import 'dart:math';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 import 'package:tripsitter/classes/airport.dart';
 import 'package:tripsitter/classes/counter.dart';
 import 'package:tripsitter/classes/filterbutton.dart';
 import 'package:tripsitter/classes/hotels.dart';
 import 'package:tripsitter/classes/trip.dart';
-import 'package:tripsitter/components/flights/flight_options.dart';
 import 'package:tripsitter/components/hotels/hotel_info_dialog.dart';
 import 'package:tripsitter/helpers/api.dart';
 import 'package:tripsitter/helpers/data.dart';
-import 'package:tripsitter/helpers/formatters.dart';
 import 'package:tripsitter/helpers/locators.dart';
 import 'package:tripsitter/popups/checkbox_popup.dart';
 import 'package:tripsitter/popups/counter_popup.dart';
 import 'package:tripsitter/popups/select_popup.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 class HotelOptions extends StatefulWidget {
   final Trip trip;
@@ -85,7 +83,7 @@ class _HotelOptionsState extends State<HotelOptions> {
     _selectedbedTypes = [...bedList];
     sortHotels();
     // for(HotelOption hotel in hotels) {
-    // print(hotel.offers.first.toJson());
+    // debugPrint(hotel.offers.first.toJson());
     // }
     if (!mounted) return;
     setState(() {});
@@ -103,7 +101,6 @@ class _HotelOptionsState extends State<HotelOptions> {
   List<String> _selectedbedTypes = [];
 
   bool _sortDirection = true;
-  bool _isSortOpen = false;
   bool _isBedCountOpen = false;
   bool _isBedTypeOpen = false;
   final GlobalKey _sortKey = GlobalKey();
@@ -172,7 +169,6 @@ class _HotelOptionsState extends State<HotelOptions> {
 
   void _showSortPopup() {
     setState(() {
-      _isSortOpen = true;
     });
 
     final popup = SelectOnePopup<HotelSortOption>(
@@ -181,7 +177,6 @@ class _HotelOptionsState extends State<HotelOptions> {
       onSelected: (HotelSortOption value) {
         setState(() {
           _selectedSort = value;
-          _isSortOpen = false;
           sortHotels();
         });
       },
@@ -189,7 +184,6 @@ class _HotelOptionsState extends State<HotelOptions> {
 
     popup.showPopup(context, _sortKey).then((_) {
       setState(() {
-        _isSortOpen = false;
       });
     });
   }
@@ -202,8 +196,8 @@ class _HotelOptionsState extends State<HotelOptions> {
     switch (_selectedSort) {
       case HotelSortOption.price:
         return _sortDirection
-            ? minPrice(a.offers)!.compareTo(minPrice(b.offers)!)
-            : minPrice(b.offers)!.compareTo(minPrice(a.offers)!);
+            ? double.parse(minPrice(a.offers) ?? "0.0").compareTo(double.parse(minPrice(b.offers) ?? "0"))
+            : double.parse(minPrice(b.offers) ?? "0.0").compareTo(double.parse(minPrice(a.offers) ?? "0"));
       case HotelSortOption.distance:
         if(arrivalAirport == null) return 0;
         return !_sortDirection
@@ -319,8 +313,9 @@ class _HotelOptionsState extends State<HotelOptions> {
   //                   child: Text("Select${(widget.currentGroup!.infos.isNotEmpty && widget.currentGroup!.infos.map((c) => c.hotelId).contains(hotelsFiltered[i].hotel.hotelId)) ? "ed" : ""}"),
   @override
   Widget build(BuildContext context) {
+    bool isMobile = Provider.of<bool>(context, listen: false);
     return widget.currentGroup == null
-        ? Center(child: Text("Select or create a group to choose a hotel"))
+        ? const Center(child: Text("Select or create a group to choose a hotel"))
         : Padding(
             padding: const EdgeInsets.all(8.0),
             child: ListView(
@@ -329,7 +324,7 @@ class _HotelOptionsState extends State<HotelOptions> {
                 //     style: Theme.of(context).textTheme.displayMedium?.copyWith(
                 //         decoration: TextDecoration.underline,
                 //         fontWeight: FontWeight.bold)),
-                Text("Hotels for ${widget.currentGroup!.name}", style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+                Text("Hotels for ${widget.currentGroup!.name}", style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
                 Row(
                   children: [
                     Expanded(
@@ -379,10 +374,10 @@ class _HotelOptionsState extends State<HotelOptions> {
                   ExpansionTile(
                     title: ListTile(
                       // leading: Image.network("https://logos.skyscnr.com/images/carhire/sippmaps/${car.group.img}", width: 80, height: 80),
-                      title: Text("${hotelsFiltered[i].hotel.name}"),
+                      title: Text(hotelsFiltered[i].hotel.name),
                       trailing: Row(mainAxisSize: MainAxisSize.min, children: [
                         IconButton(
-                          icon: Icon(Icons.info),
+                          icon: const Icon(Icons.info),
                           onPressed: () {
                             showDialog(
                                 context: context,
@@ -420,6 +415,9 @@ class _HotelOptionsState extends State<HotelOptions> {
                             }
                             setState(() {});
                             widget.setState();
+                            if(isMobile && mounted) {
+                              Navigator.pop(context);
+                            }
                           },
                           child: Text(
                               "Select${(widget.currentGroup!.infos.isNotEmpty && widget.currentGroup!.infos.map((c) => c.hotelId).contains(hotels[i].hotel.hotelId)) ? "ed" : ""}"),

@@ -1,4 +1,3 @@
-import 'dart:convert';
 
 import 'package:intl/intl.dart';
 import 'package:tripsitter/classes/trip.dart';
@@ -58,6 +57,7 @@ class RentalCarOffer {
   final int seat;
   final RentalCarProvider provider;
   
+  @override
   bool operator ==(other) {
     return identical(this, other) || (other is RentalCarOffer && other.guid == guid);
   }
