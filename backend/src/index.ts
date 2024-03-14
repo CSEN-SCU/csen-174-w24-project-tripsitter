@@ -9,6 +9,7 @@ import { searchAirports } from "./autofill";
 import { addUserToTrip, removeUserFromTrip } from "./firebase";
 import { getRentalCars } from "./cars";
 import { createPaymentIntent } from "./stripe";
+import { getCityImage } from "./city";
 const app = express();
 const cors = require('cors')({origin: true});
 app.use(cors);
@@ -28,6 +29,8 @@ app.post('/book/flights', bookFlight);
 app.post('/book/hotels', bookHotel);
 
 app.get('/airline-logo', getAirlineLogo);
+
+app.get("/image/city",getCityImage); 
 
 app.post('/trip/user', addUserToTrip);
 app.delete('/trip/user', removeUserFromTrip);
