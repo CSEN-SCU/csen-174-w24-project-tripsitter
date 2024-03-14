@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:tripsitter/classes/airport.dart';
 import 'package:tripsitter/classes/filterbutton.dart';
 import 'package:tripsitter/classes/profile.dart';
@@ -241,6 +242,7 @@ class _EventsOptionsState extends State<EventsOptions>
 
   @override
   Widget build(BuildContext context) {
+    bool isMobile = Provider.of<bool>(context, listen: false);
     // Initialize a counter variable before mapping the events to TableRows
     return ListView(
       children: [
@@ -397,6 +399,9 @@ class _EventsOptionsState extends State<EventsOptions>
                                               setState(() {});
                                               if (widget.setState != null) {
                                                 widget.setState!();
+                                              }
+                                              if(isMobile && mounted) {
+                                                Navigator.pop(context);
                                               }
                                             },
                                       style: ButtonStyle(

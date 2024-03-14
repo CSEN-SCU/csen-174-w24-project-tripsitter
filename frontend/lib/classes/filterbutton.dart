@@ -18,19 +18,22 @@ class FilterButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ElevatedButton(
-      key: globalKey,
-      onPressed: onPressed,
-      style: ElevatedButton.styleFrom(
-        backgroundColor: color,
-        foregroundColor: Colors.black,
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          Text(text),
-          icon, // Update this line
-        ],
+    return Padding(
+      padding: const EdgeInsets.only(top:8.0),
+      child: ElevatedButton(
+        key: globalKey,
+        onPressed: onPressed,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: color,
+          foregroundColor: Colors.black,
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            Text(text),
+            icon, // Update this line
+          ],
+        ),
       ),
     );
   }

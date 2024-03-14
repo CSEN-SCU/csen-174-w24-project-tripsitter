@@ -207,7 +207,7 @@ class _ProfilePageState extends State<ProfilePage> {
                           child: const Text("Create New Trip")),
                       Container(
                           alignment: Alignment.bottomLeft,
-                          child: Image.asset("cityscape.png")),
+                          child: Image.asset("assets/cityscape.png")),
                       //button and possible picture/video
                     ],
                   )),

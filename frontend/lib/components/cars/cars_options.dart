@@ -1,6 +1,7 @@
 import 'package:animated_list_plus/animated_list_plus.dart';
 import 'package:animated_list_plus/transitions.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:tripsitter/classes/car.dart';
 import 'package:tripsitter/classes/filterbutton.dart';
 import 'package:tripsitter/classes/trip.dart';
@@ -264,6 +265,7 @@ class _CarOptionsState extends State<CarOptions> {
   
   @override
   Widget build(BuildContext context) {
+    bool isMobile = Provider.of<bool>(context, listen: false);
     return widget.currentGroup == null ? const Center(
       child: Text("Select or create a group to choose a rental car")
     ) : Padding(
@@ -372,6 +374,9 @@ class _CarOptionsState extends State<CarOptions> {
                           }
                           setState(() {});
                           widget.setState();
+                          if(isMobile && mounted) {
+                            Navigator.pop(context);
+                          }
                         },
                       )
                     ]

@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 import 'package:tripsitter/classes/airport.dart';
 import 'package:tripsitter/classes/counter.dart';
 import 'package:tripsitter/classes/filterbutton.dart';
@@ -312,6 +313,7 @@ class _HotelOptionsState extends State<HotelOptions> {
   //                   child: Text("Select${(widget.currentGroup!.infos.isNotEmpty && widget.currentGroup!.infos.map((c) => c.hotelId).contains(hotelsFiltered[i].hotel.hotelId)) ? "ed" : ""}"),
   @override
   Widget build(BuildContext context) {
+    bool isMobile = Provider.of<bool>(context, listen: false);
     return widget.currentGroup == null
         ? const Center(child: Text("Select or create a group to choose a hotel"))
         : Padding(
@@ -413,6 +415,9 @@ class _HotelOptionsState extends State<HotelOptions> {
                             }
                             setState(() {});
                             widget.setState();
+                            if(isMobile && mounted) {
+                              Navigator.pop(context);
+                            }
                           },
                           child: Text(
                               "Select${(widget.currentGroup!.infos.isNotEmpty && widget.currentGroup!.infos.map((c) => c.hotelId).contains(hotels[i].hotel.hotelId)) ? "ed" : ""}"),

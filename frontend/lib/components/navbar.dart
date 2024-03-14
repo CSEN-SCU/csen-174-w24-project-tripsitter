@@ -3,29 +3,32 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:hexcolor/hexcolor.dart';
 
 class TripSitterNavbar extends StatelessWidget implements PreferredSizeWidget {
-  const TripSitterNavbar({super.key});
+  final String title;
+  final bool backButton;
+  final bool homeButton;
+  const TripSitterNavbar({this.title = "TripSitter", this.backButton = false, this.homeButton = true, super.key});
 
   @override
   Widget build(BuildContext context) {
     return AppBar(
       title: InkWell(
-        onTap: () {
+        onTap: homeButton ? () {
           if(ModalRoute.of(context)?.settings.name != "/") {
             Navigator.pushNamed(context, "/");
           }
-        },
+        } : null,
         child: Text(
-          'TripSitter',
+          title,
           style: GoogleFonts.kadwa(
-            textStyle: const TextStyle(
+            textStyle: TextStyle(
               color: Colors.black,
               fontWeight: FontWeight.bold,
-              fontSize: 36,
+              fontSize: title == "Tripsitter" ? 36 : 24,
             ),
           ),
         ),
       ),
-      leading: InkWell(
+      leading: backButton ? BackButton() : InkWell(
         onTap: () {
           if(ModalRoute.of(context)?.settings.name != "/") {
             Navigator.pushNamed(context, "/");
@@ -33,7 +36,7 @@ class TripSitterNavbar extends StatelessWidget implements PreferredSizeWidget {
         },
         child: Padding(
           padding: const EdgeInsets.all(4.0),
-          child: Image.asset('tripsitter_logo.png'),
+          child: Image.asset('assets/tripsitter_logo.png'),
         ),
       ),
       backgroundColor: HexColor("#C6D6FF"),

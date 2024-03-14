@@ -89,6 +89,7 @@ class _UpdateProfileState extends State<UpdateProfile> {
             hometown: null,
             numberTrips: 0,
             gender: "Other",
+            hasPhoto: false,
             birthDate: DateTime(2000, 1, 1),
             joinDate: DateTime.now());
       }
@@ -195,7 +196,7 @@ class _UpdateProfileState extends State<UpdateProfile> {
         body: Center(
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 600),
-            child: Column(children: [
+            child: ListView(children: [
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: TextField(

@@ -24,10 +24,9 @@ class ConfirmationPage extends StatelessWidget {
     return Scaffold(
       appBar: const TripSitterNavbar(),
       body: Center(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
+        child: ListView(
           children: [
-            Text("Your trip is confirmed!", style: sectionHeaderStyle.copyWith(fontSize: 30)),
+            Center(child: Text("Your trip is confirmed!", style: sectionHeaderStyle.copyWith(fontSize: 30))),
             const Text(""),
             TripSummary(
               trip: trip,

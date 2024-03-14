@@ -14,9 +14,9 @@ class EventPopup extends StatelessWidget {
           Text(event.name, style: const TextStyle(fontWeight: FontWeight.bold)),
       content: SingleChildScrollView(
         child: ListBody(children: [
-          Row(children: [
-            SizedBox(
-              width: 500,
+          Wrap(children: [
+            ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 500),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -53,27 +53,21 @@ class EventPopup extends StatelessWidget {
                   if (event.info.infoStr != null &&
                       event.info.infoStr!.isNotEmpty) ...[
                     Container(height: 30),
-                    RichText(
-                      text: TextSpan(
-                          style: DefaultTextStyle.of(context).style,
-                          children: <TextSpan>[
-                            const TextSpan(
-                              text: 'More Information:\n',
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                            TextSpan(
-                              text: '${event.info.infoStr ?? ''}\n',
-                            ),
-                            if(event.info.infoStr != event.info.pleaseNote)
-                              TextSpan(
-                                text: '${event.info.pleaseNote ?? ''}\n',
-                              ),
-                            if(event.info.pleaseNote != event.info.ticketLimit)
-                              TextSpan(
-                                text: (event.info.ticketLimit ?? ''),
-                              ),
-                          ]),
-                    )
+                    Text(
+                      'More Information:',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    Text(
+                      event.info.infoStr ?? '',
+                    ),
+                    if(event.info.infoStr != event.info.pleaseNote)
+                      Text(
+                        event.info.pleaseNote ?? '',
+                      ),
+                    if(event.info.pleaseNote != event.info.ticketLimit)
+                      Text(
+                        (event.info.ticketLimit ?? ''),
+                      ),
                   ],
                   if (event.prices.isNotEmpty) ...[
                     Container(height: 30),
@@ -87,14 +81,19 @@ class EventPopup extends StatelessWidget {
             ),
             if (event.images.isNotEmpty) ...[
               const SizedBox(width: 100),
-              SizedBox(
-                  width: 400,
-                  child: Image.network(event.images.first.url, height: 300))
+              Center(
+                child: ConstrainedBox(
+                    constraints: BoxConstraints(maxWidth: 300),
+                    child: Image.network(event.images.first.url)),
+              )
             ]
           ]),
           // seatmap image
           if (event.seatmapUrl != null) ...[
-            Image.network(event.seatmapUrl!, height: 300),
+            ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 300),
+              child: Image.network(event.seatmapUrl!)
+            ),
           ],
         ]),
       ),
