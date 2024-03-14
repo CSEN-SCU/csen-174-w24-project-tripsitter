@@ -13,6 +13,7 @@ import 'package:tripsitter/components/events/select_events.dart';
 import 'package:tripsitter/components/flights/select_flight.dart';
 import 'package:provider/provider.dart';
 import 'package:tripsitter/components/navbar.dart';
+import 'package:tripsitter/components/restaurants/select_restaurants.dart';
 import 'package:tripsitter/components/trip_dash.dart';
 import 'package:tripsitter/components/trip_side_column.dart';
 import 'package:tripsitter/components/checkout/checkout.dart';
@@ -106,6 +107,11 @@ class ViewTrip extends StatelessWidget {
                                   leading: const Icon(Icons.stadium),
                                   title: const Text("Activities"),
                                   onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => MobileWrapper(title: "Select Activites", child: SelectEvents(trip, profiles)))),
+                                ),
+                                ListTile(
+                                  leading: const Icon(Icons.restaurant),
+                                  title: const Text("Restaurants"),
+                                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => MobileWrapper(title: "Select Restaurants", child: SelectRestaurants(trip, profiles)))),
                                 ),
                               ],
                             if(trip.frozen)

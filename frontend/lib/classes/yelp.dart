@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
+
 class YelpRestaurant {
   String id;
   String alias;
@@ -12,10 +14,10 @@ class YelpRestaurant {
   double rating;
   YelpCoordinates coordinates;
   List<String> transactions;
-  String price;
+  String? price;
   YelpLocation location;
-  String phone;
-  String displayPhone;
+  String? phone;
+  String? displayPhone;
   double distance;
 
   YelpRestaurant({
@@ -37,24 +39,27 @@ class YelpRestaurant {
     required this.distance,
   });
 
-  factory YelpRestaurant.fromJson(Map<String, dynamic> json) => YelpRestaurant(
-    id: json["id"],
-    alias: json["alias"],
-    name: json["name"],
-    imageUrl: json["image_url"],
-    isClosed: json["is_closed"],
-    url: json["url"],
-    reviewCount: json["review_count"],
-    categories: List<YelpCategory>.from(json["categories"].map((x) => YelpCategory.fromJson(x))),
-    rating: json["rating"].toDouble(),
-    coordinates: YelpCoordinates.fromJson(json["coordinates"]),
-    transactions: List<String>.from(json["transactions"].map((x) => x)),
-    price: json["price"],
-    location: YelpLocation.fromJson(json["location"]),
-    phone: json["phone"],
-    displayPhone: json["display_phone"],
-    distance: json["distance"].toDouble(),
-  );
+  factory YelpRestaurant.fromJson(Map<String, dynamic> json){
+    // debugPrint(json.toString());
+    return YelpRestaurant(
+      id: json["id"],
+      alias: json["alias"],
+      name: json["name"],
+      imageUrl: json["image_url"],
+      isClosed: json["is_closed"],
+      url: json["url"],
+      reviewCount: json["review_count"],
+      categories: List<YelpCategory>.from(json["categories"].map((x) => YelpCategory.fromJson(x))),
+      rating: json["rating"].toDouble(),
+      coordinates: YelpCoordinates.fromJson(json["coordinates"]),
+      transactions: List<String>.from(json["transactions"].map((x) => x)),
+      price: json["price"],
+      location: YelpLocation.fromJson(json["location"]),
+      phone: json["phone"],
+      displayPhone: json["display_phone"],
+      distance: json["distance"].toDouble(),
+    );
+  }
 
   Map<String, dynamic> toJson() => {
     "id": id,
@@ -118,8 +123,8 @@ class YelpCoordinates {
 
 class YelpLocation {
   String address1;
-  String address2;
-  String address3;
+  String? address2;
+  String? address3;
   String city;
   String zipCode;
   String country;
