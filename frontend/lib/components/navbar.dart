@@ -28,7 +28,7 @@ class TripSitterNavbar extends StatelessWidget implements PreferredSizeWidget {
           ),
         ),
       ),
-      leading: backButton ? BackButton() : InkWell(
+      leading: backButton ? const BackButton() : InkWell(
         onTap: () {
           if(ModalRoute.of(context)?.settings.name != "/") {
             Navigator.pushNamed(context, "/");

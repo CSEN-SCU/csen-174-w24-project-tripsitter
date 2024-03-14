@@ -16,6 +16,7 @@ class TripInfo extends StatefulWidget {
   const TripInfo({
     required this.trip,
     required this.col,
+    super.key
   });
 
   @override
@@ -270,7 +271,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                   // Generate a widget for each item in the list
                                   return TripInfo(
                                     trip: trips[index],
-                                    col: index % 2 == 0 ? Color.fromARGB(255, 245, 245, 245) : Color.fromARGB(255, 217, 217, 217)
+                                    col: index % 2 == 0 ? const Color.fromARGB(255, 245, 245, 245) : const Color.fromARGB(255, 217, 217, 217)
                                   );
                                 }),
                           );

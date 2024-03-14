@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:tripsitter/classes/profile.dart';
@@ -108,7 +110,7 @@ class ViewTrip extends StatelessWidget {
                               ],
                             if(trip.frozen)
                               ListTile(
-                                leading: Icon(Icons.list),
+                                leading: const Icon(Icons.list),
                                 title: const Text("Trip Itinerary"),
                                 onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => MobileWrapper(trip: trip, profiles: profiles, title: "Trip Itinerary", child: ListView(
                                   children: [
@@ -154,7 +156,7 @@ class ViewTrip extends StatelessWidget {
                                         ),
                                         TextButton(
                                           onPressed: () async {
-                                            await trip?.delete();
+                                            await trip.delete();
                                             Navigator.pop(context);
                                             Navigator.pushNamed(context, "/");
                                           }, 

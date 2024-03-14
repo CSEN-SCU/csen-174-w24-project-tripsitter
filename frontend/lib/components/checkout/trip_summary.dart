@@ -8,6 +8,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tripsitter/classes/airport.dart';
 import 'package:tripsitter/classes/flights.dart';
 import 'package:tripsitter/classes/profile.dart';
+import 'package:tripsitter/classes/ticketmaster.dart';
 import 'package:tripsitter/classes/trip.dart';
 import 'package:tripsitter/components/checkout/activity_summary.dart';
 import 'package:tripsitter/components/checkout/car_summary.dart';
@@ -37,6 +38,8 @@ class TripSummary extends StatefulWidget {
 class _TripSummaryState extends State<TripSummary> {
   bool get split => widget.trip.usingSplitPayments && widget.showSplit;
 
+  String? calendarLoading;
+
   Future<gcal.EventDateTime> getEventDateTime(FlightDepartureArrival flight) async{
     List<Airport> airports = await getAirports(context);
     Airport departureAirport = airports.firstWhere((a) => a.iataCode == flight.iataCode);
@@ -48,55 +51,94 @@ class _TripSummaryState extends State<TripSummary> {
     
     dt = tz.TZDateTime.from(dt.toUtc(), airportTz);
     dt = dt.subtract(dt.timeZoneOffset - DateTime.now().timeZoneOffset);
-    // dt = dt.toLocal();
-
-    debugPrint("$dt, $departureTimezone");
 
     return gcal.EventDateTime(dateTime: dt, timeZone: departureTimezone);
   }
 
   void createCalendarEvents() async {
-    final prefs = await SharedPreferences.getInstance();
-    String? token = prefs.getString("gcalToken");
-    if(token == null) return;
-    gapis.AuthClient client = gapis.authenticatedClient(http.Client(), gapis.AccessCredentials(
-      gapis.AccessToken(
-        'Bearer',
-        token,
-        // TODO(kevmoo): Use the correct value once it's available from authentication
-        // See https://github.com/flutter/flutter/issues/80905
-        DateTime.now().toUtc().add(const Duration(days: 365)),
-      ),
-      null, // We don't have a refreshToken
-      [gcal.CalendarApi.calendarEventsScope],
-    ));
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      String? token = prefs.getString("gcalToken");
+      if(token == null) return;
+      if(mounted) {
+        setState(() {
+          calendarLoading = "Adding trip to calendar...";
+        });
+      }
+      gapis.AuthClient client = gapis.authenticatedClient(http.Client(), gapis.AccessCredentials(
+        gapis.AccessToken(
+          'Bearer',
+          token,
+          DateTime.now().toUtc().add(const Duration(days: 365)),
+        ),
+        null, // We don't have a refreshToken
+        [gcal.CalendarApi.calendarEventsScope],
+      ));
 
-    gcal.CalendarApi(client).events.insert(gcal.Event(
-      summary: widget.trip.name,
-      start: gcal.EventDateTime(date: widget.trip.startDate.toUtc()),
-      end: gcal.EventDateTime(date: widget.trip.endDate.toUtc()),
-    ), "primary");
+      gcal.CalendarApi(client).events.insert(gcal.Event(
+        summary: widget.trip.name,
+        start: gcal.EventDateTime(date: widget.trip.startDate.toUtc()),
+        end: gcal.EventDateTime(date: widget.trip.endDate.toUtc()),
+      ), "primary");
 
-    for(FlightGroup group in widget.trip.flights.where((f) => f.members.contains(widget.uid))) {
-      for(FlightItinerary it in group.selected?.itineraries ?? []) {
-        for(FlightSegment seg in it.segments) {
-          gcal.EventDateTime start = await getEventDateTime(seg.departure);
-          gcal.EventDateTime end = await getEventDateTime(seg.arrival);
+      for(FlightGroup group in widget.trip.flights.where((f) => f.members.contains(widget.uid))) {
+        for(FlightItinerary it in group.selected?.itineraries ?? []) {
+          for(FlightSegment seg in it.segments) {
+            gcal.EventDateTime start = await getEventDateTime(seg.departure);
+            gcal.EventDateTime end = await getEventDateTime(seg.arrival);
 
-          gcal.Event event = gcal.Event(
-            summary: "Flight ${seg.carrierCode}${seg.number} ${seg.departure.iataCode} - ${seg.arrival.iataCode}",
-            description: "Departure: ${DateFormat("MM/dd/yyyy h:mm a").format(seg.departure.at)} (Local Time) \nArrival: ${DateFormat("MM/dd/yyyy h:mm a").format(seg.arrival.at)} (Local Time)\n${group.pnr != null ? "Booking Confirmation: ${group.pnr}" : ""}",
-            start: start,
-            end: end,
-          );
-          gcal.Event created = await gcal.CalendarApi(client).events.insert(event, "primary");
-          debugPrint("Created event ${created.id}");
+            gcal.Event event = gcal.Event(
+              summary: "Flight ${seg.carrierCode}${seg.number} ${seg.departure.iataCode} - ${seg.arrival.iataCode}",
+              description: "Departure: ${DateFormat("MM/dd/yyyy h:mm a").format(seg.departure.at)} (Local Time) \nArrival: ${DateFormat("MM/dd/yyyy h:mm a").format(seg.arrival.at)} (Local Time)\n${group.pnr != null ? "Booking Confirmation: ${group.pnr}" : ""}",
+              start: start,
+              end: end,
+            );
+            gcal.Event created = await gcal.CalendarApi(client).events.insert(event, "primary");
+            debugPrint("Created event ${created.id}");
+          }
         }
       }
+
+      for(Activity a in widget.trip.activities.where((a) => a.participants.contains(widget.uid))) {
+        TicketmasterEvent e = a.event;
+        if(e.startTime.dateTimeUtc == null) continue;
+        String summary = e.name;
+        String description = "${e.url ?? ""}\n\n${e.info.infoStr ?? ""}";
+        String location = e.venues.map((e) => e.name).join(", ");
+        DateTime start = e.startTime.dateTimeUtc!;
+        DateTime end = start.add(const Duration(hours: 4));
+
+        gcal.Event event = gcal.Event(
+          summary: summary,
+          description: description,
+          location: location,
+          start: gcal.EventDateTime(dateTime: start.toUtc()),
+          end: gcal.EventDateTime(dateTime: end.toUtc()),
+        );
+        gcal.Event created = await gcal.CalendarApi(client).events.insert(event, "primary");
+        debugPrint("Created event ${created.id}");
+
+      }
+      debugPrint("Added to calendar");
+      if(mounted) {
+        setState(() {
+          calendarLoading = null;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Events successfully added to calendar'),
+          ),
+        );
+      }
     }
-
-    debugPrint("Added to calendar");
-
+    catch (e) {
+      debugPrint("Error adding to calendar: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Error adding to calendar. Trying signing out and back in and try again.'),
+        ),
+      );
+    }
   }
 
   @override
@@ -118,7 +160,7 @@ class _TripSummaryState extends State<TripSummary> {
             Text("${widget.trip.destination.name}, ${widget.trip.destination.country}", style: sectionHeaderStyle.copyWith(fontSize: 15)),
             Container(height: 20),
             if(widget.showBooking)
-              ElevatedButton(onPressed: createCalendarEvents, child: Text("Add to Calendar")),
+              ElevatedButton(onPressed: createCalendarEvents, child: Text(calendarLoading ?? "Add to Calendar")),
             if((split ? widget.trip.flights.where((f) => f.members.contains(widget.uid)) : widget.trip.flights).isNotEmpty)
               ...[
                 SummaryHeader("Flights: \$${split ? widget.trip.userFlightsPrice(widget.uid) : widget.trip.flightsPrice}${split ? "" : " total"}", icon: Icons.flight_takeoff_rounded),
