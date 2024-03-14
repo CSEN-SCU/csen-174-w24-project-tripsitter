@@ -1,6 +1,7 @@
 
 // ignore_for_file: use_build_context_synchronously
 
+import 'package:collection/collection.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -77,8 +78,7 @@ class _TripSideColumnState extends State<TripSideColumn> {
                     Text(DateFormat('yyyy-MM-dd – kk:mm').format(comment.date)),
                 isThreeLine: true,
                 title: Text(
-                    "${profiles.firstWhere((element) => element.id == comment.uid).name}\n${comment.comment}"),
-                // leading: ProfilePicture(profiles.firstWhere((element) => element.id == comment.uid)),
+                    "${profiles.firstWhereOrNull((element) => element.id == comment.uid)?.name ?? ""}\n${comment.comment}"),
                 trailing: comment.uid == user.uid
                     ? IconButton(
                         icon: const Icon(Icons.delete),

@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -74,7 +75,7 @@ class _HotelGroupsState extends State<HotelGroups> {
                     ),
                     subtitle: Text(group.members
                         .map((uid) =>
-                            widget.profiles.firstWhere((e) => e.id == uid).name)
+                            widget.profiles.firstWhereOrNull((e) => e.id == uid)?.name ?? "")
                         .join(", ")),
                     trailing: Row(
                       mainAxisSize: MainAxisSize.min,

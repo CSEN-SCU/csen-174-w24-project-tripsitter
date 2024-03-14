@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:tripsitter/classes/profile.dart';
 import 'package:tripsitter/classes/trip.dart';
 
@@ -474,7 +475,10 @@ class HotelBooking {
   factory HotelBooking.fromHotelGroup(HotelGroup group, List<UserProfile> profiles) {
     List<TravelerInfo> guests = [];
     for(int i = 0; i < group.members.length; i++) {
-      guests.add(TravelerInfo.fromUserProfile(profiles.firstWhere((profile) => profile.id == group.members[i]), i));
+      UserProfile? p = profiles.firstWhereOrNull((profile) => profile.id == group.members[i]);
+      if(p != null) {
+        guests.add(TravelerInfo.fromUserProfile(p, i));
+      }
     }
     return HotelBooking(
       offerId: group.selectedOffer!.id,

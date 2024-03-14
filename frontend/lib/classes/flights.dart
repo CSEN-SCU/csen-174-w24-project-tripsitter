@@ -909,7 +909,10 @@ class FlightBooking {
   factory FlightBooking.fromFlightGroup(FlightGroup group, List<UserProfile> profiles) {
     List<TravelerInfo> travelers = [];
     for(int i = 0; i < group.members.length; i++) {
-      travelers.add(TravelerInfo.fromUserProfile(profiles.firstWhere((profile) => profile.id == group.members[i]), i));
+      UserProfile? p = profiles.firstWhereOrNull((profile) => profile.id == group.members[i]);
+      if(p != null) {
+        travelers.add(TravelerInfo.fromUserProfile(p, i));
+      }
     }
     return FlightBooking(
       flightOffers: [if(group.selected != null) group.selected!],

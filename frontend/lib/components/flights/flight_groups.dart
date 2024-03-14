@@ -97,7 +97,7 @@ class _FlightGroupsState extends State<FlightGroups> {
                   children: [
                     ListTile(
                       title: Text("${group.departureAirport} - ${group.arrivalAirport}"),
-                      subtitle: Text(group.members.map((e) => profiles.firstWhere((profile) => profile.id == e).name ).join(', ')),
+                      subtitle: Text(group.members.map((e) => profiles.firstWhereOrNull((profile) => profile.id == e)?.name ?? "").join(', ')),
                       onTap: () {
                         widget.setCurrentGroup(group);
                         widget.setState();

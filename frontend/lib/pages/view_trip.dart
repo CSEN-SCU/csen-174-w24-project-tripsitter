@@ -45,7 +45,7 @@ class ViewTrip extends StatelessWidget {
           }
           return MultiProvider(
             providers: [
-              StreamProvider.value(
+              FutureProvider.value(
                 value: UserProfile.getTripProfiles(trip.uids),
                 initialData: List<UserProfile>.empty(growable: true),
               )
@@ -127,12 +127,19 @@ class ViewTrip extends StatelessWidget {
                               List<UserProfile> profiles = Provider.of<List<UserProfile>>(context);
                               return SizedBox(
                                 width: constraints.maxWidth * 0.7,
-                                child: trip.frozen ? Container(color: const Color.fromARGB(255, 255, 255, 255), padding: const EdgeInsets.all(8), child: TripSummary(
-                                  trip: trip, 
-                                  uid: Provider.of<User?>(context)?.uid ?? "", 
-                                  profiles: profiles,
-                                  showBooking: true,
-                                  showSplit: !trip.isConfirmed,
+                                child: trip.frozen ? Container(color: const Color.fromARGB(255, 255, 255, 255), padding: const EdgeInsets.all(8), child: ListView(
+                                  children: [
+                                    Align(
+                                      alignment: Alignment.centerLeft,
+                                      child: TripSummary(
+                                        trip: trip, 
+                                        uid: Provider.of<User?>(context)?.uid ?? "", 
+                                        profiles: profiles,
+                                        showBooking: true,
+                                        showSplit: !trip.isConfirmed,
+                                      ),
+                                    ),
+                                  ],
                                 )) : TripDashBoard(trip),
                               );
                             }
