@@ -466,6 +466,7 @@ class FlightGroup {
 
   Future<void> addOption(FlightOffer option) async {
     _options.add(option);
+    _selected = option;
     await _save();
   }
 
@@ -488,12 +489,18 @@ class FlightGroup {
   }
 
   Future<void> setDepartureAirport(String airport) async {
+    if(airport == _departureAirport) return;
     _departureAirport = airport;
+    options.clear();
+    _selected = null;
     await _save();
   }
 
   Future<void> setArrivalAirport(String airport) async {
+    if(airport == _arrivalAirport) return;
     _arrivalAirport = airport;
+    options.clear();
+    _selected = null;
     await _save();
   }
 }
@@ -580,6 +587,8 @@ class HotelGroup {
   Future<void> addOption(HotelInfo info, HotelOffer offer) async {
     _offers.add(offer);
     _infos.add(info);
+    _selectedInfo = info;
+    _selectedOffer = offer;
     await _save();
   }
   Future<void> removeOption(int i) async {
@@ -670,6 +679,7 @@ class RentalCarGroup {
   }
   Future<void> addOption(RentalCarOffer option) async {
     _options.add(option);
+    _selected = option;
     await _save();
   }
   Future<void> removeOption(RentalCarOffer option) async {

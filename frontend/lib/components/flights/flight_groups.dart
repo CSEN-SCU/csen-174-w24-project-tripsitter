@@ -1,8 +1,11 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:collection/collection.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:tripsitter/classes/airport.dart';
 import 'package:tripsitter/classes/flights.dart';
 import 'package:tripsitter/classes/profile.dart';
 import 'package:tripsitter/classes/trip.dart';
@@ -96,6 +99,84 @@ class _FlightGroupsState extends State<FlightGroups> {
                 child: Column(
                   children: [
                     ListTile(
+                      trailing: IconButton(
+                        icon: const Icon(Icons.edit),
+                        onPressed:() async {
+                          List<Airport> nearbyDepartureAirports = await getNearbyAirports(group.departureAirport, context);
+                          debugPrint(nearbyDepartureAirports.map((e) => e.iataCode).join(", "));
+
+                          List<Airport> nearbyArrivalAirports = await getNearbyAirports(group.arrivalAirport, context);
+                          debugPrint(nearbyArrivalAirports.map((e) => e.iataCode).join(", "));
+
+                          showDialog(context: context, builder: (context) => AlertDialog(
+                            title: const Text("Change Airports"),
+                            content: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                if(nearbyDepartureAirports.length > 1)
+                                  DropdownButtonFormField<Airport>(
+                                    decoration: InputDecoration(
+                                      labelText: 'Departure Airport',
+                                    ),
+                                    value: nearbyDepartureAirports.firstWhere((a) => a.iataCode == group.departureAirport),
+                                    items: nearbyDepartureAirports.map((Airport value) {
+                                      return DropdownMenuItem<Airport>(
+                                        value: value,
+                                        child: Text("${value.name} (${value.iataCode})"),
+                                      );
+                                    }).toList(),
+                                    onChanged: (Airport? value) async {
+                                      if(value == null) return;
+                                      await group.setDepartureAirport(value.iataCode);
+                                      setState(() {
+                                        
+                                      });
+                                      widget.setState();
+                                      if(mounted) {
+                                        Navigator.pop(context);
+                                      }
+                                    },
+                                  ),
+                                if(nearbyArrivalAirports.length > 1)
+                                  DropdownButtonFormField<Airport>(
+                                    decoration: InputDecoration(
+                                      labelText: 'Arrival Airport',
+                                    ),
+                                    value: nearbyArrivalAirports.firstWhere((a) => a.iataCode == group.arrivalAirport),
+                                    items: nearbyArrivalAirports.map((Airport value) {
+                                      return DropdownMenuItem<Airport>(
+                                        value: value,
+                                        child: Text("${value.name} (${value.iataCode})"),
+                                      );
+                                    }).toList(),
+                                    onChanged: (Airport? value) async {
+                                      if(value == null) return;
+                                      await group.setArrivalAirport(value.iataCode);
+                                      setState(() {
+                                        
+                                      });
+                                      widget.setState();
+                                      if(mounted) {
+                                        Navigator.pop(context);
+                                      }
+                                    },
+                                  ),
+                              ],
+                            ),
+                            actions: [
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                }, 
+                                child: const Text("Done")
+                              )
+                            ]
+                          )
+                          );
+
+                          
+                        },
+                      ),
                       title: Text("${group.departureAirport} - ${group.arrivalAirport}"),
                       subtitle: Text(group.members.map((e) => profiles.firstWhereOrNull((profile) => profile.id == e)?.name ?? "").join(', ')),
                       onTap: () {
