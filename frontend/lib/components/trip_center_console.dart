@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:tripsitter/classes/trip.dart';
 import 'package:tripsitter/components/trip_console_dot.dart';
+import 'package:tripsitter/helpers/api.dart';
 
 class TripCenterConsole extends StatefulWidget {
   final Trip trip;
@@ -50,7 +51,14 @@ class _MyStatefulWidgetState extends State<TripCenterConsole>
   void initState() {
     super.initState();
     setup();
+    TripsitterApi.getCityImage(widget.trip.destination).then((value) {
+      setState(() {
+        cityImage = value;
+      });
+    });
   }
+
+  String? cityImage;
 
   void setup() {
     positions = {
