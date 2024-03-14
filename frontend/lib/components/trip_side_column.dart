@@ -178,8 +178,8 @@ class _TripSideColumnState extends State<TripSideColumn> {
               ]
           ));
         }, 
-        icon: Icon(Icons.delete), 
-        label: Text("Delete Trip")
+        icon: const Icon(Icons.delete), 
+        label: const Text("Delete Trip")
       )
     ]);
   }

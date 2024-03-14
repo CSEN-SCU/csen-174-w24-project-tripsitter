@@ -10,7 +10,6 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:intl_phone_field/intl_phone_field.dart';
-import 'package:provider/provider.dart';
 import 'package:tripsitter/classes/city.dart';
 import 'package:tripsitter/classes/profile.dart';
 import 'package:tripsitter/helpers/data.dart';
@@ -166,8 +165,6 @@ class _UpdateProfileState extends State<UpdateProfile> {
 //text field widgit
   @override
   Widget build(BuildContext context) {
-    User? user = Provider.of<User?>(
-        context); //built in firebase stuff to get ID is who is currently using it
     if (profile == null) {
       return Center(
           child: ConstrainedBox(

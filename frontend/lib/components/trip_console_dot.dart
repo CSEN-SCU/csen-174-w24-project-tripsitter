@@ -106,15 +106,15 @@ class TripConsoleDotState extends State<TripConsoleDot> {
   IconData get icon {
     switch (widget.type) {
       case PageType.hotel:
-        return Icons.hotel;
+        return Icons.hotel_rounded;
       case PageType.flights:
         return Icons.flight_takeoff_rounded;
       case PageType.rentalCar:
-        return Icons.directions_car;
+        return Icons.directions_car_rounded;
       case PageType.activities:
-        return Icons.stadium;
+        return Icons.stadium_rounded;
       case PageType.cities:
-        return Icons.location_city;
+        return Icons.location_city_rounded;
     }
     return Icons.error;
   }

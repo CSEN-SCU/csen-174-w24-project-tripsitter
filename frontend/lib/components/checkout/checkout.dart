@@ -84,22 +84,21 @@ class _CheckoutPageState extends State<CheckoutPage> {
                 padding: const EdgeInsets.all(8.0),
                 child: ConstrainedBox(
                   constraints: const BoxConstraints(
-                    maxWidth: 600,
+                    maxWidth: 800,
                   ),
                   child: ListView(
                     children: [
-                      const Text("Checkout Page"),
                       TripSummary(
                         trip: trip,
                         uid: uid,
                         profiles: widget.profiles,
                       ),
-                      Text("${split ? "Your total" : "Total price"}: \$${split ? trip.userTotalPrice(uid) : trip.totalPrice}"),
+                      Text("${split ? "Your total" : "Total price"}: \$${(split ? trip.userTotalPrice(uid) : trip.totalPrice).toStringAsFixed(2)}"),
                       if((split ? trip.rentalCars.where((r) => r.members.contains(uid)) : trip.rentalCars).isNotEmpty || (split ? trip.activities.where((a) => a.participants.contains(uid)) : trip.activities).isNotEmpty)
                         ...[
                           Container(height: 50),
                           const Text("Note: Only flights and hotels can be paid directly through TripSitter. After purchasing, you will be directed to the rental car and activity websites to complete your purchase."),
-                          Text("Amount owed to TripSitter: \$${split ? trip.userStripePrice(uid) : trip.stripePrice}")
+                          Text("Amount owed to TripSitter: \$${(split ? trip.userStripePrice(uid) : trip.stripePrice).toStringAsFixed(2)}")
                         ],
                       ConstrainedBox(
                         constraints: const BoxConstraints(
