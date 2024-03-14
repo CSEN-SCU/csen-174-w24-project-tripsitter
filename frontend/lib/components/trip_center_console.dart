@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:tripsitter/classes/trip.dart';
 import 'package:tripsitter/components/trip_console_dot.dart';
+import 'package:tripsitter/helpers/api.dart';
 
 class TripCenterConsole extends StatefulWidget {
   final Trip trip;
@@ -50,7 +51,14 @@ class _MyStatefulWidgetState extends State<TripCenterConsole>
   void initState() {
     super.initState();
     setup();
+    TripsitterApi.getCityImage(widget.trip.destination).then((value) {
+      setState(() {
+        cityImage = value;
+      });
+    });
   }
+
+  String? cityImage;
 
   void setup() {
     positions = {
@@ -59,7 +67,7 @@ class _MyStatefulWidgetState extends State<TripCenterConsole>
       "Flights": XYPairSized(0.0, 0.0, defaultDotSize),
       "Activities": XYPairSized(0.0, 0.0, defaultDotSize),
       "City": XYPairSized(
-          widget.maxWidth * 0.5, widget.maxHeight * 0.4, defaultDotSize),
+          widget.maxWidth * 0.5, widget.maxHeight * 0.4, defaultDotSize*2),
     };
 
     defaultAngles = {
@@ -311,7 +319,9 @@ class _MyStatefulWidgetState extends State<TripCenterConsole>
               shape: BoxShape.circle,
               color: Color.fromARGB(255, 153, 17, 17),
             ),
-            child: Icon(
+            child: cityImage !=null ? CircleAvatar(
+              backgroundImage: NetworkImage(cityImage!)
+              ) : Icon(
               Icons.location_city,
               color: Colors.white,
               size: positions["City"]!.size * 0.7,
