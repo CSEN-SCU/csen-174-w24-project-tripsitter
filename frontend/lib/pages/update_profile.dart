@@ -132,7 +132,7 @@ class _UpdateProfileState extends State<UpdateProfile> {
     if (img == null) {
       return;
     }
-    if(mounted) {
+    if (mounted) {
       setState(() {
         loadingPic = true;
       });
@@ -144,7 +144,7 @@ class _UpdateProfileState extends State<UpdateProfile> {
       String url = await ref.getDownloadURL();
       image = url;
       await profile?.updatePhoto(true);
-      if(mounted) setState(() {});
+      if (mounted) setState(() {});
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Profile picture uploaded successfully!'),
@@ -153,7 +153,7 @@ class _UpdateProfileState extends State<UpdateProfile> {
     } on FirebaseException catch (e) {
       debugPrint(e.toString());
     }
-    if(mounted) {
+    if (mounted) {
       setState(() {
         loadingPic = false;
       });
@@ -323,15 +323,18 @@ class _UpdateProfileState extends State<UpdateProfile> {
                 ),
               ),
               ListTile(
-                leading: loadingPic ? const CircularProgressIndicator() : CircleAvatar(
-                  backgroundImage:
-                      (profile!.hasPhoto && image != null)
-                          ? NetworkImage(image!)
-                          : null,
-                  child: !(profile!.hasPhoto && image != null)
-                      ? const Icon(Icons.person)
-                      : null),
-                title: ElevatedButton(onPressed: () => uploadImage(), child: const Text("Select Image")),
+                leading: loadingPic
+                    ? const CircularProgressIndicator()
+                    : CircleAvatar(
+                        backgroundImage: (profile!.hasPhoto && image != null)
+                            ? NetworkImage(image!)
+                            : null,
+                        child: !(profile!.hasPhoto && image != null)
+                            ? const Icon(Icons.person)
+                            : null),
+                title: ElevatedButton(
+                    onPressed: () => uploadImage(),
+                    child: const Text("Select Image")),
               ),
               const SizedBox(height: 10),
               ElevatedButton(
