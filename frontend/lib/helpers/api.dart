@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:tripsitter/classes/airport.dart';
 import 'package:tripsitter/classes/car.dart';
 import 'package:tripsitter/classes/city.dart';
 import 'package:tripsitter/classes/flights.dart';
@@ -31,6 +32,7 @@ class TripsitterApi {
   static const String bookFlightUrl = "$baseApiUrl/book/flights";
   static const String bookHotelUrl = "$baseApiUrl/book/hotels";
   static const String cityImageUrl = "$baseApiUrl/image/city";
+  static const String searchTimezoneUrl = "$baseApiUrl/search/timezone";
 
   static const String addUserUrl = '$baseApiUrl/trip/user';
   static const String createPaymentIntentUrl = '$baseApiUrl/checkout/intent';
@@ -203,4 +205,19 @@ class TripsitterApi {
       throw Exception('Failed to load hotels');
     }
   }
+
+  static Future<String> getAirportTimezone(Airport airport) async {
+    Map<String,String> coords = {'lat': airport.lat.toString(), 'lon': airport.lon.toString()};
+    Uri uri = useHttps ? Uri.https(baseUrl,searchTimezoneUrl, coords) : Uri.http(baseUrl, searchTimezoneUrl, coords);
+    http.Response response = await http.get(uri);
+    if (response.statusCode == 200) {
+      dynamic data = jsonDecode(response.body);
+      timezoneMap[airport.iataCode] = data['timeZoneId'];
+      return data['timeZoneId'];
+    } else {
+      throw Exception('Failed to load timezone');
+    }
+  }
 }
+
+Map<String,String> timezoneMap = {};

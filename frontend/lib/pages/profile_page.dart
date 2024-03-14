@@ -1,4 +1,5 @@
 import 'package:collection/collection.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -15,6 +16,7 @@ class TripInfo extends StatefulWidget {
   const TripInfo({
     required this.trip,
     required this.col,
+    super.key
   });
 
   @override
@@ -196,6 +198,13 @@ class _ProfilePageState extends State<ProfilePage> {
                                   "Tripping since ${DateFormat.yMMM().format(profile.joinDate)}"),
                               Text(
                                   "Number of Trips: ${profile.numberTrips}"),
+                              Container(height: 50),
+                              ElevatedButton(
+                                onPressed: () {
+                                  FirebaseAuth.instance.signOut();
+                                },
+                                child: const Text("Sign out")
+                              )
                             ],
                           )
                           ],
@@ -262,7 +271,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                   // Generate a widget for each item in the list
                                   return TripInfo(
                                     trip: trips[index],
-                                    col: index % 2 == 0 ? Color.fromARGB(255, 245, 245, 245) : Color.fromARGB(255, 217, 217, 217)
+                                    col: index % 2 == 0 ? const Color.fromARGB(255, 245, 245, 245) : const Color.fromARGB(255, 217, 217, 217)
                                   );
                                 }),
                           );
