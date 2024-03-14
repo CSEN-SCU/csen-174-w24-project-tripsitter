@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'dart:typed_data';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -5,17 +7,12 @@ import 'package:csv/csv.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:provider/provider.dart';
+import 'package:intl/intl.dart';
+import 'package:intl_phone_field/intl_phone_field.dart';
 import 'package:tripsitter/classes/city.dart';
 import 'package:tripsitter/classes/profile.dart';
-import 'package:tripsitter/components/new_trip_popup.dart';
-import 'package:tripsitter/components/payment.dart';
 import 'package:tripsitter/helpers/data.dart';
-import 'package:tripsitter/pages/login.dart';
-import 'package:tripsitter/pages/profile_page.dart';
-import 'dart:io';
 
 class UpdateProfile extends StatefulWidget {
   const UpdateProfile({super.key});
@@ -37,6 +34,8 @@ class _UpdateProfileState extends State<UpdateProfile> {
 
   List<City> cities = [];
 
+  List<String> genders = <String>['Male', 'Female', 'Other'];
+
   void loadCities() async {
     cities = await getCities(context);
     if (mounted) {
@@ -44,7 +43,7 @@ class _UpdateProfileState extends State<UpdateProfile> {
         "assets/worldcities.csv",
       );
       List<List<dynamic>> list =
-          CsvToListConverter().convert(result, eol: "\n");
+          const CsvToListConverter().convert(result, eol: "\n");
       list.removeAt(0);
       if (!mounted) {
         return;
@@ -76,7 +75,7 @@ class _UpdateProfileState extends State<UpdateProfile> {
         nameController.text = profile!.name;
         emailController.text = profile!.email;
       } else {
-        print("NEW PROFILE");
+        debugPrint("NEW PROFILE");
         nameController.text = user.displayName!;
         emailController.text = user.email!;
         newProfile = true;
@@ -84,12 +83,19 @@ class _UpdateProfileState extends State<UpdateProfile> {
             id: user.uid,
             name: user.displayName!,
             email: user.email!,
+            countryCode: "1",
+            countryISO: "US",
+            phoneNumber: "",
             hometown: null,
             numberTrips: 0,
+            gender: "Other",
+            birthDate: DateTime(2000, 1, 1),
             joinDate: DateTime.now());
       }
     });
   }
+  String? initialCountry;
+  String? initialPhone;
 
   // Future getImageFromGallery() async {
   //   User? user = FirebaseAuth.instance.currentUser;
@@ -110,9 +116,9 @@ class _UpdateProfileState extends State<UpdateProfile> {
   //   await uploadTask.whenComplete(() async {
   //     var url = await ref.getDownloadURL();
   //     image_url = url.toString();
-  //     print(image_url);
+  //     debugPrint(image_url);
   //   }).catchError((onError) {
-  //     print(onError);
+  //     debugPrint(onError);
   //   });
   //   if (!mounted) {
   //     return;
@@ -121,8 +127,8 @@ class _UpdateProfileState extends State<UpdateProfile> {
   // }
   Future<void> uploadImage() async {
     User? user = FirebaseAuth.instance.currentUser;
-    final ImagePicker _picker = ImagePicker();
-    final XFile? img = await _picker.pickImage(source: ImageSource.gallery);
+    final ImagePicker picker = ImagePicker();
+    final XFile? img = await picker.pickImage(source: ImageSource.gallery);
     if (img == null) {
       return;
     }
@@ -145,7 +151,7 @@ class _UpdateProfileState extends State<UpdateProfile> {
         ),
       );
     } on FirebaseException catch (e) {
-      print(e);
+      debugPrint(e.toString());
     }
     if (mounted) {
       setState(() {
@@ -154,19 +160,17 @@ class _UpdateProfileState extends State<UpdateProfile> {
     }
   }
 
-  String? image = null;
+  String? image;
 
 //text field widgit
   @override
   Widget build(BuildContext context) {
-    User? user = Provider.of<User?>(
-        context); //built in firebase stuff to get ID is who is currently using it
     if (profile == null) {
       return Center(
           child: ConstrainedBox(
+        constraints: const BoxConstraints(maxHeight: 200, maxWidth: 200),
         child:
-            AspectRatio(aspectRatio: 1.0, child: CircularProgressIndicator()),
-        constraints: BoxConstraints(maxHeight: 200, maxWidth: 200),
+            const AspectRatio(aspectRatio: 1.0, child: CircularProgressIndicator()),
       ));
     }
     if (image == null && profile!.hasPhoto) {
@@ -178,15 +182,19 @@ class _UpdateProfileState extends State<UpdateProfile> {
       });
     }
 
+    if(initialCountry == null) {
+      initialCountry = profile!.countryISO;
+      initialPhone = "+${profile!.countryCode}${profile!.phoneNumber}";
+    }
+
     return Scaffold(
         appBar: AppBar(
           title: Text(newProfile ? "Create Profile" : "Update Profile"),
         ),
-        //TODO: pull ID, Prompt for name, Pull Email, Prompt for hometown, initialize number of trips to 0, populate join date, prompt for user photo, default stripe ID
         //store all of that info into the db
         body: Center(
           child: ConstrainedBox(
-            constraints: BoxConstraints(maxWidth: 600),
+            constraints: const BoxConstraints(maxWidth: 600),
             child: Column(children: [
               Padding(
                 padding: const EdgeInsets.all(8.0),
@@ -200,6 +208,30 @@ class _UpdateProfileState extends State<UpdateProfile> {
                     fillColor: Colors.grey[300],
                     border: InputBorder.none,
                     labelText: 'Name',
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: TextField(
+                  onTap: () async {
+                    DateTime? date = await showDatePicker(
+                        context: context,
+                        initialDate: profile!.birthDate,
+                        firstDate: DateTime(1900),
+                        lastDate: DateTime.now());
+                    if (date != null) {
+                      profile!.updateBirthDate(date);
+                      if(mounted) setState(() {});
+                    }
+                  },
+                  readOnly: true,
+                  controller: TextEditingController(text: DateFormat('yyyy-MM-dd').format(profile!.birthDate)),
+                  decoration: InputDecoration(
+                    filled: true,
+                    fillColor: Colors.grey[300],
+                    border: InputBorder.none,
+                    labelText: 'Birth Date',
                   ),
                 ),
               ),
@@ -240,25 +272,76 @@ class _UpdateProfileState extends State<UpdateProfile> {
                   },
                 ),
               ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: DropdownButtonFormField<String>(
+                  decoration: InputDecoration(
+                      filled: true,
+                      fillColor: Colors.grey[300],
+                      border: InputBorder.none,
+                      labelText: 'Gender',
+                    ),
+                  value: profile!.gender,
+                  icon: const Icon(Icons.arrow_downward),
+                  elevation: 16,
+                  onChanged: (String? value) {
+                    // This is called when the user selects an item.
+                    if(value == null) return;
+                    setState(() {
+                      profile!.updateGender(value);
+                    });
+                  },
+                  items: genders.map<DropdownMenuItem<String>>((String value) {
+                    return DropdownMenuItem<String>(
+                      value: value,
+                      child: Text(value),
+                    );
+                  }).toList(),
+                )
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: IntlPhoneField(
+                    decoration: InputDecoration(
+                      filled: true,
+                      fillColor: Colors.grey[300],
+                      border: InputBorder.none,
+                      labelText: 'Phone Number',
+                    ),
+                    initialCountryCode: initialCountry,
+                    initialValue: initialPhone,
+                    onChanged: (phone) {
+                      try {if(phone.isValidNumber()) {
+                        profile!.updateCountryCode(phone.countryCode.substring(1));
+                        profile!.updatePhoneNumber(phone.number);
+                        profile!.updateCountryISO(phone.countryISOCode);
+                      }
+                      } catch(e) {
+                        debugPrint(e.toString());
+                      }
+                    },
+                ),
+              ),
               ListTile(
                 leading: loadingPic
-                    ? CircularProgressIndicator()
+                    ? const CircularProgressIndicator()
                     : CircleAvatar(
                         backgroundImage: (profile!.hasPhoto && image != null)
                             ? NetworkImage(image!)
                             : null,
                         child: !(profile!.hasPhoto && image != null)
-                            ? Icon(Icons.person)
+                            ? const Icon(Icons.person)
                             : null),
                 title: ElevatedButton(
                     onPressed: () => uploadImage(),
-                    child: Text("Select Image")),
+                    child: const Text("Select Image")),
               ),
+              const SizedBox(height: 10),
               ElevatedButton(
                   onPressed: () async {
                     if (profile!.hometown == null) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text("Please select a hometown")));
+                          const SnackBar(content: Text("Please select a hometown")));
                       return;
                     }
                     await profile?.save();
@@ -266,7 +349,14 @@ class _UpdateProfileState extends State<UpdateProfile> {
                       Navigator.pushReplacementNamed(context, "/");
                     }
                   },
-                  child: Text("Save Profile"))
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor:
+                                    const Color.fromARGB(255, 125, 175, 220),
+                                foregroundColor: Colors.black,
+                              ),
+                  child: const Text("Save Profile"),
+              )
+                  
             ]),
           ),
         ));

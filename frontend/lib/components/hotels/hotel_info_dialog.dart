@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:tripsitter/classes/hotels.dart';
-import 'package:tripsitter/helpers/formatters.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 class HotelInfoDialog extends StatelessWidget {
   final HotelInfo hotel;
@@ -10,7 +8,7 @@ class HotelInfoDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text("Hotel Details"),
+      title: const Text("Hotel Details"),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -23,7 +21,7 @@ class HotelInfoDialog extends StatelessWidget {
           onPressed: () {
             Navigator.of(context).pop();
           },
-          child: Text("Close"),
+          child: const Text("Close"),
         )
       ],
     );

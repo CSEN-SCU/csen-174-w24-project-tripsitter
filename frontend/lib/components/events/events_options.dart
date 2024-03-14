@@ -1,16 +1,19 @@
 import 'dart:math';
 
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
-import 'package:intl/intl.dart';
+import 'package:tripsitter/classes/airport.dart';
+import 'package:tripsitter/classes/filterbutton.dart';
 import 'package:tripsitter/classes/profile.dart';
 import 'package:tripsitter/classes/ticketmaster.dart';
 import 'package:tripsitter/classes/trip.dart';
 import 'package:tripsitter/components/events/event_info_dialog.dart';
 import 'package:tripsitter/components/events/events_map.dart';
-import 'package:tripsitter/components/events/select_events.dart';
 import 'package:tripsitter/helpers/api.dart';
+import 'package:tripsitter/helpers/data.dart';
+import 'package:tripsitter/helpers/locators.dart';
 import 'package:tripsitter/popups/checkbox_popup.dart';
+import 'package:tripsitter/popups/select_popup.dart';
 
 class EventsOptions extends StatefulWidget {
   final Trip trip;
@@ -34,6 +37,24 @@ class EventsOptions extends StatefulWidget {
   State<EventsOptions> createState() => _EventsOptionsState();
 }
 
+enum EventSortOption {
+  price,
+  distanceAirport,
+  distanceHotel;
+
+  @override
+  String toString() {
+    switch (this) {
+      case EventSortOption.price:
+        return 'Price';
+      case EventSortOption.distanceAirport:
+        return 'Distance to Airport';
+      case EventSortOption.distanceHotel:
+        return 'Distance to Hotel';
+    }
+  }
+}
+
 class _EventsOptionsState extends State<EventsOptions>
     with TickerProviderStateMixin {
   List<TicketmasterEvent> events = [];
@@ -47,7 +68,6 @@ class _EventsOptionsState extends State<EventsOptions>
 
   @override
   void initState() {
-    // TODO: implement initState
     isLoaded = false;
     controller = AnimationController(
       /// [AnimationController]s can be created with `vsync: this` because of
@@ -61,6 +81,10 @@ class _EventsOptionsState extends State<EventsOptions>
     super.initState();
     super.initState();
     getEvents();
+    getAirports(context).then((value) {
+      if(widget.trip.flights.isEmpty || widget.trip.flights.first.selected == null) return;
+      arrivalAirport = value.firstWhereOrNull((element) => element.iataCode == widget.trip.flights.first.arrivalAirport);
+    });
   }
 
   @override
@@ -69,8 +93,15 @@ class _EventsOptionsState extends State<EventsOptions>
     super.dispose();
   }
 
+  List<String> selectedGenres = [];
+  bool _sortDirection = true;
+  bool _isGenreOpen = false;
+  final GlobalKey _sortKey = GlobalKey();
+  final GlobalKey _genreKey = GlobalKey();
+  EventSortOption _selectedSort = EventSortOption.price;
+
   Future<void> getEvents() async {
-    print("Getting events for trip ${trip.id}");
+    debugPrint("Getting events for trip ${trip.id}");
     List<TicketmasterEvent> call =
         await TripsitterApi.getEvents(TicketmasterQuery(
       lat: trip.destination.lat,
@@ -78,28 +109,149 @@ class _EventsOptionsState extends State<EventsOptions>
       startDateTime: trip.startDate,
       endDateTime: trip.endDate,
     ));
+    call.sort(compareEvents);
 
+    Set<String> genres = {};
+    for(TicketmasterEvent e in call) {
+      for(TicketmasterClassification c in e.classifications) {
+        if(c.genre != null) {
+          genres.add(c.genre!.name);
+        }
+      }
+    }
+    debugPrint(genres.toList().toString());
     // After fetching events, initialize GlobalKeys for each
     setState(() {
+      selectedGenres = genres.toList();
       events = call;
     });
 
     isLoaded = true;
   }
 
+  void _showGenrePopup() async {
+    if(events.isEmpty) return;
+    setState(() {
+      _isGenreOpen = true;
+    });
+
+    Set<String> genres = {};
+    for(TicketmasterEvent e in events) {
+      for(TicketmasterClassification c in e.classifications) {
+        if(c.genre != null) {
+          genres.add(c.genre!.name);
+        }
+      }
+    }
+
+    final genresList = genres.toList();
+    genresList.sort((a, b) => a.compareTo(b));
+
+    final popup = CheckboxPopup(
+      options: genresList,
+      format: (String option) => option[0] + option.substring(1).toLowerCase(),
+      selected: selectedGenres,
+      onSelected: (List<String> newSelected) {
+        setState(() {
+          selectedGenres = newSelected;
+          // getFlights(reset: false);
+        });
+      },
+    );
+
+    popup.showPopup(context, _genreKey).then((_) {
+      setState(() {
+        _isGenreOpen = false;
+      });
+    });
+  }
+
+  bool filterEvents(TicketmasterEvent event) {
+    double distanceFromAirport = 0;
+    if(arrivalAirport != null) {
+      distanceFromAirport = distance(event.venues.first.latitude ?? 0, event.venues.first.longitude ?? 0, arrivalAirport!.lat, arrivalAirport!.lon);
+    }
+    if(distanceFromAirport > 150) {
+      return false;
+    }
+    if(selectedGenres.isEmpty) return true;
+    for(TicketmasterClassification c in event.classifications) {
+      if(c.genre != null && selectedGenres.contains(c.genre!.name)) {
+        return true;
+      }
+    }
+    return false;
+  }
+  Airport? arrivalAirport;
+
+  int compareEvents(TicketmasterEvent a, TicketmasterEvent b) {
+    switch (_selectedSort) {
+      case EventSortOption.price:
+        return a.prices.isEmpty
+            ? 1
+            : b.prices.isEmpty
+                ? -1
+                : a.prices.map((p) => p.min).reduce(min).compareTo(
+                    b.prices.map((p) => p.min).reduce(min));
+      case EventSortOption.distanceAirport:
+        if(arrivalAirport == null) return 0;
+        return a.venues.isEmpty
+            ? 1
+            : b.venues.isEmpty
+                ? -1
+                : distance(a.venues.first.latitude ?? 0, a.venues.first.longitude ?? 0, arrivalAirport!.lat, arrivalAirport!.lon).compareTo(
+                    distance(b.venues.first.latitude ?? 0, b.venues.first.longitude ?? 0, arrivalAirport!.lat, arrivalAirport!.lon));
+      case EventSortOption.distanceHotel:
+        if(trip.hotels.isEmpty || trip.hotels.first.selectedInfo == null) return 0;
+        return a.venues.isEmpty
+            ? 1
+            : b.venues.isEmpty
+                ? -1
+                : distance(a.venues.first.latitude ?? 0, a.venues.first.longitude ?? 0, trip.hotels.first.selectedInfo!.latitude ?? 0, trip.hotels.first.selectedInfo!.longitude ?? 0).compareTo(
+                    distance(b.venues.first.latitude ?? 0, b.venues.first.longitude ?? 0, trip.hotels.first.selectedInfo!.latitude ?? 0, trip.hotels.first.selectedInfo!.longitude ?? 0));
+        // return a.venues.isEmpty
+        //     ? 1
+        //     : b.venues.isEmpty
+        //         ? -1
+        //         : a.venues.firstOrNull?.distanceToHotel.compareTo(
+        //             b.venues.firstOrNull?.distanceToHotel);
+    }
+  }
+
+  void _showSortPopup() {
+    setState(() {
+    });
+
+    final popup = SelectOnePopup<EventSortOption>(
+      options: EventSortOption.values,
+      selected: _selectedSort,
+      onSelected: (EventSortOption value) {
+        setState(() {
+          _selectedSort = value;
+          events.sort(compareEvents);
+        });
+      },
+    );
+
+    popup.showPopup(context, _sortKey).then((_) {
+      setState(() {
+      });
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     // Initialize a counter variable before mapping the events to TableRows
-    int rowIndex = 0;
-
     return ListView(
       children: [
+        // Text("Choose Activities",
+        //     style: Theme.of(context)
+        //         .textTheme
+        //         .displayMedium
+        //         ?.copyWith(fontWeight: FontWeight.bold)),
         Wrap(
           children: [
-            Text("Choose Activites",
-                style: Theme.of(context).textTheme.displayMedium?.copyWith(
-                    decoration: TextDecoration.underline,
-                    fontWeight: FontWeight.bold)),
+            const Text("Choose Activities", style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
             Padding(
               padding: const EdgeInsets.fromLTRB(80, 10, 0, 0),
               child: Text("Toggle Map Mode",
@@ -116,6 +268,41 @@ class _EventsOptionsState extends State<EventsOptions>
                 });
               },
             ),
+          ],
+        ),
+        Row(
+          children: [
+            Expanded(
+              child: Wrap(
+                spacing: 10,
+                children: <Widget>[
+                  FilterButton(
+                      text: 'Genre',
+                      globalKey: _genreKey,
+                      onPressed: _showGenrePopup,
+                      icon: Icon(
+                        _isGenreOpen
+                            ? Icons.arrow_drop_up
+                            : Icons.arrow_drop_down,
+                      )),
+                ],
+              ),
+            ),
+            FilterButton(
+              color: Colors.grey[100]!,
+              text: _selectedSort.toString(),
+              globalKey: _sortKey,
+              onPressed: _showSortPopup,
+              icon: IconButton(
+                onPressed: () {
+                  setState(() {
+                    _sortDirection = !_sortDirection;
+                  });
+                },
+                icon: Icon(_sortDirection
+                    ? Icons.arrow_upward
+                    : Icons.arrow_downward),
+              )),
           ],
         ),
         !isLoaded
@@ -139,7 +326,7 @@ class _EventsOptionsState extends State<EventsOptions>
                           height: constraints.maxHeight - 50,
                           trip: trip,
                           profiles: widget.profiles,
-                          events: events,
+                          events: (_sortDirection ? events : events.reversed).where(filterEvents).toList(),
                           setState: widget.setState,
                         );
                       },
@@ -154,13 +341,13 @@ class _EventsOptionsState extends State<EventsOptions>
                         4: FixedColumnWidth(150),
                       },
                     defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-                    children: events
+                    children: (_sortDirection ? events : events.reversed).where(filterEvents)
                         .map((event) => TableRow(children: [
                               TableCell(
                                   child: Padding(
                                 padding: const EdgeInsets.all(8.0),
                                 child: event.images.isEmpty
-                                    ? Icon(Icons.star)
+                                    ? const Icon(Icons.star)
                                     : Image.network(event.images.first.url,
                                         height: 50),
                               )),
@@ -181,7 +368,7 @@ class _EventsOptionsState extends State<EventsOptions>
                                   child: Padding(
                                 padding: const EdgeInsets.all(8.0),
                                 child: IconButton(
-                                    icon: Icon(Icons.info),
+                                    icon: const Icon(Icons.info),
                                     onPressed: () {
                                       showDialog(
                                         context: context,
@@ -216,13 +403,13 @@ class _EventsOptionsState extends State<EventsOptions>
                                           backgroundColor:
                                               MaterialStateProperty.all<Color>(
                                                   selected
-                                                      ? Color.fromARGB(
+                                                      ? const Color.fromARGB(
                                                           255, 127, 166, 198)
                                                       : Colors.grey[300]!)),
                                       child: Text(
                                           'Select${selected ? 'ed' : ''}',
                                           style:
-                                              TextStyle(color: Colors.black)),
+                                              const TextStyle(color: Colors.black)),
                                     );
                                   }),
                                 ),

@@ -10,7 +10,7 @@ class CarInfoDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text("Car Details"),
+      title: const Text("Car Details"),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -35,7 +35,7 @@ class CarInfoDialog extends StatelessWidget {
           onPressed: () {
             Navigator.of(context).pop();
           },
-          child: Text("Close"),
+          child: const Text("Close"),
         )
       ],
     );

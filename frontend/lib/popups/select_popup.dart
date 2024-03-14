@@ -15,7 +15,7 @@ class SelectOnePopup<T> extends StatelessWidget {
   Future<void> showPopup(BuildContext context, GlobalKey key) async {
     final RenderBox button =
         key.currentContext!.findRenderObject() as RenderBox;
-    final RenderBox overlay = Overlay.of(key.currentContext!)!
+    final RenderBox overlay = Overlay.of(key.currentContext!)
         .context
         .findRenderObject() as RenderBox;
     final RelativeRect position = RelativeRect.fromRect(

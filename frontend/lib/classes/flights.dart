@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/widgets.dart';
 import 'package:collection/collection.dart';
+import 'package:tripsitter/classes/profile.dart';
 import 'package:tripsitter/classes/trip.dart';
 
 class FlightsQuery {
@@ -129,7 +130,7 @@ class FlightItineraryRecursive {
       currentObj = itineraries;
       depth = 0;
       for (FlightItinerary i in offer.itineraries) {
-        FlightItineraryRecursive? iRec = itineraries.firstWhereOrNull((ir) {
+        FlightItineraryRecursive? iRec = currentObj.firstWhereOrNull((ir) {
           if (ir.id == i.id) {
             return true;
           }
@@ -224,6 +225,7 @@ class FlightOffer {
   final List<String> validatingAirlineCodes;
   final List<FlightTravelerPricing> travelerPricings;
   final List<TripComment> comments;
+  final Map<String,dynamic> json;
 
   const FlightOffer({
     required this.type,
@@ -241,6 +243,7 @@ class FlightOffer {
     required this.validatingAirlineCodes,
     required this.travelerPricings,
     required this.comments,
+    required this.json
   });
 
   Future<void> addComment(TripComment comment) async {
@@ -271,50 +274,51 @@ class FlightOffer {
           json['travelerPricings'].map((travelerPricing) =>
               FlightTravelerPricing.fromJson(travelerPricing))),
       comments: json["comments"] != null ? List<TripComment>.from(json["comments"].map((x) => TripComment.fromJson(x))) : List.empty(growable: true),
+      json: json
     );
   }
 
   Map<String, dynamic> toJson({bool includeComments = false}) {
-    Map<String, dynamic> json = {
-      'type': type,
-      'id': id,
-      'source': source,
-      'instantTicketingRequired': instantTicketingRequired,
-      'nonHomogeneous': nonHomogeneous,
-      'oneWay': oneWay,
-      'lastTicketingDate': lastTicketingDate,
-      'lastTicketingDateTime': lastTicketingDateTime,
-      'numberOfBookableSeats': numberOfBookableSeats,
-      'itineraries':
-          itineraries.map((itinerary) => itinerary.toJson()).toList(),
-      'price': price.toJson(),
-      'pricingOptions': pricingOptions.toJson(),
-      'validatingAirlineCodes': validatingAirlineCodes,
-      'travelerPricings': travelerPricings
-          .map((travelerPricing) => travelerPricing.toJson())
-          .toList(),
-    };
-    if(includeComments){
-      json["comments"] = comments.map((e) => e.toJson()).toList();
-    }
+    // Map<String, dynamic> json = {
+    //   'type': type,
+    //   'id': id,
+    //   'source': source,
+    //   'instantTicketingRequired': instantTicketingRequired,
+    //   'nonHomogeneous': nonHomogeneous,
+    //   'oneWay': oneWay,
+    //   'lastTicketingDate': lastTicketingDate,
+    //   'lastTicketingDateTime': lastTicketingDateTime,
+    //   'numberOfBookableSeats': numberOfBookableSeats,
+    //   'itineraries':
+    //       itineraries.map((itinerary) => itinerary.toJson()).toList(),
+    //   'price': price.toJson(),
+    //   'pricingOptions': pricingOptions.toJson(),
+    //   'validatingAirlineCodes': validatingAirlineCodes,
+    //   'travelerPricings': travelerPricings
+    //       .map((travelerPricing) => travelerPricing.toJson())
+    //       .toList(),
+    // };
+    // if(includeComments){
+    //   json["comments"] = comments.map((e) => e.toJson()).toList();
+    // }
     return json;
   }
 
   @override
-  bool operator ==(that) {
-    if(identical(this, that)) {
+  bool operator ==(other) {
+    if(identical(this, other)) {
       return true;
     }
-    if(that is! FlightOffer) {
+    if(other is! FlightOffer) {
       return false;
     }
     // if(id == that.id) {
     //   return true;
     // }
-    if(oneWay != that.oneWay) {
+    if(oneWay != other.oneWay) {
       return false;
     }
-    if(itineraries.length != that.itineraries.length) {
+    if(itineraries.length != other.itineraries.length) {
       return false;
     }
     // bool itinerariesEqual = true;
@@ -325,12 +329,12 @@ class FlightOffer {
     // }
     // if(itinerariesEqual) {return true;}
     for(int i = 0; i < itineraries.length; i++) {
-      if(itineraries[i].segments.length != that.itineraries[i].segments.length) {
+      if(itineraries[i].segments.length != other.itineraries[i].segments.length) {
         return false;
       }
       for(int j = 0; j < itineraries[i].segments.length; j++) {
         FlightSegment s1 = itineraries[i].segments[j];
-        FlightSegment s2 = that.itineraries[i].segments[j];
+        FlightSegment s2 = other.itineraries[i].segments[j];
         if(
           s1.departure.iataCode != s2.departure.iataCode ||
           s1.arrival.iataCode != s2.arrival.iataCode ||
@@ -669,11 +673,15 @@ class FlightFareDetailsBySegment {
       'segmentId': segmentId,
       'cabin': cabin,
       'fareBasis': fareBasis,
-      'brandedFare': brandedFare,
-      'brandedFareLabel': brandedFareLabel,
       'class': classType,
       'amenities': amenities.map((amenity) => amenity.toJson()).toList(),
     };
+    if(brandedFare != null) {
+      json['brandedFare'] = brandedFare;
+    }
+    if(brandedFareLabel != null) {
+      json['brandedFareLabel'] = brandedFareLabel;
+    }
     if(includedCheckedBags != null) {
       json['includedCheckedBags'] = includedCheckedBags!.toJson();
     }
@@ -808,7 +816,7 @@ class AirlineInfo {
 }
 
 class Airline {
-  static Map<String, Airline> _airlineCache = {};
+  static final Map<String, Airline> _airlineCache = {};
 
   static Future<void> cacheAirlines(BuildContext context) async {
     if (_airlineCache.isNotEmpty) return;
@@ -875,5 +883,37 @@ extension StringToDuration on String {
     }
     final timeString = timeMatch.group(0);
     return int.parse(timeString!.substring(0, timeString.length - 1));
+  }
+}
+
+
+class FlightBooking {
+  List<FlightOffer> flightOffers;
+  List<TravelerInfo> travelers;
+
+  FlightBooking({
+    required this.flightOffers,
+    required this.travelers,
+  });
+
+  Map<String, dynamic> toJson() {
+    return {
+      "data": {
+        "type": "flight-order",
+        "flightOffers": flightOffers.map((offer) => offer.toJson()).toList(),
+        "travelers": travelers.map((traveler) => traveler.toFlightJson()).toList(),
+      }
+    };
+  }
+
+  factory FlightBooking.fromFlightGroup(FlightGroup group, List<UserProfile> profiles) {
+    List<TravelerInfo> travelers = [];
+    for(int i = 0; i < group.members.length; i++) {
+      travelers.add(TravelerInfo.fromUserProfile(profiles.firstWhere((profile) => profile.id == group.members[i]), i));
+    }
+    return FlightBooking(
+      flightOffers: [if(group.selected != null) group.selected!],
+      travelers: travelers,
+    );
   }
 }

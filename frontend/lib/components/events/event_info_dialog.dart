@@ -1,4 +1,3 @@
-import 'dart:html';
 
 import 'package:flutter/material.dart';
 import 'package:tripsitter/classes/ticketmaster.dart';
@@ -63,14 +62,16 @@ class EventPopup extends StatelessWidget {
                               style: TextStyle(fontWeight: FontWeight.bold),
                             ),
                             TextSpan(
-                              text: (event.info.infoStr ?? '') + '\n',
+                              text: '${event.info.infoStr ?? ''}\n',
                             ),
-                            TextSpan(
-                              text: (event.info.pleaseNote ?? '') + '\n',
-                            ),
-                            TextSpan(
-                              text: (event.info.ticketLimit ?? ''),
-                            ),
+                            if(event.info.infoStr != event.info.pleaseNote)
+                              TextSpan(
+                                text: '${event.info.pleaseNote ?? ''}\n',
+                              ),
+                            if(event.info.pleaseNote != event.info.ticketLimit)
+                              TextSpan(
+                                text: (event.info.ticketLimit ?? ''),
+                              ),
                           ]),
                     )
                   ],

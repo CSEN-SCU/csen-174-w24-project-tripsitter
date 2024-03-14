@@ -1,26 +1,18 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:collection/collection.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:tripsitter/classes/profile.dart';
 import 'package:tripsitter/classes/trip.dart';
 import 'package:tripsitter/components/navbar.dart';
-import 'package:tripsitter/components/new_trip_popup.dart';
-import 'package:tripsitter/components/payment.dart';
-import 'package:tripsitter/helpers/locators.dart';
-import 'package:tripsitter/pages/login.dart';
 import 'package:tripsitter/pages/update_profile.dart';
 
-//TODO: pull and populate user info. have fallbacks for photo
 class TripInfo extends StatefulWidget {
   final Trip trip;
   final Color col;
 
-  TripInfo({
+  const TripInfo({
     required this.trip,
     required this.col,
   });
@@ -44,7 +36,7 @@ class _TripInfoState extends State<TripInfo> {
         },
         style: ElevatedButton.styleFrom(
           backgroundColor: widget.col,
-          textStyle: TextStyle(color: Colors.black, fontSize: 20, height: 2),
+          textStyle: const TextStyle(color: Colors.black, fontSize: 20, height: 2),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(0)),
         ),
         child: Row(
@@ -53,48 +45,58 @@ class _TripInfoState extends State<TripInfo> {
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                const SizedBox(height: 10),
                 Text(
                   name,
-                  style: TextStyle(color: Colors.black),
+                  style: const TextStyle(color: Colors.black),
                 ),
+                const SizedBox(height: 5),
                 Row(
                   children: [
-                    Icon(
+                    const Icon(
                       Icons.location_pin,
                       color: Colors.black,
                     ),
+                    const SizedBox(width: 5),
                     Text(
-                      city + ', ' + country,
-                      style: TextStyle(color: Colors.black),
+                      '$city, $country',
+                      style: const TextStyle(color: Colors.black),
                     )
                   ],
                 ),
+                const SizedBox(height: 5),
                 Row(
                   children: [
-                    Icon(
+                    const Icon(
                       Icons.calendar_month,
                       color: Colors.black,
                     ),
+                    const SizedBox(width: 5),
                     Text(
                       start,
-                      style: TextStyle(color: Colors.black),
+                      style: const TextStyle(color: Colors.black),
                     ),
-                    Icon(
+                    const SizedBox(width: 5),
+                    const Icon(
                       Icons.arrow_forward,
+                      size: 15,
                       color: Colors.black,
                     ),
+                    const SizedBox(width: 5),
                     Text(
                       end,
-                      style: TextStyle(color: Colors.black),
+                      style: const TextStyle(color: Colors.black),
                     )
                   ],
-                )
+                ),
+                const SizedBox(height: 10),
               ],
             ),
+            const SizedBox(width: 300),
             Center(
               child: Text(
-                "     Price - \$" + price,
-                style: TextStyle(color: Colors.black),
+                "     Price - \$$price",
+                style: const TextStyle(color: Colors.black),
               ),
             )
           ],
@@ -110,13 +112,13 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  String? image = null;
   bool upcoming = true;
+  String? image;
   @override
   Widget build(BuildContext context) {
     UserProfile? profile = Provider.of<UserProfile?>(context);
     if (profile == null) {
-      return UpdateProfile();
+      return const UpdateProfile();
     }
     if (image == null && profile.hasPhoto) {
       FirebaseStorage.instance
@@ -126,14 +128,13 @@ class _ProfilePageState extends State<ProfilePage> {
         if (mounted) setState(() => image = a);
       });
     }
-
     return MultiProvider(
       providers: [
         StreamProvider.value(
             value: Trip.getTripsByProfile(profile.id),
             initialData: List<Trip>.empty(growable: true),
             catchError: (_, err) {
-              print(err);
+              debugPrint(err.toString());
               return List<Trip>.empty(growable: true);
             })
       ],
@@ -144,7 +145,7 @@ class _ProfilePageState extends State<ProfilePage> {
         body: Center(
           child: Row(
             children: [
-              Container(
+              SizedBox(
                   width: MediaQuery.of(context).size.width * .55,
                   height: MediaQuery.of(context).size.height,
                   child:
@@ -156,52 +157,54 @@ class _ProfilePageState extends State<ProfilePage> {
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         //profile part
                         children: [
-                          Container(
-                            //width: MediaQuery.of(context).size.width*.45 ,
-                            child: Column(
-                              //the icon and change button
-                              children: [
-                                CircleAvatar(
-                                    radius: 100,
-                                    backgroundImage:
-                                        (profile.hasPhoto && image != null)
-                                            ? NetworkImage(image!)
-                                            : null,
-                                    child: !(profile.hasPhoto && image != null)
-                                        ? Icon(Icons.person)
-                                        : null),
-                                ElevatedButton(
-                                    onPressed: () {
-                                      Navigator.pushNamed(context, "/profile");
-                                    },
-                                    child: Text("Edit Profile"))
-                              ],
-                            ),
+                          Column(
+                            //the icon and change button
+                            children: [
+                              CircleAvatar(
+                                  radius: 100,
+                                  backgroundImage:
+                                      (profile.hasPhoto && image != null)
+                                          ? NetworkImage(image!)
+                                          : null,
+                                  child:
+                                      !(profile.hasPhoto && image != null)
+                                          ? const Icon(Icons.person)
+                                          : null),
+                              const SizedBox(height: 10),
+                              ElevatedButton(
+                                  onPressed: () {
+                                    Navigator.pushNamed(
+                                        context, "/profile");
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor:
+                                        const Color.fromARGB(255, 238, 238, 238),
+                                    foregroundColor: Colors.black,
+                                  ),
+                                  child: const Text("Edit Profile")),
+                            ],
                           ),
-                          Container(
-                            //width: MediaQuery.of(context).size.width*.55 ,
-
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  profile.name,
-                                  style: TextStyle(
-                                      fontSize: 30, decorationThickness: 2),
-                                ),
-                                Text(
-                                    "Tripping since ${DateFormat.yMMM().format(profile.joinDate)}"),
-                                Text("Number of trips: ${profile.numberTrips}"),
-                              ],
-                            ),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                profile.name,
+                                style: const TextStyle(
+                                    fontSize: 30, decorationThickness: 2),
+                              ),
+                              Text(
+                                  "Tripping since ${DateFormat.yMMM().format(profile.joinDate)}"),
+                              Text(
+                                  "Number of Trips: ${profile.numberTrips}"),
+                            ],
                           )
-                        ],
-                      ),
+                          ],
+                        ),
                       ElevatedButton(
                           onPressed: () {
                             Navigator.pushNamed(context, "/new");
                           },
-                          child: Text("Create New Trip")),
+                          child: const Text("Create New Trip")),
                       Container(
                           alignment: Alignment.bottomLeft,
                           child: Image.asset("cityscape.png")),
@@ -210,13 +213,13 @@ class _ProfilePageState extends State<ProfilePage> {
                   )),
 
               //the trip info
-              Container(
+              SizedBox(
                   width: MediaQuery.of(context).size.width * .45,
                   child: Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Text("My Trips"),
+                        const Text("My Trips"),
                         Center(
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
@@ -226,14 +229,14 @@ class _ProfilePageState extends State<ProfilePage> {
                                     upcoming = true;
                                     setState(() {});
                                   },
-                                  child: Text("Upcoming")),
-                              Icon(Icons.swap_horiz_sharp),
+                                  child: const Text("Upcoming")),
+                              const Icon(Icons.swap_horiz_sharp),
                               ElevatedButton(
                                   onPressed: () {
                                     upcoming = false;
                                     setState(() {});
                                   },
-                                  child: Text("Past"))
+                                  child: const Text("Past"))
                             ],
                           ),
                         ),
@@ -257,17 +260,10 @@ class _ProfilePageState extends State<ProfilePage> {
                                 itemCount: trips.length,
                                 itemBuilder: (BuildContext context, int index) {
                                   // Generate a widget for each item in the list
-                                  if (index % 2 == 0) {
-                                    return TripInfo(
-                                        trip: trips[index],
-                                        col:
-                                            Color.fromARGB(255, 217, 217, 217));
-                                  } else {
-                                    return TripInfo(
-                                        trip: trips[index],
-                                        col:
-                                            Color.fromARGB(255, 245, 245, 245));
-                                  }
+                                  return TripInfo(
+                                    trip: trips[index],
+                                    col: index % 2 == 0 ? Color.fromARGB(255, 245, 245, 245) : Color.fromARGB(255, 217, 217, 217)
+                                  );
                                 }),
                           );
                         }),

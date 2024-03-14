@@ -68,7 +68,7 @@ class _SelectFlightState extends State<SelectFlight> {
                 ),
               )
             ),
-            Container(
+            SizedBox(
               width: constraints.maxWidth * 0.65,
               child: Padding(
                 padding: const EdgeInsets.all(8.0),

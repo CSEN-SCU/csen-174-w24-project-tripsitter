@@ -17,7 +17,7 @@ class CheckboxPopup extends StatelessWidget {
   Future<void> showPopup(BuildContext context, GlobalKey key) async {
     final RenderBox button =
         key.currentContext!.findRenderObject() as RenderBox;
-    final RenderBox overlay = Overlay.of(key.currentContext!)!
+    final RenderBox overlay = Overlay.of(key.currentContext!)
         .context
         .findRenderObject() as RenderBox;
     final RelativeRect position = RelativeRect.fromRect(
@@ -38,7 +38,7 @@ class CheckboxPopup extends StatelessWidget {
       items: [
         PopupMenuItem<void>(
           child: ListTile(
-            leading: isAllSelected ? Icon(Icons.clear) : Icon(Icons.select_all),
+            leading: isAllSelected ? const Icon(Icons.clear) : const Icon(Icons.select_all),
             title: Text(selectAllLabel),
             onTap: () {
               if (isAllSelected) {
