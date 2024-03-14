@@ -61,7 +61,7 @@ class ViewTrip extends StatelessWidget {
                     builder: (BuildContext context, BoxConstraints constraints) {
                       if(isMobile) {
                         List<UserProfile> profiles = Provider.of<List<UserProfile>>(context);
-                        return Column(
+                        return ListView(
                           children: [
                             Text(trip.name, 
                               style: const TextStyle(
@@ -137,33 +137,37 @@ class ViewTrip extends StatelessWidget {
                             if(trip.isConfirmed)
                               const Text("Trip is confirmed", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
                             Container(width: 10),
-                            ElevatedButton.icon(
-                              onPressed: () {
-                                showDialog(context: context, builder: (context) => 
-                                  AlertDialog(
-                                    title: const Text("Delete Trip"),
-                                    content: const Text("Are you sure you want to delete this trip?"),
-                                    actions: [
-                                      TextButton(
-                                        onPressed: () {
-                                          Navigator.pop(context);
-                                        }, 
-                                        child: const Text("Cancel")
-                                      ),
-                                      TextButton(
-                                        onPressed: () async {
-                                          await trip?.delete();
-                                          Navigator.pop(context);
-                                          Navigator.pushNamed(context, "/");
-                                        }, 
-                                        child: const Text("Delete")
-                                      )
-                                    ]
-                                ));
-                              }, 
-                              icon: const Icon(Icons.delete), 
-                              label: const Text("Delete Trip")
-                            )
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: ElevatedButton.icon(
+                                onPressed: () {
+                                  showDialog(context: context, builder: (context) => 
+                                    AlertDialog(
+                                      title: const Text("Delete Trip"),
+                                      content: const Text("Are you sure you want to delete this trip?"),
+                                      actions: [
+                                        TextButton(
+                                          onPressed: () {
+                                            Navigator.pop(context);
+                                          }, 
+                                          child: const Text("Cancel")
+                                        ),
+                                        TextButton(
+                                          onPressed: () async {
+                                            await trip?.delete();
+                                            Navigator.pop(context);
+                                            Navigator.pushNamed(context, "/");
+                                          }, 
+                                          child: const Text("Delete")
+                                        )
+                                      ]
+                                  ));
+                                }, 
+                                icon: const Icon(Icons.delete), 
+                                label: const Text("Delete Trip")
+                              ),
+                            ),
+                            Container(height: 30)
                           ],
                         );
                       }
