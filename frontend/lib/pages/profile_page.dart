@@ -1,4 +1,5 @@
 import 'package:collection/collection.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -196,6 +197,13 @@ class _ProfilePageState extends State<ProfilePage> {
                                   "Tripping since ${DateFormat.yMMM().format(profile.joinDate)}"),
                               Text(
                                   "Number of Trips: ${profile.numberTrips}"),
+                              Container(height: 50),
+                              ElevatedButton(
+                                onPressed: () {
+                                  FirebaseAuth.instance.signOut();
+                                },
+                                child: const Text("Sign out")
+                              )
                             ],
                           )
                           ],

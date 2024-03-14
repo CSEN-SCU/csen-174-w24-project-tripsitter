@@ -1,16 +1,28 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:tripsitter/classes/airport.dart';
+import 'package:tripsitter/classes/flights.dart';
 import 'package:tripsitter/classes/profile.dart';
 import 'package:tripsitter/classes/trip.dart';
 import 'package:tripsitter/components/checkout/activity_summary.dart';
 import 'package:tripsitter/components/checkout/car_summary.dart';
 import 'package:tripsitter/components/checkout/flight_summary.dart';
 import 'package:tripsitter/components/checkout/hotel_summary.dart';
+import 'package:tripsitter/helpers/api.dart';
+import 'package:tripsitter/helpers/data.dart';
 import 'package:tripsitter/helpers/styles.dart';
+import 'package:googleapis/calendar/v3.dart' as gcal;
+import 'package:http/http.dart' as http;
+import 'package:googleapis_auth/googleapis_auth.dart' as gapis;
+import 'package:timezone/data/latest.dart' as tz;
+import 'package:timezone/timezone.dart' as tz;
 
-class TripSummary extends StatelessWidget {
+class TripSummary extends StatefulWidget {
   final Trip trip;
   final String uid;
   final List<UserProfile> profiles;
@@ -18,7 +30,74 @@ class TripSummary extends StatelessWidget {
   final bool showBooking;
   const TripSummary({required this.trip, required this.uid, required this.profiles, this.showSplit = true, this.showBooking = false, super.key});
 
-  bool get split => trip.usingSplitPayments && showSplit;
+  @override
+  State<TripSummary> createState() => _TripSummaryState();
+}
+
+class _TripSummaryState extends State<TripSummary> {
+  bool get split => widget.trip.usingSplitPayments && widget.showSplit;
+
+  Future<gcal.EventDateTime> getEventDateTime(FlightDepartureArrival flight) async{
+    List<Airport> airports = await getAirports(context);
+    Airport departureAirport = airports.firstWhere((a) => a.iataCode == flight.iataCode);
+    String departureTimezone = timezoneMap[flight.iataCode] ?? await TripsitterApi.getAirportTimezone(departureAirport);
+    DateTime dt = flight.at;
+    debugPrint("$dt");
+    tz.initializeTimeZones();
+    final airportTz = tz.getLocation(departureTimezone);
+    
+    dt = tz.TZDateTime.from(dt.toUtc(), airportTz);
+    dt = dt.subtract(dt.timeZoneOffset - DateTime.now().timeZoneOffset);
+    // dt = dt.toLocal();
+
+    debugPrint("$dt, $departureTimezone");
+
+    return gcal.EventDateTime(dateTime: dt, timeZone: departureTimezone);
+  }
+
+  void createCalendarEvents() async {
+    final prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString("gcalToken");
+    if(token == null) return;
+    gapis.AuthClient client = gapis.authenticatedClient(http.Client(), gapis.AccessCredentials(
+      gapis.AccessToken(
+        'Bearer',
+        token,
+        // TODO(kevmoo): Use the correct value once it's available from authentication
+        // See https://github.com/flutter/flutter/issues/80905
+        DateTime.now().toUtc().add(const Duration(days: 365)),
+      ),
+      null, // We don't have a refreshToken
+      [gcal.CalendarApi.calendarEventsScope],
+    ));
+
+    gcal.CalendarApi(client).events.insert(gcal.Event(
+      summary: widget.trip.name,
+      start: gcal.EventDateTime(date: widget.trip.startDate.toUtc()),
+      end: gcal.EventDateTime(date: widget.trip.endDate.toUtc()),
+    ), "primary");
+
+    for(FlightGroup group in widget.trip.flights.where((f) => f.members.contains(widget.uid))) {
+      for(FlightItinerary it in group.selected?.itineraries ?? []) {
+        for(FlightSegment seg in it.segments) {
+          gcal.EventDateTime start = await getEventDateTime(seg.departure);
+          gcal.EventDateTime end = await getEventDateTime(seg.arrival);
+
+          gcal.Event event = gcal.Event(
+            summary: "Flight ${seg.carrierCode}${seg.number} ${seg.departure.iataCode} - ${seg.arrival.iataCode}",
+            description: "Departure: ${DateFormat("MM/dd/yyyy h:mm a").format(seg.departure.at)} (Local Time) \nArrival: ${DateFormat("MM/dd/yyyy h:mm a").format(seg.arrival.at)} (Local Time)\n${group.pnr != null ? "Booking Confirmation: ${group.pnr}" : ""}",
+            start: start,
+            end: end,
+          );
+          gcal.Event created = await gcal.CalendarApi(client).events.insert(event, "primary");
+          debugPrint("Created event ${created.id}");
+        }
+      }
+    }
+
+    debugPrint("Added to calendar");
+
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -28,42 +107,44 @@ class TripSummary extends StatelessWidget {
       ),
       child: MultiProvider(
         providers: [
-          Provider.value(value: profiles),
+          Provider.value(value: widget.profiles),
           Provider.value(value: split),
         ],
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(trip.name, style: sectionHeaderStyle),
-            Text("${DateFormat('MMM d, yyyy').format(trip.startDate)} → ${DateFormat('MMM d, yyyy').format(trip.endDate)}", style: sectionHeaderStyle.copyWith(fontSize: 15)),
-            Text("${trip.destination.name}, ${trip.destination.country}", style: sectionHeaderStyle.copyWith(fontSize: 15)),
+            Text(widget.trip.name, style: sectionHeaderStyle),
+            Text("${DateFormat('MMM d, yyyy').format(widget.trip.startDate)} → ${DateFormat('MMM d, yyyy').format(widget.trip.endDate)}", style: sectionHeaderStyle.copyWith(fontSize: 15)),
+            Text("${widget.trip.destination.name}, ${widget.trip.destination.country}", style: sectionHeaderStyle.copyWith(fontSize: 15)),
             Container(height: 20),
-            if((split ? trip.flights.where((f) => f.members.contains(uid)) : trip.flights).isNotEmpty)
+            if(widget.showBooking)
+              ElevatedButton(onPressed: createCalendarEvents, child: Text("Add to Calendar")),
+            if((split ? widget.trip.flights.where((f) => f.members.contains(widget.uid)) : widget.trip.flights).isNotEmpty)
               ...[
-                SummaryHeader("Flights: \$${split ? trip.userFlightsPrice(uid) : trip.flightsPrice}${split ? "" : " total"}", icon: Icons.flight_takeoff_rounded),
-                for(var flight in (split ? trip.flights.where((f) => f.members.contains(uid)) : trip.flights))
-                  FlightSummary(flight: flight, price: split ? flight.userPrice(uid) : flight.price),
+                SummaryHeader("Flights: \$${split ? widget.trip.userFlightsPrice(widget.uid) : widget.trip.flightsPrice}${split ? "" : " total"}", icon: Icons.flight_takeoff_rounded),
+                for(var flight in (split ? widget.trip.flights.where((f) => f.members.contains(widget.uid)) : widget.trip.flights))
+                  FlightSummary(flight: flight, price: split ? flight.userPrice(widget.uid) : flight.price),
                 Container(height: 10)
               ],
-            if((split ? trip.hotels.where((h) => h.members.contains(uid)) : trip.hotels).isNotEmpty)
+            if((split ? widget.trip.hotels.where((h) => h.members.contains(widget.uid)) : widget.trip.hotels).isNotEmpty)
               ...[
-                SummaryHeader("Hotels: \$${split ? trip.userHotelsPrice(uid) : trip.hotelsPrice}${split ? "" : " total"}", icon: Icons.hotel_rounded),
-                for(var hotel in (split ? trip.hotels.where((h) => h.members.contains(uid)) : trip.hotels))
-                  HotelSummary(hotel: hotel, price: split ? hotel.userPrice(uid) : hotel.price),
+                SummaryHeader("Hotels: \$${split ? widget.trip.userHotelsPrice(widget.uid) : widget.trip.hotelsPrice}${split ? "" : " total"}", icon: Icons.hotel_rounded),
+                for(var hotel in (split ? widget.trip.hotels.where((h) => h.members.contains(widget.uid)) : widget.trip.hotels))
+                  HotelSummary(hotel: hotel, price: split ? hotel.userPrice(widget.uid) : hotel.price),
                 Container(height: 10)
               ],
-            if((split ? trip.rentalCars.where((r) => r.members.contains(uid)) : trip.rentalCars).isNotEmpty)
+            if((split ? widget.trip.rentalCars.where((r) => r.members.contains(widget.uid)) : widget.trip.rentalCars).isNotEmpty)
               ...[
-                SummaryHeader("Rental Cars: \$${split ? trip.userRentalCarsPrice(uid) : trip.rentalCarsPrice}${split ? "" : " total"}", icon: Icons.directions_car_rounded),
-                for(var rentalCar in (split ? trip.rentalCars.where((r) => r.members.contains(uid)) : trip.rentalCars))
-                  CarSummary(car: rentalCar, price: split ? rentalCar.userPrice(uid) : rentalCar.price, showBooking: showBooking),
+                SummaryHeader("Rental Cars: \$${split ? widget.trip.userRentalCarsPrice(widget.uid) : widget.trip.rentalCarsPrice}${split ? "" : " total"}", icon: Icons.directions_car_rounded),
+                for(var rentalCar in (split ? widget.trip.rentalCars.where((r) => r.members.contains(widget.uid)) : widget.trip.rentalCars))
+                  CarSummary(car: rentalCar, price: split ? rentalCar.userPrice(widget.uid) : rentalCar.price, showBooking: widget.showBooking),
                 Container(height: 10)
               ],
-            if((split ? trip.activities.where((a) => a.participants.contains(uid)) : trip.activities).isNotEmpty)
+            if((split ? widget.trip.activities.where((a) => a.participants.contains(widget.uid)) : widget.trip.activities).isNotEmpty)
               ...[
-                SummaryHeader("Activities: \$${split ? trip.userActivitiesPrice(uid) : trip.activitiesPrice} total", icon: Icons.stadium_rounded),
-                for(var activity in (split ? trip.activities.where((a) => a.participants.contains(uid)) : trip.activities))
-                  ActivitySummary(activity: activity, price: split ? activity.userPrice(uid) : activity.price, showBooking: showBooking),
+                SummaryHeader("Activities: \$${split ? widget.trip.userActivitiesPrice(widget.uid) : widget.trip.activitiesPrice} total", icon: Icons.stadium_rounded),
+                for(var activity in (split ? widget.trip.activities.where((a) => a.participants.contains(widget.uid)) : widget.trip.activities))
+                  ActivitySummary(activity: activity, price: split ? activity.userPrice(widget.uid) : activity.price, showBooking: widget.showBooking),
                 Container(height: 10)
               ],
               Padding(
@@ -72,7 +153,7 @@ class TripSummary extends StatelessWidget {
                   alignment: Alignment.centerRight,
                   child: SizedBox(
                     width: 150,
-                    child: Text("${split ? "Your total" : "Total"}\n\$${(split ? trip.userTotalPrice(uid) : trip.totalPrice).toStringAsFixed(2)}", style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold), textAlign: TextAlign.right,)
+                    child: Text("${split ? "Your total" : "Total"}\n\$${(split ? widget.trip.userTotalPrice(widget.uid) : widget.trip.totalPrice).toStringAsFixed(2)}", style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold), textAlign: TextAlign.right,)
                   )
                 ),
               ),
