@@ -13,6 +13,7 @@ import "package:tripsitter/components/trip_center_console.dart";
 class PageType {
   static const String hotel = "Hotels";
   static const String flights = "Flights";
+  static const String restaurants = "Restaurants";
   static const String rentalCar = "Rental Cars";
   static const String activities = "Activities";
   static const String cities = "Cities";
@@ -65,6 +66,8 @@ class TripConsoleDotState extends State<TripConsoleDot> {
         return SelectHotels(widget.trip, profiles);
       case PageType.flights:
         return SelectFlight(widget.trip, profiles);
+      case PageType.restaurants:
+        return SelectFlight(widget.trip, profiles);
       case PageType.rentalCar:
         return SelectCars(widget.trip, profiles);
       case PageType.activities:
@@ -109,6 +112,8 @@ class TripConsoleDotState extends State<TripConsoleDot> {
         return Icons.hotel_rounded;
       case PageType.flights:
         return Icons.flight_takeoff_rounded;
+      case PageType.restaurants:
+        return Icons.restaurant_rounded;
       case PageType.rentalCar:
         return Icons.directions_car_rounded;
       case PageType.activities:

@@ -26,7 +26,7 @@ class _MyStatefulWidgetState extends State<TripCenterConsole>
   // The initial gap in degrees between the four dots
   final double angleGap = 30.0;
   // The fraction of the angleGap that the angle is changed by
-  final double gapExpansionFactor = 0.4;
+  final double gapExpansionFactor = 0.3;
   // Multiplier on maxHeight to determine the radius of the circular path
   final double radiusMultiplier = 0.58;
   // default size in pixels of the dots
@@ -45,13 +45,13 @@ class _MyStatefulWidgetState extends State<TripCenterConsole>
   double prevMaxHeight = 0;
 
   String currentPopupState = "None";
-  // will only ever have values of "Hotels","Rental Cars","Flights","Activities","City"
 
   @override
   void initState() {
     super.initState();
     setup();
     TripsitterApi.getCityImage(widget.trip.destination).then((value) {
+      if(!mounted) return;
       setState(() {
         cityImage = value;
       });
@@ -66,6 +66,7 @@ class _MyStatefulWidgetState extends State<TripCenterConsole>
       "Rental Cars": XYPairSized(0.0, 0.0, defaultDotSize),
       "Flights": XYPairSized(0.0, 0.0, defaultDotSize),
       "Activities": XYPairSized(0.0, 0.0, defaultDotSize),
+      "Restaurants": XYPairSized(0.0, 0.0, defaultDotSize),
       "City": XYPairSized(
           (widget.maxWidth - min(widget.maxHeight, widget.maxWidth))/2 + min(widget.maxHeight, widget.maxWidth) * 0.5, 
           (widget.maxHeight - min(widget.maxHeight, widget.maxWidth))/2 + min(widget.maxHeight, widget.maxWidth) * 0.4, defaultDotSize*2),
@@ -73,8 +74,9 @@ class _MyStatefulWidgetState extends State<TripCenterConsole>
 
     defaultAngles = {
       "Activities": 90 - (1.5 * angleGap),
-      "Hotels": 90 - (0.5 * angleGap),
-      "Flights": 90 + (0.5 * angleGap),
+      "Hotels": 90 - (0.75 * angleGap),
+      "Restaurants": 90 ,
+      "Flights": 90 + (0.75 * angleGap),
       "Rental Cars": 90 + (1.5 * angleGap),
     };
 
@@ -88,6 +90,10 @@ class _MyStatefulWidgetState extends State<TripCenterConsole>
         duration: const Duration(milliseconds: 200),
       ),
       "Flights": AnimationController(
+        vsync: this,
+        duration: const Duration(milliseconds: 200),
+      ),
+      "Restaurants": AnimationController(
         vsync: this,
         duration: const Duration(milliseconds: 200),
       ),
@@ -122,12 +128,19 @@ class _MyStatefulWidgetState extends State<TripCenterConsole>
           curve: Curves.linear,
         ),
       ),
+      "Restaurants": Tween<double>(begin: 1.0, end: 1.5).animate(
+        CurvedAnimation(
+          parent: _iconAnimationControllers["Restaurants"]!,
+          curve: Curves.linear,
+        ),
+      ),
     };
 
     setElementAngleDegrees(defaultAngles["Activities"]!, "Activities");
     setElementAngleDegrees(defaultAngles["Hotels"]!, "Hotels");
     setElementAngleDegrees(defaultAngles["Flights"]!, "Flights");
     setElementAngleDegrees(defaultAngles["Rental Cars"]!, "Rental Cars");
+    setElementAngleDegrees(defaultAngles["Restaurants"]!, "Restaurants");
 
     prevMaxHeight = widget.maxHeight;
     prevMaxWidth = widget.maxWidth;
@@ -187,6 +200,9 @@ class _MyStatefulWidgetState extends State<TripCenterConsole>
                     defaultAngles["Activities"]! -
                         angleGap * gapExpansionFactor,
                     "Activities");
+                setElementAngleDegrees(
+                    defaultAngles["Restaurants"]! + angleGap * gapExpansionFactor,
+                    "Restaurants");
       
                 // Start the animation
                 _iconAnimationControllers["Hotels"]?.forward();
@@ -195,6 +211,7 @@ class _MyStatefulWidgetState extends State<TripCenterConsole>
                 setElementAngleDegrees(defaultAngles["Hotels"]!, "Hotels");
                 updateDotSize(defaultDotSize, "Hotels");
                 setElementAngleDegrees(defaultAngles["Flights"]!, "Flights");
+                setElementAngleDegrees(defaultAngles["Restaurants"]!, "Restaurants");
                 setElementAngleDegrees(
                     defaultAngles["Rental Cars"]!, "Rental Cars");
                 setElementAngleDegrees(
@@ -223,6 +240,10 @@ class _MyStatefulWidgetState extends State<TripCenterConsole>
                       defaultAngles["Activities"]! -
                           angleGap * gapExpansionFactor,
                       "Activities");
+                  setElementAngleDegrees(
+                      defaultAngles["Restaurants"]! -
+                          angleGap * gapExpansionFactor,
+                      "Restaurants");
                   // Start the animation
                   _iconAnimationControllers["Rental Cars"]?.forward();
                 },
@@ -230,6 +251,7 @@ class _MyStatefulWidgetState extends State<TripCenterConsole>
                   setElementAngleDegrees(defaultAngles["Hotels"]!, "Hotels");
                   updateDotSize(defaultDotSize, "Rental Cars");
                   setElementAngleDegrees(defaultAngles["Flights"]!, "Flights");
+                  setElementAngleDegrees(defaultAngles["Restaurants"]!, "Restaurants");
                   setElementAngleDegrees(
                       defaultAngles["Rental Cars"]!, "Rental Cars");
                   setElementAngleDegrees(
@@ -259,6 +281,10 @@ class _MyStatefulWidgetState extends State<TripCenterConsole>
                   defaultAngles["Activities"]! -
                       angleGap * gapExpansionFactor,
                   "Activities");
+              setElementAngleDegrees(
+                  defaultAngles["Restaurants"]! -
+                      angleGap * gapExpansionFactor,
+                  "Restaurants");
               // Start the animation
               _iconAnimationControllers["Flights"]!.forward();
             },
@@ -266,11 +292,52 @@ class _MyStatefulWidgetState extends State<TripCenterConsole>
               setElementAngleDegrees(defaultAngles["Hotels"]!, "Hotels");
               updateDotSize(defaultDotSize, "Flights");
               setElementAngleDegrees(defaultAngles["Flights"]!, "Flights");
+              setElementAngleDegrees(defaultAngles["Restaurants"]!, "Restaurants");
               setElementAngleDegrees(
                   defaultAngles["Rental Cars"]!, "Rental Cars");
               setElementAngleDegrees(
                   defaultAngles["Activities"]!, "Activities");
               _iconAnimationControllers["Flights"]!.reverse();
+            },
+          ),
+          // Restaurants
+          TripConsoleDot(
+              trip: widget.trip,
+            type: PageType.restaurants, 
+            positions: positions, 
+            iconAnimationControllers: _iconAnimationControllers, 
+            iconAnimations: _iconAnimations, 
+            onEnter: (_) {
+              setElementAngleDegrees(
+                  defaultAngles["Hotels"]! - angleGap * gapExpansionFactor,
+                  "Hotels");
+              updateDotSize(defaultDotSize * expandDotFactor, "Restaurants");
+              setElementAngleDegrees(defaultAngles["Restaurants"]!, "Restaurants");
+              setElementAngleDegrees(
+                  defaultAngles["Rental Cars"]! +
+                      angleGap * gapExpansionFactor,
+                  "Rental Cars");
+              setElementAngleDegrees(
+                  defaultAngles["Flights"]! +
+                      angleGap * gapExpansionFactor,
+                  "Flights");
+              setElementAngleDegrees(
+                  defaultAngles["Activities"]! -
+                      angleGap * gapExpansionFactor,
+                  "Activities");
+              // Start the animation
+              _iconAnimationControllers["Restaurants"]!.forward();
+            },
+            onExit: (_) {
+              setElementAngleDegrees(defaultAngles["Hotels"]!, "Hotels");
+              updateDotSize(defaultDotSize, "Restaurants");
+              setElementAngleDegrees(defaultAngles["Restaurants"]!, "Restaurants");
+              setElementAngleDegrees(defaultAngles["Flights"]!, "Flights");
+              setElementAngleDegrees(
+                  defaultAngles["Rental Cars"]!, "Rental Cars");
+              setElementAngleDegrees(
+                  defaultAngles["Activities"]!, "Activities");
+              _iconAnimationControllers["Restaurants"]!.reverse();
             },
           ),
           // Activities
@@ -289,6 +356,9 @@ class _MyStatefulWidgetState extends State<TripCenterConsole>
                       defaultAngles["Flights"]! + angleGap * gapExpansionFactor,
                       "Flights");
                   setElementAngleDegrees(
+                      defaultAngles["Restaurants"]! + angleGap * gapExpansionFactor,
+                      "Restaurants");
+                  setElementAngleDegrees(
                       defaultAngles["Rental Cars"]! +
                           angleGap * gapExpansionFactor,
                       "Rental Cars");
@@ -302,6 +372,7 @@ class _MyStatefulWidgetState extends State<TripCenterConsole>
                   setElementAngleDegrees(defaultAngles["Hotels"]!, "Hotels");
                   updateDotSize(defaultDotSize, "Activities");
                   setElementAngleDegrees(defaultAngles["Flights"]!, "Flights");
+                setElementAngleDegrees(defaultAngles["Restaurants"]!, "Restaurants");
                   setElementAngleDegrees(
                       defaultAngles["Rental Cars"]!, "Rental Cars");
                   setElementAngleDegrees(

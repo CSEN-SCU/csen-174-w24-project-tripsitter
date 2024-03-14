@@ -10,6 +10,7 @@ import { addUserToTrip, removeUserFromTrip } from "./firebase";
 import { getRentalCars } from "./cars";
 import { createPaymentIntent } from "./stripe";
 import { getCityImage } from "./city";
+import { getRestaurants } from "./yelp";
 const app = express();
 const cors = require('cors')({origin: true});
 app.use(cors);
@@ -25,6 +26,7 @@ app.get('/search/hotels', getHotels);
 app.get('/search/events', searchEvents);
 app.get('/search/cars', getRentalCars);
 app.get('/search/timezone', getAirportTimezone);
+app.get('/search/restaurants', getRestaurants);
 
 app.post('/book/flights', bookFlight);
 app.post('/book/hotels', bookHotel);
