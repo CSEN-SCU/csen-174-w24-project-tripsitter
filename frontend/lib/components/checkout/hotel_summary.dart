@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -31,7 +32,7 @@ class HotelSummary extends StatelessWidget {
               children: [
                 Text("${hotel.name}${hotel.pnr != null ? " (Confirmation: ${hotel.pnr})" : ""}", style: summaryHeaderStyle),
                 Text(hotel.selectedOffer!.checkInDate != hotel.selectedOffer!.checkOutDate ? "${dateFormatter.format(DateTime.parse(hotel.selectedOffer!.checkInDate))} → ${dateFormatter.format(DateTime.parse(hotel.selectedOffer!.checkOutDate))}" : dateFormatter.format(DateTime.parse(hotel.selectedOffer!.checkInDate))),
-                Text("${hotel.selectedInfo!.name}"),
+                Text(hotel.selectedInfo!.name),
               ]
             ),
           ),
@@ -39,7 +40,7 @@ class HotelSummary extends StatelessWidget {
             Expanded(
               flex: 1,
               child: Column(
-                children: hotel.members.map((e) => profiles.firstWhere((profile) => profile.id == e).name).map((e) => Text(e)).toList() ,
+                children: hotel.members.map((e) => profiles.firstWhereOrNull((profile) => profile.id == e)?.name ?? "").map((e) => Text(e)).toList() ,
               )
             ),
           SizedBox(

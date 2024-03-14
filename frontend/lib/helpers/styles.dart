@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-TextStyle summaryHeaderStyle = TextStyle(
+TextStyle summaryHeaderStyle = const TextStyle(
     decoration: TextDecoration.underline,
 );
 

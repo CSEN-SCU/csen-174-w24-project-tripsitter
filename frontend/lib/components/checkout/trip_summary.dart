@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:tripsitter/classes/profile.dart';
 import 'package:tripsitter/classes/trip.dart';
@@ -33,7 +34,9 @@ class TripSummary extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text("Trip: ${trip.name}", style: sectionHeaderStyle),
+            Text(trip.name, style: sectionHeaderStyle),
+            Text("${DateFormat('MMM d, yyyy').format(trip.startDate)} → ${DateFormat('MMM d, yyyy').format(trip.endDate)}", style: sectionHeaderStyle.copyWith(fontSize: 15)),
+            Text("${trip.destination.name}, ${trip.destination.country}", style: sectionHeaderStyle.copyWith(fontSize: 15)),
             Container(height: 20),
             if((split ? trip.flights.where((f) => f.members.contains(uid)) : trip.flights).isNotEmpty)
               ...[
@@ -90,7 +93,7 @@ class SummaryHeader extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Text(title, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, decoration: TextDecoration.underline)),
+        Text(title, style: GoogleFonts.kadwa(textStyle: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, decoration: TextDecoration.underline))),
         if(icon != null)
           Padding(
             padding: const EdgeInsets.only(left: 8.0),

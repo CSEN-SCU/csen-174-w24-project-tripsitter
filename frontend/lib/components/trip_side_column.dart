@@ -54,19 +54,20 @@ class _TripSideColumnState extends State<TripSideColumn> {
                       },
                     )))
           .toList(),
-      TextButton.icon(
-          onPressed: () async {
-            String? email = await showDialog<String>(
-                context: context,
-                builder: (BuildContext context) {
-                  return const AddMemberDialog();
-                });
-            if (email != null) {
-              await TripsitterApi.addUser(email, trip!.id);
-            }
-          },
-          icon: const Icon(Icons.add),
-          label: const Text("Add Member")),
+      if(!trip!.frozen)
+        TextButton.icon(
+            onPressed: () async {
+              String? email = await showDialog<String>(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return const AddMemberDialog();
+                  });
+              if (email != null) {
+                await TripsitterApi.addUser(email, trip!.id);
+              }
+            },
+            icon: const Icon(Icons.add),
+            label: const Text("Add Member")),
       const SizedBox(height: 20.0),
       const Text("Discussion",
           style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
@@ -119,13 +120,14 @@ class _TripSideColumnState extends State<TripSideColumn> {
       ),
       if (!isMobile) ...[
         Container(height: 10),
-        CheckboxListTile(
-          value: trip!.usingSplitPayments,
-          title: const Text("Split Payments"),
-          onChanged: (bool? value) {
-            trip!.toggleSplitPayments();
-          },
-        ),
+        if(!trip!.frozen)
+          CheckboxListTile(
+            value: trip!.usingSplitPayments,
+            title: const Text("Split Payments"),
+            onChanged: (bool? value) {
+              trip!.toggleSplitPayments();
+            },
+          ),
         if ((trip!.usingSplitPayments
             ? trip!.paymentsComplete[user.uid] != true
             : !trip!.isConfirmed))

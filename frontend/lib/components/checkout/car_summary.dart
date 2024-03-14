@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:tripsitter/classes/profile.dart';
@@ -39,7 +40,7 @@ class CarSummary extends StatelessWidget {
             Expanded(
               flex: 1,
               child: Column(
-                children: car.members.map((e) => profiles.firstWhere((profile) => profile.id == e).name).map((e) => Text(e)).toList() ,
+                children: car.members.map((e) => profiles.firstWhereOrNull((profile) => profile.id == e)?.name ?? "").map((e) => Text(e)).toList() ,
               )
             ),
           SizedBox(

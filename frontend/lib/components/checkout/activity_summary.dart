@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:tripsitter/classes/profile.dart';
@@ -38,7 +39,7 @@ class ActivitySummary extends StatelessWidget {
             Expanded(
               flex: 1,
               child: Column(
-                children: activity.participants.map((e) => profiles.firstWhere((profile) => profile.id == e).name).map((e) => Text(e)).toList() ,
+                children: activity.participants.map((e) => profiles.firstWhereOrNull((profile) => profile.id == e)?.name ?? "").map((e) => Text(e)).toList() ,
               )
             ),
           SizedBox(

@@ -70,7 +70,6 @@ class _CheckoutPageState extends State<CheckoutPage> {
       children: [
         if((split ? trip.rentalCars.where((r) => r.members.contains(uid)) : trip.rentalCars).isNotEmpty || (split ? trip.activities.where((a) => a.participants.contains(uid)) : trip.activities).isNotEmpty)
           ...[
-            Container(height: 50),
             const Text("Note: Only flights and hotels can be paid directly through TripSitter. After purchasing, you will be directed to the rental car and activity websites to complete your purchase."),
             Text("Amount owed to TripSitter: \$${(split ? trip.userStripePrice(uid) : trip.stripePrice).toStringAsFixed(2)}", style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
           ],
@@ -89,86 +88,61 @@ class _CheckoutPageState extends State<CheckoutPage> {
             },    
           ),
         ),
-        (cardDetails?.complete ?? false) ? 
-          ElevatedButton(
-            onPressed: () async {
-              setState(() {
-                loading = true;
-                status = "Processing payment...";
-              });
-              PaymentIntentData data = await TripsitterApi.createPaymentIntent(user.uid, trip);
-              debugPrint("Payment intent data created ${data.clientSecret}");
-              try {
-                PaymentIntent intent = await Stripe.instance.confirmPayment(
-                  paymentIntentClientSecret: data.clientSecret,
-                  data: PaymentMethodParams.card(paymentMethodData: PaymentMethodData(
-                    billingDetails: BillingDetails(
-                      name: user.displayName,
-                      email: user.email,
-                    ),
-                  )),
-                );
-                debugPrint("Intent processed");
-                debugPrint(intent.amount.toString());
-                debugPrint(intent.receiptEmail);
-                debugPrint(intent.status.toString());
+        Container(height: 50),
+        ElevatedButton(
+          onPressed: (cardDetails?.complete ?? false) ? () async {
+            setState(() {
+              loading = true;
+              status = "Processing payment...";
+            });
+            PaymentIntentData data = await TripsitterApi.createPaymentIntent(user.uid, trip);
+            debugPrint("Payment intent data created ${data.clientSecret}");
+            try {
+              PaymentIntent intent = await Stripe.instance.confirmPayment(
+                paymentIntentClientSecret: data.clientSecret,
+                data: PaymentMethodParams.card(paymentMethodData: PaymentMethodData(
+                  billingDetails: BillingDetails(
+                    name: user.displayName,
+                    email: user.email,
+                  ),
+                )),
+              );
+              debugPrint("Intent processed");
+              debugPrint(intent.amount.toString());
+              debugPrint(intent.receiptEmail);
+              debugPrint(intent.status.toString());
 
-                if(intent.status == PaymentIntentsStatus.Succeeded) {
-                  trip.freeze();
-                  if(trip.usingSplitPayments) {
-                    trip.paymentsComplete[user.uid] = true;
-                    // check if all users on the trip have paid
-                    bool allPaid = true;
-                    for(String uid in trip.uids) {
-                      if(trip.paymentsComplete[uid] != true) {
-                        allPaid = false;
-                        break;
-                      }
-                    }
-                    if(allPaid) {
-                      purchaseEverything();
-                    }
-                    else {
-                      await trip.save();
-                      if(mounted) {
-                        setState(() {
-                          loading = false;
-                        });
-                      }
-                      Navigator.pop(context);
-
+              if(intent.status == PaymentIntentsStatus.Succeeded) {
+                trip.freeze();
+                if(trip.usingSplitPayments) {
+                  trip.paymentsComplete[user.uid] = true;
+                  // check if all users on the trip have paid
+                  bool allPaid = true;
+                  for(String uid in trip.uids) {
+                    if(trip.paymentsComplete[uid] != true) {
+                      allPaid = false;
+                      break;
                     }
                   }
-                  else {
+                  if(allPaid) {
                     purchaseEverything();
                   }
-                }
-                else if(mounted){
-                  await showDialog(
-                    context: context, 
-                    builder: (context) => AlertDialog(
-                      title: const Text("Payment failed"),
-                      content: const Text("Payment failed, please try again"),
-                      actions: [
-                        TextButton(
-                          onPressed: () {
-                            Navigator.of(context).pop();
-                          }, 
-                          child: const Text("OK")
-                        ),
-                      ],
-                    )
-                  );
-                  if(mounted) {
-                    setState(() {
-                      loading = false;
-                    });
-                  
+                  else {
+                    await trip.save();
+                    if(mounted) {
+                      setState(() {
+                        loading = false;
+                      });
+                    }
+                    Navigator.pop(context);
+
                   }
                 }
-              } catch (e) {
-                debugPrint("Error creating payment intent");
-                debugPrint(e.toString());
+                else {
+                  purchaseEverything();
+                }
+              }
+              else if(mounted){
                 await showDialog(
                   context: context, 
                   builder: (context) => AlertDialog(
@@ -188,12 +162,37 @@ class _CheckoutPageState extends State<CheckoutPage> {
                   setState(() {
                     loading = false;
                   });
+                
                 }
               }
-              
-            },
-            child: const Text("Purchase Trip!"),
-          ) : Container(height: 40),
+            } catch (e) {
+              debugPrint("Error creating payment intent");
+              debugPrint(e.toString());
+              await showDialog(
+                context: context, 
+                builder: (context) => AlertDialog(
+                  title: const Text("Payment failed"),
+                  content: const Text("Payment failed, please try again"),
+                  actions: [
+                    TextButton(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      }, 
+                      child: const Text("OK")
+                    ),
+                  ],
+                )
+              );
+              if(mounted) {
+                setState(() {
+                  loading = false;
+                });
+              }
+            }
+            
+          } : null,
+          child: const Text("Purchase Trip!"),
+        ),
       ],
     );
   }
@@ -252,7 +251,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                               ),
                             ),
                           ),
-                          Container(
+                          SizedBox(
                             width: constraints.maxWidth * 0.6,
                             child: Padding(
                               padding: const EdgeInsets.all(8.0),

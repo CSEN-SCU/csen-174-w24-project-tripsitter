@@ -75,7 +75,7 @@ class _TripDashBoardState extends State<TripDashBoard> {
                     children: [
                       SizedBox(width: 20.0),
                       SizedBox(
-                        width: 200,
+                        width: 300,
                         child: TextField(
                           controller: nameController,
                           onChanged: (str) {
@@ -257,11 +257,12 @@ class _TripDashBoardState extends State<TripDashBoard> {
                   ),
                 ),
                 Expanded(
-                    child: TripCenterConsole(
-                  trip,
-                  constraints.maxWidth,
-                  constraints.maxHeight * 0.9,
-                )),
+                  child: TripCenterConsole(
+                    trip,
+                    constraints.maxWidth,
+                    constraints.maxHeight * 0.9,
+                  )
+                ),
               ],
             );
           },

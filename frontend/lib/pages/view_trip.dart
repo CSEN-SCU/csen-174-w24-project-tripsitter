@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:tripsitter/classes/profile.dart';
 import 'package:tripsitter/classes/trip.dart';
 import 'package:tripsitter/components/cars/select_cars.dart';
+import 'package:tripsitter/components/checkout/trip_summary.dart';
 import 'package:tripsitter/components/hotels/select_hotels.dart';
 import 'package:tripsitter/components/mobile_wrapper.dart';
 import 'package:tripsitter/components/events/select_events.dart';
@@ -121,9 +122,20 @@ class ViewTrip extends StatelessWidget {
                       return Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          SizedBox(
-                            width: constraints.maxWidth * 0.7,
-                            child: TripDashBoard(trip),
+                          Builder(
+                            builder: (context) {
+                              List<UserProfile> profiles = Provider.of<List<UserProfile>>(context);
+                              return SizedBox(
+                                width: constraints.maxWidth * 0.7,
+                                child: trip.frozen ? Container(color: const Color.fromARGB(255, 255, 255, 255), padding: const EdgeInsets.all(8), child: TripSummary(
+                                  trip: trip, 
+                                  uid: Provider.of<User?>(context)?.uid ?? "", 
+                                  profiles: profiles,
+                                  showBooking: true,
+                                  showSplit: !trip.isConfirmed,
+                                )) : TripDashBoard(trip),
+                              );
+                            }
                           ),
                           Container(
                             color: const Color.fromARGB(255, 239, 239, 239),
