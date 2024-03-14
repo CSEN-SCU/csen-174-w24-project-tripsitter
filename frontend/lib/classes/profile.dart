@@ -28,7 +28,7 @@ class UserProfile {
     required phoneNumber,
     required gender,
     required countryISO,
-    hasPhoto,
+    required hasPhoto,
     stripeId,
   })  : _id = id,
         _name = name,

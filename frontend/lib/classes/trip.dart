@@ -470,6 +470,9 @@ class FlightGroup {
   }
 
   Future<void> removeOption(FlightOffer option) async {
+    if(option == _selected) {
+      _selected = null;
+    }
     _options.remove(option);
     await _save();
   }
@@ -581,6 +584,9 @@ class HotelGroup {
   }
   Future<void> removeOption(int i) async {
     if(i < 0 || i > _offers.length) return;
+    if(_selectedOffer == _offers[i]) {
+      _selectedOffer = null;
+    }
     _offers.removeAt(i);
     _infos.removeAt(i);
     await _save();
@@ -667,10 +673,16 @@ class RentalCarGroup {
     await _save();
   }
   Future<void> removeOption(RentalCarOffer option) async {
+    if(option == _selected) {
+      _selected = null;
+    }
     _options.remove(option);
     await _save();
   }
   Future<void> removeOptionById(String id) async {
+    if(_selected?.guid == id) {
+      _selected = null;
+    }
     _options.removeWhere((element) => element.guid == id);
     await _save();
   }

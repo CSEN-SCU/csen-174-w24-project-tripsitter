@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:tripsitter/classes/profile.dart';
 import 'package:tripsitter/classes/trip.dart';
+import 'package:tripsitter/components/navbar.dart';
 
 class MobileWrapper extends StatelessWidget {
   final Widget child;
@@ -21,10 +22,8 @@ class MobileWrapper extends StatelessWidget {
           Provider<List<UserProfile>>.value(value: profiles!),
       ],
       child: Scaffold(
-        appBar: AppBar(
-          title: Text(title),
-        ),
-        body: child,
+        appBar: TripSitterNavbar(title: title, backButton: true, homeButton: false),
+        body: Container(color: Colors.white, child: child),
       ),
     );
   }

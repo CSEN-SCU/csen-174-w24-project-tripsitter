@@ -8,6 +8,7 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:tripsitter/classes/profile.dart';
 import 'package:tripsitter/classes/trip.dart';
+import 'package:tripsitter/components/comments.dart';
 import 'package:tripsitter/components/profile_pic.dart';
 import 'package:tripsitter/helpers/api.dart';
 import 'package:tripsitter/components/checkout/checkout.dart';
@@ -21,8 +22,6 @@ class TripSideColumn extends StatefulWidget {
 }
 
 class _TripSideColumnState extends State<TripSideColumn> {
-  TextEditingController commentController = TextEditingController();
-
   Trip? get trip => widget.trip;
 
   @override
@@ -43,7 +42,7 @@ class _TripSideColumnState extends State<TripSideColumn> {
               title: Text(profile.name),
               subtitle: Text(profile.email),
               trailing: trip!.frozen
-                  ? (trip!.usingSplitPayments
+                  ? ((trip!.usingSplitPayments && !trip!.isConfirmed)
                       ? Icon((trip!.paymentsComplete[profile.id] ?? false)
                           ? Icons.credit_card
                           : Icons.credit_card_off)
@@ -70,55 +69,8 @@ class _TripSideColumnState extends State<TripSideColumn> {
             icon: const Icon(Icons.add),
             label: const Text("Add Member")),
       const SizedBox(height: 20.0),
-      const Text("Discussion",
-          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-      ...trip!.comments
-          .map((TripComment comment) => ListTile(
-                subtitle:
-                    Text(DateFormat('yyyy-MM-dd – kk:mm').format(comment.date)),
-                isThreeLine: true,
-                title: Text(
-                    "${profiles.firstWhereOrNull((element) => element.id == comment.uid)?.name ?? ""}\n${comment.comment}"),
-                trailing: comment.uid == user.uid
-                    ? IconButton(
-                        icon: const Icon(Icons.delete),
-                        onPressed: () async {
-                          await trip!.removeComment(comment);
-                          if (!mounted) return;
-                          setState(() {});
-                        },
-                      )
-                    : null,
-              ))
-          .toList(),
-      ListTile(
-        title: TextField(
-            controller: commentController,
-            decoration: const InputDecoration(
-              border: OutlineInputBorder(),
-              labelText: 'Add Comment',
-            ),
-            onSubmitted: (String value) async {
-              await trip!.addComment(TripComment(
-                  comment: value, uid: user.uid, date: DateTime.now()));
-              commentController.clear();
-              if (!mounted) return;
-              setState(() {});
-            }),
-        trailing: IconButton(
-          icon: const Icon(Icons.send),
-          onPressed: () async {
-            await trip!.addComment(TripComment(
-                comment: commentController.text,
-                uid: user.uid,
-                date: DateTime.now()));
-            commentController.clear();
-            if (!mounted) return;
-            setState(() {});
-          },
-        ),
-      ),
       if (!isMobile) ...[
+        CommentsSection(trip: trip!, profiles: profiles, user: user),
         Container(height: 10),
         if(!trip!.frozen)
           CheckboxListTile(
@@ -154,35 +106,36 @@ class _TripSideColumnState extends State<TripSideColumn> {
                   TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
         if (trip!.isConfirmed)
           const Text("Trip is confirmed",
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold))
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+        ElevatedButton.icon(
+          onPressed: () {
+            showDialog(context: context, builder: (context) => 
+              AlertDialog(
+                title: const Text("Delete Trip"),
+                content: const Text("Are you sure you want to delete this trip?"),
+                actions: [
+                  TextButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    }, 
+                    child: const Text("Cancel")
+                  ),
+                  TextButton(
+                    onPressed: () async {
+                      await trip?.delete();
+                      Navigator.pop(context);
+                      Navigator.pushNamed(context, "/");
+                    }, 
+                    child: const Text("Delete")
+                  )
+                ]
+            ));
+          }, 
+          icon: const Icon(Icons.delete), 
+          label: const Text("Delete Trip")
+        )
       ],
-      ElevatedButton.icon(
-        onPressed: () {
-          showDialog(context: context, builder: (context) => 
-            AlertDialog(
-              title: const Text("Delete Trip"),
-              content: const Text("Are you sure you want to delete this trip?"),
-              actions: [
-                TextButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                  }, 
-                  child: const Text("Cancel")
-                ),
-                TextButton(
-                  onPressed: () async {
-                    await trip?.delete();
-                    Navigator.pop(context);
-                    Navigator.pushNamed(context, "/");
-                  }, 
-                  child: const Text("Delete")
-                )
-              ]
-          ));
-        }, 
-        icon: const Icon(Icons.delete), 
-        label: const Text("Delete Trip")
-      )
+      
     ]);
   }
 }

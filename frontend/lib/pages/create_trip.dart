@@ -100,109 +100,113 @@ class _CreateTripState extends State<CreateTrip> {
       body: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 600),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Text('Let\'s get started', style: Theme.of(context).textTheme.displayMedium),
-              const Text("Tell me some basic details about your dream trip"),
-              // address input field
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Autocomplete<City>(
-                  fieldViewBuilder: (context, textEditingController, focusNode, onFieldSubmitted) => TextFormField(
-                    controller: textEditingController,
-                    focusNode: focusNode,
-                    onFieldSubmitted: (_) {},
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: ListView(
+              children: [
+                Center(child: Text('Let\'s get started', style: Theme.of(context).textTheme.displayMedium)),
+                const Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: Text("Tell me some basic details about your dream trip"),
+                ),
+                // address input field
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Autocomplete<City>(
+                    fieldViewBuilder: (context, textEditingController, focusNode, onFieldSubmitted) => TextFormField(
+                      controller: textEditingController,
+                      focusNode: focusNode,
+                      onFieldSubmitted: (_) {},
+                      decoration: InputDecoration(
+                        filled: true,
+                        fillColor: Colors.grey[300],
+                        border: InputBorder.none,
+                        labelText: 'Location',
+                      ),
+                    ),
+                    displayStringForOption: (option) => "${option.name}, ${option.country}",
+                    optionsBuilder: (TextEditingValue value) {
+                      if(value.text == '') {
+                        return const Iterable<City>.empty();
+                      }
+                      return cities.where((t){
+                        return t.name.toLowerCase().contains(value.text.toLowerCase());
+                      });
+                    },
+                    onSelected: (selected) {
+                      selectedCity = selected;
+                    },
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: TextFormField(
+                    onTap: () async {
+                      DateTime? d = await showDatePicker(
+                        context: context,
+                        initialDate: startDate ?? DateTime.now(),
+                        firstDate: DateTime(2024, 1, 1),
+                        lastDate: endDate ?? DateTime(2100),
+                      );
+                      if (d != null) {
+                        setState(() => startDate = d);
+                      }
+                    },
+                    readOnly: true,
+                    controller: TextEditingController.fromValue(
+                      TextEditingValue(
+                        text: startDate == null
+                          ? ''
+                          : DateFormat(DateFormat.YEAR_MONTH_DAY).format(startDate!),
+                      ),
+                    ),
                     decoration: InputDecoration(
                       filled: true,
                       fillColor: Colors.grey[300],
                       border: InputBorder.none,
-                      labelText: 'Location',
+                      labelText: 'Start Date',
                     ),
                   ),
-                  displayStringForOption: (option) => "${option.name}, ${option.country}",
-                  optionsBuilder: (TextEditingValue value) {
-                    if(value.text == '') {
-                      return const Iterable<City>.empty();
-                    }
-                    return cities.where((t){
-                      return t.name.toLowerCase().contains(value.text.toLowerCase());
-                    });
-                  },
-                  onSelected: (selected) {
-                    selectedCity = selected;
-                  },
                 ),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: TextFormField(
-                  onTap: () async {
-                    DateTime? d = await showDatePicker(
-                      context: context,
-                      initialDate: startDate ?? DateTime.now(),
-                      firstDate: DateTime(2024, 1, 1),
-                      lastDate: endDate ?? DateTime(2100),
-                    );
-                    if (d != null) {
-                      setState(() => startDate = d);
-                    }
-                  },
-                  readOnly: true,
-                  controller: TextEditingController.fromValue(
-                    TextEditingValue(
-                      text: startDate == null
-                        ? ''
-                        : DateFormat(DateFormat.YEAR_MONTH_DAY).format(startDate!),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: TextFormField(
+                    onTap: () async {
+                      DateTime? d = await showDatePicker(
+                        context: context,
+                        initialDate: endDate ?? startDate ?? DateTime.now(),
+                        firstDate: startDate ?? DateTime(2024, 1, 1),
+                        lastDate: DateTime(2100),
+                      );
+                      if (d != null) {
+                        setState(() => endDate = d);
+                      }
+                    },
+                    readOnly: true,
+                    controller: TextEditingController.fromValue(
+                      TextEditingValue(
+                        text: endDate == null
+                          ? ''
+                          : DateFormat(DateFormat.YEAR_MONTH_DAY).format(endDate!),
+                      ),
+                    ),
+                    decoration: InputDecoration(
+                      filled: true,
+                      fillColor: Colors.grey[300],
+                      border: InputBorder.none,
+                      labelText: 'End Date',
                     ),
                   ),
-                  decoration: InputDecoration(
-                    filled: true,
-                    fillColor: Colors.grey[300],
-                    border: InputBorder.none,
-                    labelText: 'Start Date',
-                  ),
                 ),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: TextFormField(
-                  onTap: () async {
-                    DateTime? d = await showDatePicker(
-                      context: context,
-                      initialDate: endDate ?? startDate ?? DateTime.now(),
-                      firstDate: startDate ?? DateTime(2024, 1, 1),
-                      lastDate: DateTime(2100),
-                    );
-                    if (d != null) {
-                      setState(() => endDate = d);
-                    }
-                  },
-                  readOnly: true,
-                  controller: TextEditingController.fromValue(
-                    TextEditingValue(
-                      text: endDate == null
-                        ? ''
-                        : DateFormat(DateFormat.YEAR_MONTH_DAY).format(endDate!),
-                    ),
-                  ),
-                  decoration: InputDecoration(
-                    filled: true,
-                    fillColor: Colors.grey[300],
-                    border: InputBorder.none,
-                    labelText: 'End Date',
-                  ),
+            
+                Container(height: 50),
+                ElevatedButton(
+                  onPressed: () => createTrip(user.uid),
+                  child: const Text('Create Trip'),
                 ),
-              ),
-
-              Container(height: 50),
-              ElevatedButton(
-                onPressed: () => createTrip(user.uid),
-                child: const Text('Create Trip'),
-              ),
-              // time input field
-            ],
+                // time input field
+              ],
+            ),
           ),
         ),
       ),

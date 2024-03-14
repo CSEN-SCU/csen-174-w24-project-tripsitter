@@ -86,6 +86,10 @@ class _FlightOptionsState extends State<FlightOptions> {
         flights = originalFlights;
         currentDepth = 0;
         widget.setState!();
+        bool isMobile = Provider.of<bool>(context, listen: false);
+        if(isMobile) {
+          Navigator.pop(context);
+        }
       }
     });
   }
