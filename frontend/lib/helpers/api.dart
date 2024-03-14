@@ -13,13 +13,13 @@ import 'package:tripsitter/classes/hotels.dart';
 import 'package:tripsitter/classes/trip.dart';
 
 class TripsitterApi {
-  static const String baseUrl = '127.0.0.1:5001';
-  static const String baseApiUrl = '/tripsitter-coen-174/us-central1/api';
-  static const bool useHttps = false;
+  // static const String baseUrl = '127.0.0.1:5001';
+  // static const String baseApiUrl = '/tripsitter-coen-174/us-central1/api';
+  // static const bool useHttps = false;
   
-  // static const String baseUrl = 'us-central1-tripsitter-coen-174.cloudfunctions.net';
-  // static const String baseApiUrl = '/api';
-  // static const bool useHttps = true;
+  static const String baseUrl = 'us-central1-tripsitter-coen-174.cloudfunctions.net';
+  static const String baseApiUrl = '/api';
+  static const bool useHttps = true;
 
   static const String searchFlightsUrl = '$baseApiUrl/search/flights';
   static const String searchAirlinesUrl = '$baseApiUrl/search/airlines';
