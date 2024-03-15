@@ -1,3 +1,5 @@
+import 'package:animated_list_plus/animated_list_plus.dart';
+import 'package:animated_list_plus/transitions.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -248,6 +250,7 @@ class _RestaurantsOptionsState extends State<RestaurantsOptions>
     int rowIndex = 0;
     // Initialize a counter variable before mapping the restaurants to TableRows
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // Text("Choose Restaurants",
         //     style: Theme.of(context)
@@ -255,25 +258,32 @@ class _RestaurantsOptionsState extends State<RestaurantsOptions>
         //         .displayMedium
         //         ?.copyWith(fontWeight: FontWeight.bold)),
         Wrap(
+          spacing: 80,
+          alignment: WrapAlignment.start,
           children: [
             const Text("Choose Restaurants",
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(80, 10, 0, 0),
-              child: Text("Toggle Map Mode",
-                  style: Theme.of(context).textTheme.displayMedium?.copyWith(
-                        decoration: TextDecoration.none,
-                        fontSize: 12,
-                      )),
-            ),
-            Switch(
-              value: mapSelected,
-              onChanged: (bool value) {
-                setState(() {
-                  mapSelected = value;
-                });
-              },
-            ),
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(0, 10, 0, 0),
+                  child: Text("Toggle Map Mode",
+                      style: Theme.of(context).textTheme.displayMedium?.copyWith(
+                            decoration: TextDecoration.none,
+                            fontSize: 12,
+                          )),
+                ),
+                Switch(
+                  value: mapSelected,
+                  onChanged: (bool value) {
+                    setState(() {
+                      mapSelected = value;
+                    });
+                  },
+                ),
+              ],
+            )
           ],
         ),
         Row(
@@ -342,98 +352,125 @@ class _RestaurantsOptionsState extends State<RestaurantsOptions>
                   getLon: (dynamic r) => (r as YelpRestaurant).coordinates.longitude
                 )
                 : Expanded(
-                  child: ListView(
-                      children: [
-                        for (YelpRestaurant restaurant in (_sortDirection
-                                ? restaurants
-                                : restaurants.reversed)
-                            .where(filterRestaurants))
-                          Padding(
+                  child: ImplicitlyAnimatedList<YelpRestaurant>(
+                    insertDuration: const Duration(milliseconds: 350),
+                    removeDuration: const Duration(milliseconds: 350),
+                    updateDuration: const Duration(milliseconds: 350),
+                    areItemsTheSame: (a, b) => a.id == b.id,
+                    items: (_sortDirection
+                                        ? restaurants
+                                        : restaurants.reversed)
+                                    .where(filterRestaurants).toList(),
+                    itemBuilder: (context, animation, restaurant, i){
+                          Color bgColor = rowIndex % 2 == 0
+                              ? Colors.grey[200]! // Light gray color
+                              : Colors.white; // White color
+                    
+                          // Increment the row index for the next iteration
+                          rowIndex++;
+                      return SizeFadeTransition(
+                        sizeFraction: 0.8,
+                        curve: Curves.easeInOut,
+                        animation: animation,
+                        child: Container(
+                          color: bgColor,
+                          child: Padding(
                             padding: const EdgeInsets.all(8.0),
-                            child: Card(
-                              child: ListTile(
-                                leading: CircleAvatar(backgroundImage: NetworkImage(restaurant.imageUrl)),
-                                title: Text(restaurant.name),
-                                subtitle: Text(
-                                    "${restaurant.price ?? ""}\n★ ${restaurant.rating.toString()}"),
-                                trailing: Column(
-                                  children: [
-                                    Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        IconButton(
-                                            icon: const Icon(Icons.info),
-                                            onPressed: () {
-                                              showDialog(
-                                                context: context,
-                                                builder: (BuildContext context) {
-                                                  return RestaurantPopup(restaurant);
-                                                },
-                                              );
-                                            }),
-                                        Builder(builder: (context) {
-                                          bool selected = trip.meals
-                                              .map((e) => e.restaurant.id)
-                                              .contains(restaurant.id);
-                                          return ElevatedButton(
-                                            onPressed: selected
-                                                ? () async {
-                                                    await trip.removeMeal(trip
-                                                        .meals
-                                                        .firstWhere((a) =>
-                                                            a.restaurant.id == restaurant.id));
-                                                    setState(() {});
-                                                    if (widget.setState != null) {
-                                                      widget.participantsPopupOpenState[
-                                                          restaurant.id] = true;
-                                                      widget.selectedParticipantsMap
-                                                          .remove(restaurant.id);
-                                                      widget.participantsPopupKeys
-                                                          .remove(restaurant.id);
-                                                      widget.setState!();
-                                                    }
+                            child: ListTile(
+                              leading: CircleAvatar(backgroundImage: NetworkImage(restaurant.imageUrl)),
+                              title: Text(restaurant.name),
+                              subtitle: Text(
+                                  "${restaurant.price ?? ""}\n★ ${restaurant.rating.toString()}"),
+                              trailing: Column(
+                                children: [
+                                  Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      IconButton(
+                                          icon: const Icon(Icons.info),
+                                          onPressed: () {
+                                            showDialog(
+                                              context: context,
+                                              builder: (BuildContext context) {
+                                                return RestaurantPopup(restaurant);
+                                              },
+                                            );
+                                          }),
+                                      Builder(builder: (context) {
+                                        bool selected = trip.meals
+                                            .map((e) => e.restaurant.id)
+                                            .contains(restaurant.id);
+                                        return GestureDetector(
+                                          onTap: selected
+                                              ? () async {
+                                                print("Removing restaurant");
+                                                  await trip.removeMeal(trip
+                                                      .meals
+                                                      .firstWhere((e) =>
+                                                          e.restaurant.id == restaurant.id));
+                                                  setState(() {});
+                                                  if (widget.setState != null) {
+                                                    widget.participantsPopupOpenState[
+                                                        restaurant.id] = true;
+                                                    widget.selectedParticipantsMap
+                                                        .remove(restaurant.id);
+                                                    widget.participantsPopupKeys
+                                                        .remove(restaurant.id);
+                                                    widget.setState!();
                                                   }
-                                                : () async {
-                                                    await trip.addMeal(
-                                                        restaurant,
+                                                }
+                                              : () async {
+                                                  print("Adding restaurant");
+                                                  await trip.addMeal(
+                                                      restaurant,
+                                                      widget.profiles
+                                                          .map((e) => e.id)
+                                                          .toList());
+                                                  setState(() {});
+                                                  if (widget.setState != null) {
+                                                    widget.participantsPopupOpenState[
+                                                        restaurant.id] = false;
+                                                    widget.selectedParticipantsMap[
+                                                            restaurant.id] =
                                                         widget.profiles
                                                             .map((e) => e.id)
-                                                            .toList());
-                                                    setState(() {});
-                                                    if (widget.setState != null) {
-                                                      widget.participantsPopupOpenState[
-                                                          restaurant.id] = false;
-                                                      widget.selectedParticipantsMap[
-                                                              restaurant.id] =
-                                                          widget.profiles
-                                                              .map((e) => e.id)
-                                                              .toList();
-                                                      widget.participantsPopupKeys[
-                                                          restaurant.id] = GlobalKey();
-                                                      widget.setState!();
-                                                    }
-                                                  },
-                                            style: ButtonStyle(
-                                                backgroundColor:
-                                                    MaterialStateProperty.all<Color>(
-                                                        selected
-                                                            ? const Color.fromARGB(
-                                                                255, 127, 166, 198)
-                                                            : Colors.grey[300]!)),
-                                            child: Text('Select${selected ? 'ed' : ''}',
-                                                style: const TextStyle(
-                                                    color: Colors.black)),
-                                          );
-                                        }),
-                                      ],
-                                    ),
-                                  ],
-                                ),
+                                                            .toList();
+                                                    widget.participantsPopupKeys[
+                                                        restaurant.id] = GlobalKey();
+                                                    widget.setState!();
+                                                  }
+                                                },
+                                          child: Checkbox(
+                                            value: selected,
+                                            onChanged: null,
+                                            fillColor: MaterialStateProperty.all<Color>(
+                                                selected
+                                                    ? const Color.fromARGB(
+                                                        255, 127, 166, 198)
+                                                    : Colors.grey[300]!),
+                                            // style: ButtonStyle(
+                                            //     backgroundColor:
+                                            //         MaterialStateProperty.all<Color>(
+                                            //             selected
+                                            //                 ? const Color.fromARGB(
+                                            //                     255, 127, 166, 198)
+                                            //                 : Colors.grey[300]!)),
+                                            // child: Text('Select${selected ? 'ed' : ''}',
+                                            //     style: const TextStyle(
+                                            //         color: Colors.black)),
+                                          ),
+                                        );
+                                      }),
+                                    ],
+                                  ),
+                                ],
                               ),
                             ),
                           ),
-                      ],
-                    ),
+                        ),
+                      );
+                    }
+                  ),
                 ),
       ],
     );

@@ -230,30 +230,36 @@ class _HotelOptionsState extends State<HotelOptions> {
         : Padding(
           padding: const EdgeInsets.all(8.0),
           child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Text("Hotels for ${widget.currentGroup!.name}",
               //     style: Theme.of(context).textTheme.displayMedium?.copyWith(
               //         decoration: TextDecoration.underline,
               //         fontWeight: FontWeight.bold)),
-              Row(
+              Wrap(
+                spacing: 80,
                 children: [
                   Text("Hotels for ${widget.currentGroup!.name}", style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(80, 10, 0, 0),
-                    child: Text("Toggle Map Mode",
-                        style: Theme.of(context).textTheme.displayMedium?.copyWith(
-                              decoration: TextDecoration.none,
-                              fontSize: 12,
-                            )),
-                  ),
-                  Switch(
-                    value: mapSelected,
-                    onChanged: (bool value) {
-                      setState(() {
-                        mapSelected = value;
-                      });
-                    },
-                  ),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(0, 10, 0, 0),
+                      child: Text("Toggle Map Mode",
+                          style: Theme.of(context).textTheme.displayMedium?.copyWith(
+                                decoration: TextDecoration.none,
+                                fontSize: 12,
+                              )),
+                    ),
+                    Switch(
+                      value: mapSelected,
+                      onChanged: (bool value) {
+                        setState(() {
+                          mapSelected = value;
+                        });
+                      },
+                    ),
+                  ],)
                 ],
               ),
               Row(
