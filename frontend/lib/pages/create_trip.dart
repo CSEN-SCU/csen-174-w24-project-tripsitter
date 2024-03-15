@@ -34,7 +34,9 @@ class _CreateTripState extends State<CreateTrip> {
 
   void loadCities() async {
     cities = await getCities(context);
-    setState(() {});
+    if(mounted) {
+      setState(() {});
+    }
   }
 
   Future<void> createTrip(String uid) async {
@@ -78,7 +80,8 @@ class _CreateTripState extends State<CreateTrip> {
       flights: List.empty(growable: true), 
       hotels: List.empty(growable: true), 
       rentalCars: List.empty(growable: true), 
-      activities: List.empty(growable: true)
+      activities: List.empty(growable: true),
+      meals: List.empty(growable: true),
     );
     await newTrip.save();
     // ignore: use_build_context_synchronously
@@ -145,10 +148,10 @@ class _CreateTripState extends State<CreateTrip> {
                       DateTime? d = await showDatePicker(
                         context: context,
                         initialDate: startDate ?? DateTime.now(),
-                        firstDate: DateTime(2024, 1, 1),
+                        firstDate: DateTime.now(),
                         lastDate: endDate ?? DateTime(2100),
                       );
-                      if (d != null) {
+                      if (d != null && mounted) {
                         setState(() => startDate = d);
                       }
                     },
@@ -178,7 +181,7 @@ class _CreateTripState extends State<CreateTrip> {
                         firstDate: startDate ?? DateTime(2024, 1, 1),
                         lastDate: DateTime(2100),
                       );
-                      if (d != null) {
+                      if (d != null && mounted) {
                         setState(() => endDate = d);
                       }
                     },

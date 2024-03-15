@@ -9,7 +9,7 @@ import 'package:tripsitter/classes/profile.dart';
 import 'package:tripsitter/classes/ticketmaster.dart';
 import 'package:tripsitter/classes/trip.dart';
 import 'package:tripsitter/components/events/event_info_dialog.dart';
-import 'package:tripsitter/components/events/events_map.dart';
+import 'package:tripsitter/components/map.dart';
 import 'package:tripsitter/helpers/api.dart';
 import 'package:tripsitter/helpers/data.dart';
 import 'package:tripsitter/helpers/locators.dart';
@@ -83,8 +83,10 @@ class _EventsOptionsState extends State<EventsOptions>
     super.initState();
     getEvents();
     getAirports(context).then((value) {
-      if(widget.trip.flights.isEmpty || widget.trip.flights.first.selected == null) return;
-      arrivalAirport = value.firstWhereOrNull((element) => element.iataCode == widget.trip.flights.first.arrivalAirport);
+      if (widget.trip.flights.isEmpty ||
+          widget.trip.flights.first.selected == null) return;
+      arrivalAirport = value.firstWhereOrNull((element) =>
+          element.iataCode == widget.trip.flights.first.arrivalAirport);
     });
   }
 
@@ -113,9 +115,9 @@ class _EventsOptionsState extends State<EventsOptions>
     call.sort(compareEvents);
 
     Set<String> genres = {};
-    for(TicketmasterEvent e in call) {
-      for(TicketmasterClassification c in e.classifications) {
-        if(c.genre != null) {
+    for (TicketmasterEvent e in call) {
+      for (TicketmasterClassification c in e.classifications) {
+        if (c.genre != null) {
           genres.add(c.genre!.name);
         }
       }
@@ -131,15 +133,15 @@ class _EventsOptionsState extends State<EventsOptions>
   }
 
   void _showGenrePopup() async {
-    if(events.isEmpty) return;
+    if (events.isEmpty) return;
     setState(() {
       _isGenreOpen = true;
     });
 
     Set<String> genres = {};
-    for(TicketmasterEvent e in events) {
-      for(TicketmasterClassification c in e.classifications) {
-        if(c.genre != null) {
+    for (TicketmasterEvent e in events) {
+      for (TicketmasterClassification c in e.classifications) {
+        if (c.genre != null) {
           genres.add(c.genre!.name);
         }
       }
@@ -169,20 +171,25 @@ class _EventsOptionsState extends State<EventsOptions>
 
   bool filterEvents(TicketmasterEvent event) {
     double distanceFromAirport = 0;
-    if(arrivalAirport != null) {
-      distanceFromAirport = distance(event.venues.first.latitude ?? 0, event.venues.first.longitude ?? 0, arrivalAirport!.lat, arrivalAirport!.lon);
+    if (arrivalAirport != null) {
+      distanceFromAirport = distance(
+          event.venues.first.latitude ?? 0,
+          event.venues.first.longitude ?? 0,
+          arrivalAirport!.lat,
+          arrivalAirport!.lon);
     }
-    if(distanceFromAirport > 150) {
+    if (distanceFromAirport > 150) {
       return false;
     }
-    if(selectedGenres.isEmpty) return true;
-    for(TicketmasterClassification c in event.classifications) {
-      if(c.genre != null && selectedGenres.contains(c.genre!.name)) {
+    if (selectedGenres.isEmpty) return true;
+    for (TicketmasterClassification c in event.classifications) {
+      if (c.genre != null && selectedGenres.contains(c.genre!.name)) {
         return true;
       }
     }
     return false;
   }
+
   Airport? arrivalAirport;
 
   int compareEvents(TicketmasterEvent a, TicketmasterEvent b) {
@@ -192,36 +199,54 @@ class _EventsOptionsState extends State<EventsOptions>
             ? 1
             : b.prices.isEmpty
                 ? -1
-                : a.prices.map((p) => p.min).reduce(min).compareTo(
-                    b.prices.map((p) => p.min).reduce(min));
+                : a.prices
+                    .map((p) => p.min)
+                    .reduce(min)
+                    .compareTo(b.prices.map((p) => p.min).reduce(min));
       case EventSortOption.distanceAirport:
-        if(arrivalAirport == null) return 0;
+        if (arrivalAirport == null) return 0;
         return a.venues.isEmpty
             ? 1
             : b.venues.isEmpty
                 ? -1
-                : distance(a.venues.first.latitude ?? 0, a.venues.first.longitude ?? 0, arrivalAirport!.lat, arrivalAirport!.lon).compareTo(
-                    distance(b.venues.first.latitude ?? 0, b.venues.first.longitude ?? 0, arrivalAirport!.lat, arrivalAirport!.lon));
+                : distance(
+                        a.venues.first.latitude ?? 0,
+                        a.venues.first.longitude ?? 0,
+                        arrivalAirport!.lat,
+                        arrivalAirport!.lon)
+                    .compareTo(distance(
+                        b.venues.first.latitude ?? 0,
+                        b.venues.first.longitude ?? 0,
+                        arrivalAirport!.lat,
+                        arrivalAirport!.lon));
       case EventSortOption.distanceHotel:
-        if(trip.hotels.isEmpty || trip.hotels.first.selectedInfo == null) return 0;
+        if (trip.hotels.isEmpty || trip.hotels.first.selectedInfo == null)
+          return 0;
         return a.venues.isEmpty
             ? 1
             : b.venues.isEmpty
                 ? -1
-                : distance(a.venues.first.latitude ?? 0, a.venues.first.longitude ?? 0, trip.hotels.first.selectedInfo!.latitude ?? 0, trip.hotels.first.selectedInfo!.longitude ?? 0).compareTo(
-                    distance(b.venues.first.latitude ?? 0, b.venues.first.longitude ?? 0, trip.hotels.first.selectedInfo!.latitude ?? 0, trip.hotels.first.selectedInfo!.longitude ?? 0));
-        // return a.venues.isEmpty
-        //     ? 1
-        //     : b.venues.isEmpty
-        //         ? -1
-        //         : a.venues.firstOrNull?.distanceToHotel.compareTo(
-        //             b.venues.firstOrNull?.distanceToHotel);
+                : distance(
+                        a.venues.first.latitude ?? 0,
+                        a.venues.first.longitude ?? 0,
+                        trip.hotels.first.selectedInfo!.latitude ?? 0,
+                        trip.hotels.first.selectedInfo!.longitude ?? 0)
+                    .compareTo(distance(
+                        b.venues.first.latitude ?? 0,
+                        b.venues.first.longitude ?? 0,
+                        trip.hotels.first.selectedInfo!.latitude ?? 0,
+                        trip.hotels.first.selectedInfo!.longitude ?? 0));
+      // return a.venues.isEmpty
+      //     ? 1
+      //     : b.venues.isEmpty
+      //         ? -1
+      //         : a.venues.firstOrNull?.distanceToHotel.compareTo(
+      //             b.venues.firstOrNull?.distanceToHotel);
     }
   }
 
   void _showSortPopup() {
-    setState(() {
-    });
+    setState(() {});
 
     final popup = SelectOnePopup<EventSortOption>(
       options: EventSortOption.values,
@@ -235,16 +260,16 @@ class _EventsOptionsState extends State<EventsOptions>
     );
 
     popup.showPopup(context, _sortKey).then((_) {
-      setState(() {
-      });
+      setState(() {});
     });
   }
 
   @override
   Widget build(BuildContext context) {
     bool isMobile = Provider.of<bool>(context, listen: false);
+    int rowIndex = 0;
     // Initialize a counter variable before mapping the events to TableRows
-    return ListView(
+    return Column(
       children: [
         // Text("Choose Activities",
         //     style: Theme.of(context)
@@ -253,7 +278,8 @@ class _EventsOptionsState extends State<EventsOptions>
         //         ?.copyWith(fontWeight: FontWeight.bold)),
         Wrap(
           children: [
-            const Text("Choose Activities", style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+            const Text("Choose Activities",
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
             Padding(
               padding: const EdgeInsets.fromLTRB(80, 10, 0, 0),
               child: Text("Toggle Map Mode",
@@ -291,20 +317,20 @@ class _EventsOptionsState extends State<EventsOptions>
               ),
             ),
             FilterButton(
-              color: Colors.grey[100]!,
-              text: _selectedSort.toString(),
-              globalKey: _sortKey,
-              onPressed: _showSortPopup,
-              icon: IconButton(
-                onPressed: () {
-                  setState(() {
-                    _sortDirection = !_sortDirection;
-                  });
-                },
-                icon: Icon(_sortDirection
-                    ? Icons.arrow_upward
-                    : Icons.arrow_downward),
-              )),
+                color: Colors.grey[100]!,
+                text: _selectedSort.toString(),
+                globalKey: _sortKey,
+                onPressed: _showSortPopup,
+                icon: IconButton(
+                  onPressed: () {
+                    setState(() {
+                      _sortDirection = !_sortDirection;
+                    });
+                  },
+                  icon: Icon(_sortDirection
+                      ? Icons.arrow_upward
+                      : Icons.arrow_downward),
+                )),
           ],
         ),
         !isLoaded
@@ -320,107 +346,143 @@ class _EventsOptionsState extends State<EventsOptions>
                 ),
               )
             : mapSelected
-                ? Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: LayoutBuilder(
-                      builder: (context, constraints) {
-                        return EventsMap(
-                          height: constraints.maxHeight - 50,
-                          trip: trip,
-                          profiles: widget.profiles,
-                          events: (_sortDirection ? events : events.reversed).where(filterEvents).toList(),
-                          setState: widget.setState,
-                        );
-                      },
-                    ),
-                  )
-                : Table(
-                    columnWidths: const <int, TableColumnWidth>{
-                        0: FixedColumnWidth(75),
-                        1: FlexColumnWidth(1),
-                        2: FlexColumnWidth(1),
-                        3: FixedColumnWidth(50),
-                        4: FixedColumnWidth(150),
-                      },
-                    defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-                    children: (_sortDirection ? events : events.reversed).where(filterEvents)
-                        .map((event) => TableRow(children: [
-                              TableCell(
+                ? TripsitterMap<TicketmasterEvent>(
+                    trip: trip,
+                    extras: const [
+                      MarkerType.airport,
+                      MarkerType.hotel,
+                      MarkerType.restaurant
+                    ],
+                    isSelected: (dynamic event) => trip.activities
+                                .map((e) => e.event.id)
+                                .contains((event as TicketmasterEvent).id),
+                    getLat: (dynamic e) => (e as TicketmasterEvent).venues.first.latitude ?? 0,
+                    getLon: (dynamic e) => (e as TicketmasterEvent).venues.first.longitude ?? 0,
+                    items: (_sortDirection ? events : events.reversed)
+                        .where(filterEvents)
+                        .toList()
+                )
+                : Expanded(
+                  child: SingleChildScrollView(
+                    child: Table(
+                        columnWidths: const <int, TableColumnWidth>{
+                            0: FixedColumnWidth(75),
+                            1: FlexColumnWidth(1),
+                            2: FlexColumnWidth(1),
+                            3: FixedColumnWidth(50),
+                            4: FixedColumnWidth(150),
+                          },
+                        defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+                        children: (_sortDirection ? events : events.reversed)
+                            .where(filterEvents)
+                            .map((event) {
+                          Color bgColor = rowIndex % 2 == 0
+                              ? Colors.grey[200]! // Light gray color
+                              : Colors.white; // White color
+                    
+                          // Increment the row index for the next iteration
+                          rowIndex++;
+                          return TableRow(
+                              decoration: BoxDecoration(color: bgColor),
+                              children: [
+                                TableCell(
+                                    child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: event.images.isEmpty
+                                      ? const Icon(Icons.star)
+                                      : Image.network(event.images.first.url,
+                                          height: 50),
+                                )),
+                                TableCell(
+                                    child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Text(event.prices.isEmpty
+                                      ? event.name
+                                      : "${event.name}\nFrom \$${event.prices.map((p) => p.min).reduce(min)}/person"),
+                                )),
+                                TableCell(
+                                    child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Text(
+                                      '${event.venues.firstOrNull?.name}\nStarts ${event.startTime.localDate} ${event.startTime.localTime}'),
+                                )),
+                                TableCell(
+                                    child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: IconButton(
+                                      icon: const Icon(Icons.info),
+                                      onPressed: () {
+                                        showDialog(
+                                          context: context,
+                                          builder: (BuildContext context) {
+                                            return EventPopup(event);
+                                          },
+                                        );
+                                      }),
+                                )),
+                                TableCell(
                                   child: Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: event.images.isEmpty
-                                    ? const Icon(Icons.star)
-                                    : Image.network(event.images.first.url,
-                                        height: 50),
-                              )),
-                              TableCell(
-                                  child: Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Text(event.prices.isEmpty
-                                    ? event.name
-                                    : "${event.name}\nFrom \$${event.prices.map((p) => p.min).reduce(min)}/person"),
-                              )),
-                              TableCell(
-                                  child: Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Text(
-                                    '${event.venues.firstOrNull?.name}\nStarts ${event.startTime.localDate} ${event.startTime.localTime}'),
-                              )),
-                              TableCell(
-                                  child: Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: IconButton(
-                                    icon: const Icon(Icons.info),
-                                    onPressed: () {
-                                      showDialog(
-                                        context: context,
-                                        builder: (BuildContext context) {
-                                          return EventPopup(event);
-                                        },
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Builder(builder: (context) {
+                                      bool selected = trip.activities
+                                          .map((e) => e.event.id)
+                                          .contains(event.id);
+                                      return ElevatedButton(
+                                        onPressed: selected
+                                            ? () async {
+                                                await trip.removeActivity(trip
+                                                    .activities
+                                                    .firstWhere((a) =>
+                                                        a.event.id == event.id));
+                                                setState(() {});
+                                                if (widget.setState != null) {
+                                                  widget.participantsPopupOpenState[
+                                                      event.id] = true;
+                                                  widget.selectedParticipantsMap
+                                                      .remove(event.id);
+                                                  widget.participantsPopupKeys
+                                                      .remove(event.id);
+                                                  widget.setState!();
+                                                }
+                                              }
+                                            : () async {
+                                                await trip.addActivity(
+                                                    event,
+                                                    widget.profiles
+                                                        .map((e) => e.id)
+                                                        .toList());
+                                                setState(() {});
+                                                if (widget.setState != null) {
+                                                  widget.participantsPopupOpenState[
+                                                      event.id] = false;
+                                                  widget.selectedParticipantsMap[
+                                                          event.id] =
+                                                      widget.profiles
+                                                          .map((e) => e.id)
+                                                          .toList();
+                                                  widget.participantsPopupKeys[
+                                                      event.id] = GlobalKey();
+                                                  widget.setState!();
+                                                }
+                                              },
+                                        style: ButtonStyle(
+                                            backgroundColor:
+                                                MaterialStateProperty.all<Color>(
+                                                    selected
+                                                        ? const Color.fromARGB(
+                                                            255, 127, 166, 198)
+                                                        : Colors.grey[300]!)),
+                                        child: Text('Select${selected ? 'ed' : ''}',
+                                            style: const TextStyle(
+                                                color: Colors.black)),
                                       );
                                     }),
-                              )),
-                              TableCell(
-                                child: Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: Builder(builder: (context) {
-                                    bool selected = trip.activities
-                                        .map((e) => e.event.id)
-                                        .contains(event.id);
-                                    return ElevatedButton(
-                                      onPressed: selected
-                                          ? null
-                                          : () async {
-                                              await trip.addActivity(
-                                                  event,
-                                                  widget.profiles
-                                                      .map((e) => e.id)
-                                                      .toList());
-                                              setState(() {});
-                                              if (widget.setState != null) {
-                                                widget.setState!();
-                                              }
-                                              if(isMobile && mounted) {
-                                                Navigator.pop(context);
-                                              }
-                                            },
-                                      style: ButtonStyle(
-                                          backgroundColor:
-                                              MaterialStateProperty.all<Color>(
-                                                  selected
-                                                      ? const Color.fromARGB(
-                                                          255, 127, 166, 198)
-                                                      : Colors.grey[300]!)),
-                                      child: Text(
-                                          'Select${selected ? 'ed' : ''}',
-                                          style:
-                                              const TextStyle(color: Colors.black)),
-                                    );
-                                  }),
+                                  ),
                                 ),
-                              ),
-                            ]))
-                        .toList()),
+                              ]);
+                        }).toList()),
+                  ),
+                ),
       ],
     );
   }

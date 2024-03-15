@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:tripsitter/classes/profile.dart';
 import 'package:tripsitter/classes/trip.dart';
-import 'package:tripsitter/helpers/api.dart';
 
 class CommentsSection extends StatefulWidget {
   final Trip trip;

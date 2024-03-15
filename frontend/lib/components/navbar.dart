@@ -23,12 +23,12 @@ class TripSitterNavbar extends StatelessWidget implements PreferredSizeWidget {
             textStyle: TextStyle(
               color: Colors.black,
               fontWeight: FontWeight.bold,
-              fontSize: title == "Tripsitter" ? 36 : 24,
+              fontSize: title == "TripSitter" ? 36 : 24,
             ),
           ),
         ),
       ),
-      leading: backButton ? BackButton() : InkWell(
+      leading: backButton ? const BackButton() : InkWell(
         onTap: () {
           if(ModalRoute.of(context)?.settings.name != "/") {
             Navigator.pushNamed(context, "/");

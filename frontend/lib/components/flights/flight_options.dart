@@ -107,7 +107,7 @@ class _FlightOptionsState extends State<FlightOptions> {
   @override
   void didUpdateWidget(covariant FlightOptions oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if(oldWidget.currentGroup != widget.currentGroup) {
+    if(oldWidget.currentGroup != widget.currentGroup || oldWidget.currentGroup?.arrivalAirport != widget.currentGroup?.arrivalAirport || oldWidget.currentGroup?.departureAirport != widget.currentGroup?.departureAirport) {
       getFlights();
     }
   }

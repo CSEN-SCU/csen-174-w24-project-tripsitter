@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 
 import amadeus from "./amadeusClient";
 // var flightData = require('./flightData.json');
+const MAPS_API_KEY = process.env.MAPS_API_KEY!
 
 const axios = require('axios');
 const fs = require('fs');
@@ -89,6 +90,7 @@ const path = require('path');
 */ 
 
 export async function searchFlights(req: Request, res: Response){
+  // res.send(flightData); return;
     const origin = req.query.origin;
     const destination = req.query.destination;
     const departureDate = req.query.departureDate;
@@ -113,7 +115,6 @@ export async function searchFlights(req: Request, res: Response){
       travelClass: travelClass,
     });
   const offers = flightSearch.data;
-  // const offers = flightData;
   res.send(offers);
   }
 
@@ -236,4 +237,15 @@ export async function bookFlight(req: Request, res: Response){
     res.send(response);
   });
   // res.send(order.result);
+}
+
+export async function getAirportTimezone(req: Request, res: Response){
+  const lat = req.query.lat;
+  const lon = req.query.lon;
+  const now = new Date();
+  const ts = Math.floor(now.getTime() / 1000);
+  const url = `https://maps.googleapis.com/maps/api/timezone/json?location=${lat}%2C${lon}&timestamp=${ts}&key=${MAPS_API_KEY}`;
+  const response = await axios.get(url);
+  const timezone = response.data;
+  res.send(timezone);
 }

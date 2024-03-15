@@ -1,7 +1,9 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:tripsitter/classes/airport.dart';
 import 'package:tripsitter/classes/car.dart';
+import 'package:tripsitter/classes/city.dart';
 import 'package:tripsitter/classes/flights.dart';
 
 import 'package:http/http.dart' as http;
@@ -10,25 +12,29 @@ import 'package:tripsitter/classes/profile.dart';
 import 'package:tripsitter/classes/ticketmaster.dart';
 import 'package:tripsitter/classes/hotels.dart';
 import 'package:tripsitter/classes/trip.dart';
+import 'package:tripsitter/classes/yelp.dart';
 
 class TripsitterApi {
-  // static const String baseUrl = '127.0.0.1:5001';
-  // static const String baseApiUrl = '/tripsitter-coen-174/us-central1/api';
-  // static const bool useHttps = false;
+  static const String baseUrl = '127.0.0.1:5001';
+  static const String baseApiUrl = '/tripsitter-coen-174/us-central1/api';
+  static const bool useHttps = false;
   
-  static const String baseUrl = 'us-central1-tripsitter-coen-174.cloudfunctions.net';
-  static const String baseApiUrl = '/api';
-  static const bool useHttps = true;
+  // static const String baseUrl = 'us-central1-tripsitter-coen-174.cloudfunctions.net';
+  // static const String baseApiUrl = '/api';
+  // static const bool useHttps = true;
 
   static const String searchFlightsUrl = '$baseApiUrl/search/flights';
   static const String searchAirlinesUrl = '$baseApiUrl/search/airlines';
   static const String searchAirportsUrl = '$baseApiUrl/search/airports';
   static const String searchHotelsUrl = '$baseApiUrl/search/hotels';
+  static const String searchRestaurantsUrl = '$baseApiUrl/search/restaurants';
   static const String airlineLogoUrl = "$baseApiUrl/airline-logo";
   static const String eventsSearchUrl = "$baseApiUrl/search/events";
   static const String searchRentalCarsUrl = "$baseApiUrl/search/cars";
   static const String bookFlightUrl = "$baseApiUrl/book/flights";
   static const String bookHotelUrl = "$baseApiUrl/book/hotels";
+  static const String cityImageUrl = "$baseApiUrl/image/city";
+  static const String searchTimezoneUrl = "$baseApiUrl/search/timezone";
 
   static const String addUserUrl = '$baseApiUrl/trip/user';
   static const String createPaymentIntentUrl = '$baseApiUrl/checkout/intent';
@@ -96,6 +102,20 @@ class TripsitterApi {
     } else {
       throw Exception('Failed to load hotels');
     }
+  }
+
+  static Future<List<YelpRestaurant>> getRestaurants(City city) async {
+    Map<String,String> coords = {'lat': city.lat.toString(), 'lon': city.lon.toString()};
+    Uri uri = useHttps ? Uri.https(baseUrl,searchRestaurantsUrl, coords) : Uri.http(baseUrl, searchRestaurantsUrl, coords);
+    http.Response response = await http.get(uri);
+    if (response.statusCode == 200) {
+      List<dynamic> data = jsonDecode(response.body);
+      List<YelpRestaurant> restaurants = data.map((json) => YelpRestaurant.fromJson(json)).toList();
+      return restaurants;
+    } else {
+      throw Exception('Failed to load restaurants');
+    }
+
   }
 
   static Future<void> addUser(String email, String tripId) async {
@@ -190,4 +210,30 @@ class TripsitterApi {
       await group.setPnr(pnr);
     }
   }
+
+  static Future<String> getCityImage(City city) async {
+    Uri uri = useHttps ? Uri.https(baseUrl,cityImageUrl, {'city': "${city.name}, ${city.country}"}) : Uri.http(baseUrl, cityImageUrl, {'city': "${city.name}, ${city.country}"});
+    http.Response response = await http.get(uri);
+    if (response.statusCode == 200) {
+      dynamic data = jsonDecode(response.body);
+      return data['src'];
+    } else {
+      throw Exception('Failed to load hotels');
+    }
+  }
+
+  static Future<String> getAirportTimezone(Airport airport) async {
+    Map<String,String> coords = {'lat': airport.lat.toString(), 'lon': airport.lon.toString()};
+    Uri uri = useHttps ? Uri.https(baseUrl,searchTimezoneUrl, coords) : Uri.http(baseUrl, searchTimezoneUrl, coords);
+    http.Response response = await http.get(uri);
+    if (response.statusCode == 200) {
+      dynamic data = jsonDecode(response.body);
+      timezoneMap[airport.iataCode] = data['timeZoneId'];
+      return data['timeZoneId'];
+    } else {
+      throw Exception('Failed to load timezone');
+    }
+  }
 }
+
+Map<String,String> timezoneMap = {};

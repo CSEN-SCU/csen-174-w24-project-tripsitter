@@ -10,6 +10,7 @@ import 'package:tripsitter/classes/filterbutton.dart';
 import 'package:tripsitter/classes/hotels.dart';
 import 'package:tripsitter/classes/trip.dart';
 import 'package:tripsitter/components/hotels/hotel_info_dialog.dart';
+import 'package:tripsitter/components/map.dart';
 import 'package:tripsitter/helpers/api.dart';
 import 'package:tripsitter/helpers/data.dart';
 import 'package:tripsitter/helpers/locators.dart';
@@ -209,6 +210,8 @@ class _HotelOptionsState extends State<HotelOptions> {
 
   Airport? arrivalAirport;
 
+  bool mapSelected = false;
+
   List<HotelOption> get hotelsFiltered {
     return hotels.where((hotel) {
       if(hotel.offers.isEmpty) return false;
@@ -219,214 +222,165 @@ class _HotelOptionsState extends State<HotelOptions> {
     }).toList();
   }
   
-  // @override
-  // Widget build(BuildContext context) {
-  //   return widget.currentGroup == null ? Center(
-  //     child: Text("Select or create a group to choose a hotel")
-  //   ) : Padding(
-  //     padding: const EdgeInsets.all(8.0),
-  //     child: ListView(
-  //       children: [
-  //         Text("Hotels for ${widget.currentGroup!.name}", style: Theme.of(context).textTheme.displayMedium?.copyWith(decoration: TextDecoration.underline, fontWeight: FontWeight.bold)),
-  //         Row(
-  //           children: [
-  //             Expanded(
-  //               child: Wrap(
-  //                 spacing: 10,
-  //                 children: <Widget>[
-  //                   FilterButton(
-  //                       text: '# Beds',
-  //                       globalKey: _bedCountKey,
-  //                       onPressed: _showCountPopup,
-  //                       icon: Icon(
-  //                         _isBedCountOpen
-  //                             ? Icons.arrow_drop_up
-  //                             : Icons.arrow_drop_down,
-  //                       )),
-  //                   FilterButton(
-  //                       text: 'Bed Type',
-  //                       globalKey: _bedTypeKey,
-  //                       onPressed: _showTypePopup,
-  //                       icon: Icon(
-  //                         _isBedTypeOpen
-  //                             ? Icons.arrow_drop_up
-  //                             : Icons.arrow_drop_down,
-  //                       )),
-  //                 ],
-  //               ),
-  //             ),
-  //             FilterButton(
-  //               color: Colors.grey[100]!,
-  //               text: _selectedSort.toString(),
-  //               globalKey: _sortKey,
-  //               onPressed: _showSortPopup,
-  //               icon: IconButton(
-  //                 onPressed: () {
-  //                   setState(() {
-  //                     _sortDirection = !_sortDirection;
-  //                     sortHotels();
-  //                   });
-  //                 },
-  //                 icon: Icon(_sortDirection
-  //                     ? Icons.arrow_upward
-  //                     : Icons.arrow_downward),
-  //               )),
-  //           ],
-  //         ),
-  //         for (int i = 0; i < hotelsFiltered.length; i++)
-  //           ExpansionTile(
-  //             title: ListTile(
-  //               // leading: Image.network("https://logos.skyscnr.com/images/carhire/sippmaps/${car.group.img}", width: 80, height: 80),
-  //               title: Text("${hotelsFiltered[i].hotel.name}"),
-  //               trailing: Row(
-  //                 mainAxisSize: MainAxisSize.min,
-  //                 children: [
-  //                   IconButton(
-  //                     icon: Icon(Icons.info),
-  //                     onPressed: () {
-  //                       showDialog(
-  //                         context: context,
-  //                         builder: (BuildContext context) {
-  //                           return HotelInfoDialog(hotelsFiltered[i].hotel);
-  //                         }
-  //                       );
-  //                     },
-  //                   ),
-  //                 ]
-  //               ),
-  //               subtitle: Text(minPrice(hotelsFiltered[i].offers) != null ? "From \$${minPrice(hotelsFiltered[i].offers)}" : "No price available"),
-  //             ),
-  //             children: hotelsFiltered[i].offers.map((HotelOffer o) {
-  //               return ListTile(
-  //                 subtitle: Text(o.room?.description?.text ?? "No description available"),
-  //                 title: o.price.total == null ? null : Text("\$${o.price.total}"),
-  //                 trailing: ElevatedButton(
-  //                   onPressed: () async {
-  //                     if(widget.currentGroup!.infos.isNotEmpty && widget.currentGroup!.infos.map((c) => c.hotelId).contains(hotelsFiltered[i].hotel.hotelId)) {
-  //                       await widget.currentGroup!.removeOption(widget.currentGroup!.infos.indexWhere((element) => element.hotelId == hotelsFiltered[i].hotel.hotelId));
-  //                     } else {
-  //                       await widget.currentGroup!.addOption(hotelsFiltered[i].hotel, o);
-  //                     }
-  //                     setState(() {});
-  //                     widget.setState();
-  //                   },
-  //                   child: Text("Select${(widget.currentGroup!.infos.isNotEmpty && widget.currentGroup!.infos.map((c) => c.hotelId).contains(hotelsFiltered[i].hotel.hotelId)) ? "ed" : ""}"),
   @override
   Widget build(BuildContext context) {
     bool isMobile = Provider.of<bool>(context, listen: false);
     return widget.currentGroup == null
         ? const Center(child: Text("Select or create a group to choose a hotel"))
         : Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: ListView(
-              children: [
-                // Text("Hotels for ${widget.currentGroup!.name}",
-                //     style: Theme.of(context).textTheme.displayMedium?.copyWith(
-                //         decoration: TextDecoration.underline,
-                //         fontWeight: FontWeight.bold)),
-                Text("Hotels for ${widget.currentGroup!.name}", style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-                Row(
-                  children: [
-                    Expanded(
-                      child: Wrap(
-                        spacing: 10,
-                        children: <Widget>[
-                          FilterButton(
-                              text: '# Beds',
-                              globalKey: _bedCountKey,
-                              onPressed: _showCountPopup,
-                              icon: Icon(
-                                _isBedCountOpen
-                                    ? Icons.arrow_drop_up
-                                    : Icons.arrow_drop_down,
-                              )),
-                          FilterButton(
-                              text: 'Bed Type',
-                              globalKey: _bedTypeKey,
-                              onPressed: _showTypePopup,
-                              icon: Icon(
-                                _isBedTypeOpen
-                                    ? Icons.arrow_drop_up
-                                    : Icons.arrow_drop_down,
-                              )),
-                        ],
-                      ),
-                    ),
-                    FilterButton(
-                      color: Colors.grey[100]!,
-                      text: _selectedSort.toString(),
-                      globalKey: _sortKey,
-                      onPressed: _showSortPopup,
-                      icon: IconButton(
-                        onPressed: () {
-                          setState(() {
-                            _sortDirection = !_sortDirection;
-                            sortHotels();
-                          });
-                        },
-                        icon: Icon(_sortDirection
-                            ? Icons.arrow_upward
-                            : Icons.arrow_downward),
-                      )),
-                  ],
-                ),
-                for (int i = 0; i < hotelsFiltered.length; i++)
-                  ExpansionTile(
-                    title: ListTile(
-                      // leading: Image.network("https://logos.skyscnr.com/images/carhire/sippmaps/${car.group.img}", width: 80, height: 80),
-                      title: Text(hotelsFiltered[i].hotel.name),
-                      trailing: Row(mainAxisSize: MainAxisSize.min, children: [
-                        IconButton(
-                          icon: const Icon(Icons.info),
-                          onPressed: () {
-                            showDialog(
-                                context: context,
-                                builder: (BuildContext context) {
-                                  return HotelInfoDialog(hotelsFiltered[i].hotel);
-                                });
-                          },
-                        ),
-                      ]),
-                      subtitle: Text(minPrice(hotelsFiltered[i].offers) != null
-                          ? "From \$${minPrice(hotelsFiltered[i].offers)}"
-                          : "No price available"),
-                    ),
-                    children: hotelsFiltered[i].offers.map((HotelOffer o) {
-                      return ListTile(
-                        subtitle: Text(o.room?.description?.text ??
-                            "No description available"),
-                        title: o.price.total == null
-                            ? null
-                            : Text("\$${o.price.total}"),
-                        trailing: ElevatedButton(
-                          onPressed: () async {
-                            if (widget.currentGroup!.infos.isNotEmpty &&
-                                widget.currentGroup!.infos
-                                    .map((c) => c.hotelId)
-                                    .contains(hotelsFiltered[i].hotel.hotelId)) {
-                              await widget.currentGroup!.removeOption(widget
-                                  .currentGroup!.infos
-                                  .indexWhere((element) =>
-                                      element.hotelId ==
-                                      hotelsFiltered[i].hotel.hotelId));
-                            } else {
-                              await widget.currentGroup!
-                                  .addOption(hotelsFiltered[i].hotel, o);
-                            }
-                            setState(() {});
-                            widget.setState();
-                            if(isMobile && mounted) {
-                              Navigator.pop(context);
-                            }
-                          },
-                          child: Text(
-                              "Select${(widget.currentGroup!.infos.isNotEmpty && widget.currentGroup!.infos.map((c) => c.hotelId).contains(hotels[i].hotel.hotelId)) ? "ed" : ""}"),
-                        ),
-                      );
-                    }).toList(),
+          padding: const EdgeInsets.all(8.0),
+          child: Column(
+            children: [
+              // Text("Hotels for ${widget.currentGroup!.name}",
+              //     style: Theme.of(context).textTheme.displayMedium?.copyWith(
+              //         decoration: TextDecoration.underline,
+              //         fontWeight: FontWeight.bold)),
+              Row(
+                children: [
+                  Text("Hotels for ${widget.currentGroup!.name}", style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(80, 10, 0, 0),
+                    child: Text("Toggle Map Mode",
+                        style: Theme.of(context).textTheme.displayMedium?.copyWith(
+                              decoration: TextDecoration.none,
+                              fontSize: 12,
+                            )),
                   ),
-              ],
-            ),
-          );
+                  Switch(
+                    value: mapSelected,
+                    onChanged: (bool value) {
+                      setState(() {
+                        mapSelected = value;
+                      });
+                    },
+                  ),
+                ],
+              ),
+              Row(
+                children: [
+                  Expanded(
+                    child: Wrap(
+                      spacing: 10,
+                      children: <Widget>[
+                        FilterButton(
+                            text: '# Beds',
+                            globalKey: _bedCountKey,
+                            onPressed: _showCountPopup,
+                            icon: Icon(
+                              _isBedCountOpen
+                                  ? Icons.arrow_drop_up
+                                  : Icons.arrow_drop_down,
+                            )),
+                        FilterButton(
+                            text: 'Bed Type',
+                            globalKey: _bedTypeKey,
+                            onPressed: _showTypePopup,
+                            icon: Icon(
+                              _isBedTypeOpen
+                                  ? Icons.arrow_drop_up
+                                  : Icons.arrow_drop_down,
+                            )),
+                      ],
+                    ),
+                  ),
+                  FilterButton(
+                    color: Colors.grey[100]!,
+                    text: _selectedSort.toString(),
+                    globalKey: _sortKey,
+                    onPressed: _showSortPopup,
+                    icon: IconButton(
+                      onPressed: () {
+                        setState(() {
+                          _sortDirection = !_sortDirection;
+                          sortHotels();
+                        });
+                      },
+                      icon: Icon(_sortDirection
+                          ? Icons.arrow_upward
+                          : Icons.arrow_downward),
+                    )),
+                ],
+              ),
+              if(mapSelected)
+                TripsitterMap<HotelOption>(
+                  items: hotelsFiltered, 
+                  isSelected: (dynamic h) => (widget.currentGroup!.selectedInfo?.hotelId == (h as HotelOption).hotel.hotelId),
+                  isOption: (dynamic h) => (widget.currentGroup!.infos.isNotEmpty && widget.currentGroup!.infos.map((c) => c.hotelId).contains((h as HotelOption).hotel.hotelId)),
+                  isOther: (dynamic h) => (widget.trip.hotels.map((g) => g.selectedInfo?.hotelId).contains((h as HotelOption).hotel.hotelId)),
+                  extras: const [
+                    MarkerType.airport,
+                    MarkerType.restaurant,
+                    MarkerType.activity
+                  ],
+                  trip: widget.trip, 
+                  getLat: (dynamic h) => (h as HotelOption).hotel.latitude ?? 0.0, 
+                  getLon: (dynamic h) => (h as HotelOption).hotel.longitude ?? 0.0
+                ),
+              if(!mapSelected)
+                Expanded(
+                  child: ListView(
+                    children: [
+                      for (int i = 0; i < (mapSelected ? 0 : hotelsFiltered.length); i++)
+                        ExpansionTile(
+                          title: ListTile(
+                            // leading: Image.network("https://logos.skyscnr.com/images/carhire/sippmaps/${car.group.img}", width: 80, height: 80),
+                            title: Text(hotelsFiltered[i].hotel.name),
+                            trailing: Row(mainAxisSize: MainAxisSize.min, children: [
+                              IconButton(
+                                icon: const Icon(Icons.info),
+                                onPressed: () {
+                                  showDialog(
+                                      context: context,
+                                      builder: (BuildContext context) {
+                                        return HotelInfoDialog(hotelsFiltered[i].hotel);
+                                      });
+                                },
+                              ),
+                            ]),
+                            subtitle: Text(minPrice(hotelsFiltered[i].offers) != null
+                                ? "From \$${minPrice(hotelsFiltered[i].offers)}"
+                                : "No price available"),
+                          ),
+                          children: hotelsFiltered[i].offers.map((HotelOffer o) {
+                            return ListTile(
+                              subtitle: Text(o.room?.description?.text ??
+                                  "No description available"),
+                              title: o.price.total == null
+                                  ? null
+                                  : Text("\$${o.price.total}"),
+                              trailing: ElevatedButton(
+                                onPressed: () async {
+                                  if (widget.currentGroup!.infos.isNotEmpty &&
+                                      widget.currentGroup!.infos
+                                          .map((c) => c.hotelId)
+                                          .contains(hotelsFiltered[i].hotel.hotelId)) {
+                                    await widget.currentGroup!.removeOption(widget
+                                        .currentGroup!.infos
+                                        .indexWhere((element) =>
+                                            element.hotelId ==
+                                            hotelsFiltered[i].hotel.hotelId));
+                                  } else {
+                                    await widget.currentGroup!
+                                        .addOption(hotelsFiltered[i].hotel, o);
+                                  }
+                                  setState(() {});
+                                  widget.setState();
+                                  if(isMobile && mounted) {
+                                    Navigator.pop(context);
+                                  }
+                                },
+                                child: Text(
+                                    "Select${(widget.currentGroup!.infos.isNotEmpty && widget.currentGroup!.infos.map((c) => c.hotelId).contains(hotels[i].hotel.hotelId)) ? "ed" : ""}"),
+                              ),
+                            );
+                          }).toList(),
+                        ),
+                    ]
+                  ),
+                ),
+              
+            ],
+          ),
+        );
   }
 }

@@ -51,6 +51,20 @@ Next, create a `.env` file in the backend folder, and add your Stripe Secret Key
 STRIPE_SECRET=sk_test_yourSecretKey
 ```
 
+### Google Maps API
+Visit the [Google Maps API page](https://console.cloud.google.com/google/maps-apis/home) and select the correct project. Enable the Google Maps API and then create a new API key. Add the API key to your `.env`:
+```
+MAPS_API_KEY=yourKeyHere
+```
+
+### Yelp API
+Go to the [Yelp Developer API](https://www.yelp.com/developers/v3/manage_app) and create an account, then create a new app. 
+
+Add the Yelp API key in your `.env` file:
+```
+YELP_API_KEY=yourYelpKey
+```
+
 ### Amadeus
 Make an account on the [Amadeus website](https://developers.amadeus.com/register) then go to [https://developers.amadeus.com/my-apps](https://developers.amadeus.com/my-apps)
 
