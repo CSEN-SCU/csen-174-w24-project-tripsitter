@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
@@ -470,7 +471,7 @@ class _MyStatefulWidgetState extends State<TripCenterConsole>
                     child: showImage ? CircleAvatar(
                       radius: 0.5 * positions["City"]!.size,
                       key: ValueKey(true),
-                      backgroundImage: NetworkImage(cityImage!)
+                      backgroundImage: MemoryImage(base64Decode(cityImage!.split("data:image/jpeg;base64,")[1]))
                     ) : Container(
                     key: ValueKey(false),
                       width: positions["City"]!.size,

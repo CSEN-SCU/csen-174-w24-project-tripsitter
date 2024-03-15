@@ -14,6 +14,8 @@ import 'package:tripsitter/components/checkout/activity_summary.dart';
 import 'package:tripsitter/components/checkout/car_summary.dart';
 import 'package:tripsitter/components/checkout/flight_summary.dart';
 import 'package:tripsitter/components/checkout/hotel_summary.dart';
+import 'package:tripsitter/components/map.dart';
+import 'package:tripsitter/components/trip_console_dot.dart';
 import 'package:tripsitter/helpers/api.dart';
 import 'package:tripsitter/helpers/data.dart';
 import 'package:tripsitter/helpers/styles.dart';
@@ -143,6 +145,7 @@ class _TripSummaryState extends State<TripSummary> {
 
   @override
   Widget build(BuildContext context) {
+    bool isMobile = Provider.of<bool>(context);
     return ConstrainedBox(
       constraints: const BoxConstraints(
         maxWidth: 650,
@@ -161,6 +164,44 @@ class _TripSummaryState extends State<TripSummary> {
             Container(height: 20),
             if(widget.showBooking)
               ElevatedButton(onPressed: createCalendarEvents, child: Text(calendarLoading ?? "Add to Calendar")),
+            if(widget.showBooking && !isMobile)
+              ElevatedButton(onPressed: () {
+                showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return Dialog(
+                          child: Container(
+                            width: MediaQuery.of(context).size.width * 0.95,
+                            height: MediaQuery.of(context).size.height * 0.9,
+                            decoration: const BoxDecoration(
+                              borderRadius: BorderRadius.all(Radius.circular(25.0)),
+                              color: Colors.white,
+                            ),
+                            child: Stack(children: [
+                              TripsitterMap<int>(
+                                items: [],
+                                trip: widget.trip, 
+                                getLat: (r) => 0.0, 
+                                getLon: (r) => 0.0, 
+                                isSelected: (r) => false, 
+                                extras: const [
+                                  MarkerType.activity,
+                                  MarkerType.hotel,
+                                  MarkerType.restaurant,
+                                  MarkerType.airport,
+                                ]
+                              ),
+                              const Positioned(
+                                top: 10.0,
+                                right: 10.0,
+                                child: TsCloseButton(),
+                              ),
+                            ]),
+                          ),
+                        );
+                      },
+                    );
+              }, child: const Text("Show Trip Map")),
             if((split ? widget.trip.flights.where((f) => f.members.contains(widget.uid)) : widget.trip.flights).isNotEmpty)
               ...[
                 SummaryHeader("Flights: \$${split ? widget.trip.userFlightsPrice(widget.uid) : widget.trip.flightsPrice}${split ? "" : " total"}", icon: Icons.flight_takeoff_rounded),
