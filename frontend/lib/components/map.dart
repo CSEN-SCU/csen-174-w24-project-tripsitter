@@ -16,7 +16,9 @@ class TripsitterMap<T> extends StatefulWidget {
   final double Function(T item) getLat;
   final double Function(T item) getLon;
   final bool Function(T item) isSelected;
-  const TripsitterMap({required this.items, required this.trip, required this.getLat, required this.getLon, required this.isSelected, required this.extras, super.key});
+  final bool Function(T item)? isOption;
+  final bool Function(T item)? isOther;
+  const TripsitterMap({required this.items, required this.trip, required this.getLat, required this.getLon, required this.isSelected, required this.extras, this.isOption, this.isOther, super.key});
 
   @override
   State createState() => TripsitterMapState();
@@ -59,7 +61,7 @@ class TripsitterMapState extends State<TripsitterMap> {
         );
         var isNearby = eventDistance < 50.0;
         if (isNearby) {
-          addMarker(point, params[i], isSelected: widget.isSelected(item));
+          addMarker(point, params[i], isSelected: widget.isSelected(item), isOption: widget.isOption?.call(item) ?? false, isOther: widget.isOther?.call(item) ?? false);
           markersCount++;
         }
       });
@@ -155,6 +157,8 @@ class TripsitterMapState extends State<TripsitterMap> {
     {
       MarkerType type = MarkerType.item,
       bool isSelected = false,
+      bool isOption = false,
+      bool isOther = false,
     }
   ) {
     setState(() {
@@ -164,6 +168,8 @@ class TripsitterMapState extends State<TripsitterMap> {
           initialPosition: point,
           addMarkerState: addMarkerStates,
           isSelected: isSelected,
+          isOther: isOther,
+          isOption: isOption,
           type: type
         ),
       );
@@ -211,13 +217,15 @@ class Marker extends StatefulWidget {
   final LatLng coordinate;
   final void Function(MarkerState) addMarkerState;
   final MarkerType type;
-  final bool isSelected;
+  final bool isSelected, isOther, isOption;
 
   Marker({
     required this.coordinate,
     required this.initialPosition,
     required this.addMarkerState,
     required this.isSelected,
+    required this.isOther,
+    required this.isOption,
     this.type = MarkerType.item,
     super.key,
   });
@@ -246,7 +254,7 @@ class MarkerState extends State<Marker> with TickerProviderStateMixin {
   Icon getIcon() {
     switch (type) {
       case MarkerType.item:
-        return Icon(Icons.location_on, color: widget.isSelected ? Colors.blue : Colors.black, size: _iconSize);
+        return Icon(Icons.location_on, color: widget.isSelected ? Colors.blue : (widget.isOption ? Colors.green : (widget.isOther ? Colors.redAccent : Colors.black)), size: _iconSize);
       case MarkerType.hotel:
         return Icon(Icons.hotel, color: Colors.redAccent, size: _iconSize * 1.5);
       case MarkerType.airport:
