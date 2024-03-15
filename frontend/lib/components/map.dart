@@ -1,6 +1,8 @@
+import 'dart:io';
 import 'dart:math';
 
 import 'package:collection/collection.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:mapbox_gl/mapbox_gl.dart';
 import 'package:tripsitter/classes/ticketmaster.dart';
@@ -51,6 +53,7 @@ class TripsitterMapState extends State<TripsitterMap> {
     }
 
     controller.toScreenLocationBatch(params).then((value) {
+      if(widget.items.isEmpty) return;
       widget.items.forEachIndexed((i, item) {
         var point = Point<double>(value[i].x as double, value[i].y as double);
         var eventDistance = distance(
@@ -145,6 +148,7 @@ class TripsitterMapState extends State<TripsitterMap> {
     }
 
     mapController?.toScreenLocationBatch(coordinates).then((points) {
+      if(_markerStates.isEmpty) return;
       _markerStates.asMap().forEach((i, value) {
         _markerStates[i].updatePosition(points[i]);
       });
@@ -181,6 +185,10 @@ class TripsitterMapState extends State<TripsitterMap> {
     super.initState();
   }
 
+  void _onCameraIdleCallback() {
+    _updateMarkerPosition();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Expanded(
@@ -190,8 +198,10 @@ class TripsitterMapState extends State<TripsitterMap> {
           children: [
             MapboxMap(
               styleString: isLight ? MapboxStyles.LIGHT : MapboxStyles.DARK,
+              trackCameraPosition: true,
               accessToken: mapboxApiKey,
               onMapCreated: _onMapCreated,
+              onCameraIdle: _onCameraIdleCallback,
               initialCameraPosition: CameraPosition(
                 target: LatLng(
                     widget.trip.destination.lat, widget.trip.destination.lon),
@@ -271,6 +281,12 @@ class MarkerState extends State<Marker> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     var ratio = 1.0;
+
+    //web does not support Platform._operatingSystem
+    if (!kIsWeb) {
+      // iOS returns logical pixel while Android returns screen pixel
+      ratio = Platform.isIOS ? 1.0 : MediaQuery.of(context).devicePixelRatio;
+    }
     Icon icon = getIcon();
     return Positioned(
       left: _position.x / ratio - (type == MarkerType.item ? _iconSize : _iconSize * 1.5) / 2,
