@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:tripsitter/classes/trip.dart';
+import 'package:tripsitter/components/map.dart';
 import 'package:tripsitter/components/trip_console_dot.dart';
 import 'package:tripsitter/helpers/api.dart';
 
@@ -170,6 +171,28 @@ class _MyStatefulWidgetState extends State<TripCenterConsole>
 
     updateDotY(centerY + radius * sin(angle * (pi / 180)), dotName);
     updateDotX(centerX + radius * cos(angle * (pi / 180)), dotName);
+  }
+
+  bool isHovering = false;
+  bool get showImage => cityImage !=null && !isHovering;
+
+  Widget transitionBuilder(Widget widget, Animation<double> animation) {
+    final rotateAnim = Tween(begin: pi, end: 0.0).animate(animation);
+    return AnimatedBuilder(
+      animation: rotateAnim,
+      child: widget,
+      builder: (context, widget) {
+        final isUnder = (ValueKey(showImage) != widget?.key);
+        var tilt = ((animation.value - 0.5).abs() - 0.5) * 0.003;
+        tilt *= isUnder ? -1.0 : 1.0;
+        final value = isUnder ? min(rotateAnim.value, pi / 2) : rotateAnim.value;
+        return Transform(
+          transform: (Matrix4.rotationY(value)..setEntry(3, 0, tilt)),
+          child: widget,
+          alignment: Alignment.center,
+        );
+      },
+    );
   }
 
   @override
@@ -385,20 +408,89 @@ class _MyStatefulWidgetState extends State<TripCenterConsole>
             duration: const Duration(microseconds: 200),
             left: positions["City"]!.x - (0.5 * positions["City"]!.size),
             top: positions["City"]!.y - (0.5 * positions["City"]!.size),
-            child: Container(
+            child: SizedBox(
               width: positions["City"]!.size,
               height: positions["City"]!.size,
-              decoration: const BoxDecoration(
-                shape: BoxShape.circle,
-                color: Color.fromARGB(255, 153, 17, 17),
-              ),
-              child: cityImage !=null ? CircleAvatar(
-                backgroundImage: NetworkImage(cityImage!)
-                ) : Icon(
-                Icons.location_city,
-                color: Colors.white,
-                size: positions["City"]!.size * 0.7,
-              ),
+              child: MouseRegion(
+                cursor: SystemMouseCursors.click,
+                onEnter: (_) {
+                  setState(() {
+                    isHovering = true;
+                  });
+                },
+                onExit: (_) {
+                  setState(() {
+                    isHovering = false;
+                  });
+                },
+                child: GestureDetector(
+                  onTap: () {
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return Dialog(
+                          child: Container(
+                            width: MediaQuery.of(context).size.width * 0.95,
+                            height: MediaQuery.of(context).size.height * 0.9,
+                            decoration: const BoxDecoration(
+                              borderRadius: BorderRadius.all(Radius.circular(25.0)),
+                              color: Colors.white,
+                            ),
+                            child: Stack(children: [
+                              Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: TripsitterMap<int>(
+                                  items: [],
+                                  trip: widget.trip, 
+                                  getLat: (r) => 0.0, 
+                                  getLon: (r) => 0.0, 
+                                  isSelected: (r) => false, 
+                                  extras: const [
+                                    MarkerType.activity,
+                                    MarkerType.hotel,
+                                    MarkerType.restaurant,
+                                    MarkerType.airport,
+                                  ]
+                                ),
+                              ),
+                              const Positioned(
+                                top: 10.0,
+                                right: 10.0,
+                                child: TsCloseButton(),
+                              ),
+                            ]),
+                          ),
+                        );
+                      },
+                    );
+                  },
+                  child: AnimatedSwitcher(
+                    transitionBuilder: transitionBuilder,
+                    layoutBuilder: (widget, list) => Stack(children: [if(widget != null) widget, ...list]),
+                    switchInCurve: Curves.easeInBack,
+                    switchOutCurve: Curves.easeInBack.flipped,
+                    duration: Duration(milliseconds: 350),
+                    child: showImage ? CircleAvatar(
+                      radius: 0.5 * positions["City"]!.size,
+                      key: ValueKey(true),
+                      backgroundImage: NetworkImage(cityImage!)
+                    ) : Container(
+                    key: ValueKey(false),
+                      width: positions["City"]!.size,
+                      height: positions["City"]!.size,
+                      decoration: const BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Color.fromARGB(255, 153, 17, 17),
+                      ),
+                      child: Icon(
+                        Icons.pin_drop,
+                        color: Colors.white,
+                        size: positions["City"]!.size * 0.7,
+                      ),
+                    ),
+                  ),
+                ),
+              )
             ),
           ),
         ],

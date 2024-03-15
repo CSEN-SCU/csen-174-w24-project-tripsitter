@@ -98,7 +98,7 @@ class TripConsoleDotState extends State<TripConsoleDot> {
               const Positioned(
                 top: 10.0,
                 right: 10.0,
-                child: CloseButton(),
+                child: TsCloseButton(),
               ),
             ]),
           ),
@@ -182,8 +182,8 @@ class TripConsoleDotState extends State<TripConsoleDot> {
   }
 }
 
-class CloseButton extends StatelessWidget {
-  const CloseButton({super.key});
+class TsCloseButton extends StatelessWidget {
+  const TsCloseButton({super.key});
 
   @override
   Widget build(BuildContext context) {
