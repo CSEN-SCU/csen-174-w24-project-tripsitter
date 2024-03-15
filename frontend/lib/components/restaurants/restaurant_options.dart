@@ -1,15 +1,12 @@
-import 'dart:math';
-
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:tripsitter/classes/airport.dart';
 import 'package:tripsitter/classes/filterbutton.dart';
 import 'package:tripsitter/classes/profile.dart';
-import 'package:tripsitter/classes/ticketmaster.dart';
 import 'package:tripsitter/classes/trip.dart';
 import 'package:tripsitter/classes/yelp.dart';
-import 'package:tripsitter/components/events/events_map.dart';
+import 'package:tripsitter/components/map.dart';
 import 'package:tripsitter/components/restaurants/restaurant_info_dialog.dart';
 import 'package:tripsitter/helpers/api.dart';
 import 'package:tripsitter/helpers/data.dart';
@@ -331,15 +328,22 @@ class _RestaurantsOptionsState extends State<RestaurantsOptions>
                     padding: const EdgeInsets.all(8.0),
                     child: LayoutBuilder(
                       builder: (context, constraints) {
-                        return EventsMap(
-                          height: constraints.maxHeight - 50,
-                          trip: trip,
-                          profiles: widget.profiles,
-                          events: [],
-                          // restaurants: (_sortDirection ? restaurants : restaurants.reversed)
-                          //     .where(filterRestaurants)
-                          //     .toList(),
-                          setState: widget.setState,
+                        return TripsitterMap<YelpRestaurant>(
+                          items: (_sortDirection
+                              ? restaurants
+                              : restaurants.reversed)
+                          .where(filterRestaurants).toList(), 
+                          isSelected: (dynamic r) => trip.meals
+                              .map((e) => e.restaurant.id)
+                              .contains((r as YelpRestaurant).id),
+                          extras: const [
+                            MarkerType.airport,
+                            MarkerType.hotel,
+                            MarkerType.activity
+                          ],
+                          trip: trip, 
+                          getLat: (dynamic r) => (r as YelpRestaurant).coordinates.latitude, 
+                          getLon: (dynamic r) => (r as YelpRestaurant).coordinates.longitude
                         );
                       },
                     ),
