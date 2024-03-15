@@ -1,6 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:googleapis/calendar/v3.dart' as gcal;
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sign_in_button/sign_in_button.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
@@ -20,9 +22,11 @@ class _LoginPageState extends State<LoginPage> {
   void initState() {
     super.initState();
     _auth.authStateChanges().listen((event) {
-      setState(() {
-        _user = event;
-      });
+      if(mounted) {
+        setState(() {
+          _user = event;
+        });
+      }
       if (_user == null) {
         debugPrint('User is currently signed out!');
       } else {
@@ -80,22 +84,24 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Future<UserCredential> signInWithGoogle() async {
+    final prefs = await SharedPreferences.getInstance();
     if(kIsWeb) {
       // Create a new provider
       GoogleAuthProvider googleProvider = GoogleAuthProvider();
-
+      googleProvider.addScope(gcal.CalendarApi.calendarEventsScope);
       googleProvider.setCustomParameters({
         'login_hint': 'user@example.com'
       });
 
       // Once signed in, return the UserCredential
-      if(kIsWeb) {
-        return await FirebaseAuth.instance.signInWithPopup(googleProvider);
-      }
-      return await FirebaseAuth.instance.signInWithProvider(googleProvider);
+      UserCredential cred = await FirebaseAuth.instance.signInWithPopup(googleProvider);
+      prefs.setString('gcalToken', cred.credential?.accessToken ?? "");
+      return cred;
     }
     else {
-      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+      final GoogleSignInAccount? googleUser = await GoogleSignIn(
+        scopes: <String>[gcal.CalendarApi.calendarEventsScope],
+      ).signIn();
 
       // Obtain the auth details from the request
       final GoogleSignInAuthentication? googleAuth = await googleUser?.authentication;
@@ -105,6 +111,8 @@ class _LoginPageState extends State<LoginPage> {
         accessToken: googleAuth?.accessToken,
         idToken: googleAuth?.idToken,
       );
+
+      prefs.setString('gcalToken', credential.accessToken ?? "");
 
       // Once signed in, return the UserCredential
       return await FirebaseAuth.instance.signInWithCredential(credential);

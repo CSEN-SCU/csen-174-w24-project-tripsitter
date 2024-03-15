@@ -51,7 +51,6 @@ class _FlightGroupsState extends State<FlightGroups> {
       continue;
     }
     if (profile.hometown != null) {
-      // ignore: use_build_context_synchronously
       var nearestAirport = await getNearestAirport(profile.hometown!, context);
       FlightGroup? existing = trip.flights.firstWhereOrNull(
         (element) => element.departureAirport == nearestAirport,
@@ -115,7 +114,7 @@ class _FlightGroupsState extends State<FlightGroups> {
                               children: [
                                 if(nearbyDepartureAirports.length > 1)
                                   DropdownButtonFormField<Airport>(
-                                    decoration: InputDecoration(
+                                    decoration: const InputDecoration(
                                       labelText: 'Departure Airport',
                                     ),
                                     value: nearbyDepartureAirports.firstWhere((a) => a.iataCode == group.departureAirport),
@@ -139,7 +138,7 @@ class _FlightGroupsState extends State<FlightGroups> {
                                   ),
                                 if(nearbyArrivalAirports.length > 1)
                                   DropdownButtonFormField<Airport>(
-                                    decoration: InputDecoration(
+                                    decoration: const InputDecoration(
                                       labelText: 'Arrival Airport',
                                     ),
                                     value: nearbyArrivalAirports.firstWhere((a) => a.iataCode == group.arrivalAirport),

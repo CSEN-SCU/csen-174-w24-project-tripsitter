@@ -80,7 +80,8 @@ class _CreateTripState extends State<CreateTrip> {
       flights: List.empty(growable: true), 
       hotels: List.empty(growable: true), 
       rentalCars: List.empty(growable: true), 
-      activities: List.empty(growable: true)
+      activities: List.empty(growable: true),
+      meals: List.empty(growable: true),
     );
     await newTrip.save();
     // ignore: use_build_context_synchronously
