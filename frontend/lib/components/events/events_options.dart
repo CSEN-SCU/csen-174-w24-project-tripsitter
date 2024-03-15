@@ -272,6 +272,7 @@ class _EventsOptionsState extends State<EventsOptions>
     int rowIndex = 0;
     // Initialize a counter variable before mapping the events to TableRows
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // Text("Choose Activities",
         //     style: Theme.of(context)
@@ -279,12 +280,15 @@ class _EventsOptionsState extends State<EventsOptions>
         //         .displayMedium
         //         ?.copyWith(fontWeight: FontWeight.bold)),
         Wrap(
+          spacing: 80,
           children: [
             const Text("Choose Activities",
                 style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-            Row(children: [
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
               Padding(
-                padding: const EdgeInsets.fromLTRB(80, 10, 0, 0),
+                padding: const EdgeInsets.fromLTRB(0, 10, 0, 0),
                 child: Text("Toggle Map Mode",
                     style: Theme.of(context).textTheme.displayMedium?.copyWith(
                           decoration: TextDecoration.none,

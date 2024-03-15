@@ -73,122 +73,136 @@ class _RestaurantsItineraryState extends State<RestaurantsItinerary> {
 
       ...widget.trip.meals
           .map((meal) => LayoutBuilder(builder: (context, constraints) {
+
+                Widget actionsRow = Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButton(
+                        icon: const Icon(Icons.info),
+                        onPressed: () {
+                          showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return RestaurantPopup(meal.restaurant);
+                            },
+                          );
+                        }),
+                    CommentsPopup(
+                      comments: meal.comments,
+                      profiles: widget.profiles,
+                      myUid: user!.uid,
+                      removeComment: (TripComment comment) async {
+                        await meal.removeComment(comment);
+                        if (mounted) {
+                          setState(() {});
+                        }
+                      },
+                      addComment: (String comment) async {
+                        await meal.addComment(TripComment(
+                            comment: comment,
+                            uid: user.uid,
+                            date: DateTime.now()));
+                        if (mounted) {
+                          setState(() {});
+                        }
+                      },
+                    ),
+                    ElevatedButton(
+                      onPressed: () async {
+                        await widget.trip.removeMeal(meal);
+                        setState(() {});
+                        if (widget.setState != null) {
+                          widget.setState!();
+                        }
+                      },
+                      child: const Text('Remove'),
+                    ),
+                  ],
+                );
+
+                Widget participants = Expanded(
+                  child: FilterButton(
+                    text: 'Participants',
+                    icon: Icon(
+                      widget.participantsPopupOpenState[
+                                  meal.restaurant.id] ??
+                              false
+                          ? Icons.arrow_drop_up
+                          : Icons.arrow_drop_down,
+                    ),
+                    globalKey: widget.participantsPopupKeys[meal
+                        .restaurant.id]!, // Use the meal's specific key
+                    onPressed: () {
+                      final mealId = meal.restaurant.id;
+                      setState(() {
+                        widget.participantsPopupOpenState[mealId] =
+                            true;
+                      });
+                      final participantOptions =
+                          widget.profiles.map((p) => p.name).toList();
+                      final currentlySelected = widget.profiles
+                          .where((p) => widget
+                              .selectedParticipantsMap[mealId]!
+                              .contains(p.id))
+                          .map((p) => p.name)
+                          .toList();
+                      CheckboxPopup(
+                        options: participantOptions,
+                        selected: currentlySelected,
+                        onSelected: (List<String> selectedNames) {
+                          // Update the selected participants map based on names
+                          setState(() {
+                            widget.selectedParticipantsMap[mealId] =
+                                widget.profiles
+                                    .where((profile) => selectedNames
+                                        .contains(profile.name))
+                                    .map((profile) => profile.id)
+                                    .toList();
+          
+                            // Update the actual meal participants to reflect changes
+                            meal.participants.clear();
+                            meal.participants.addAll(widget
+                                .selectedParticipantsMap[mealId]!);
+                          });
+                        },
+                        format: (s) => s.toString(),
+                      )
+                          .showPopup(context,
+                              widget.participantsPopupKeys[mealId]!)
+                          .then((_) {
+                        setState(() {
+                          widget.participantsPopupOpenState[
+                              mealId] = false;
+                        });
+                      });
+                    },
+                  ),
+                );
                 return Card(
-                  child: ListTile(
-                    leading: CircleAvatar(backgroundImage: NetworkImage(meal.restaurant.imageUrl)),
-                    title: Text(meal.restaurant.name),
-                    subtitle: Text(
-                        "${meal.restaurant.price ?? ""}\n★ ${meal.restaurant.rating.toString()}"),
-                    visualDensity:
-                        const VisualDensity(vertical: 4), // to expand
-                    trailing: Column(
-                      children: [
-                        Row(
-                          mainAxisSize: MainAxisSize.min,
+                  child: Column(
+                    children: [
+                      ListTile(
+                        leading: CircleAvatar(backgroundImage: NetworkImage(meal.restaurant.imageUrl)),
+                        title: Text(meal.restaurant.name),
+                        subtitle: Text(
+                            "${meal.restaurant.price ?? ""}\n★ ${meal.restaurant.rating.toString()}"),
+                        visualDensity:
+                            const VisualDensity(vertical: 4), // to expand
+                        trailing: isMobile ? null : Column(
                           children: [
-                            IconButton(
-                                icon: const Icon(Icons.info),
-                                onPressed: () {
-                                  showDialog(
-                                    context: context,
-                                    builder: (BuildContext context) {
-                                      return RestaurantPopup(meal.restaurant);
-                                    },
-                                  );
-                                }),
-                            CommentsPopup(
-                              comments: meal.comments,
-                              profiles: widget.profiles,
-                              myUid: user!.uid,
-                              removeComment: (TripComment comment) async {
-                                await meal.removeComment(comment);
-                                if (mounted) {
-                                  setState(() {});
-                                }
-                              },
-                              addComment: (String comment) async {
-                                await meal.addComment(TripComment(
-                                    comment: comment,
-                                    uid: user.uid,
-                                    date: DateTime.now()));
-                                if (mounted) {
-                                  setState(() {});
-                                }
-                              },
-                            ),
-                            ElevatedButton(
-                              onPressed: () async {
-                                await widget.trip.removeMeal(meal);
-                                setState(() {});
-                                if (widget.setState != null) {
-                                  widget.setState!();
-                                }
-                              },
-                              child: const Text('Remove'),
-                            ),
+                            actionsRow,
+                            const SizedBox(height: 2),
+                            participants,
                           ],
                         ),
-                        const SizedBox(height: 2),
-                        Expanded(
-                          child: FilterButton(
-                            text: 'Participants',
-                            icon: Icon(
-                              widget.participantsPopupOpenState[
-                                          meal.restaurant.id] ??
-                                      false
-                                  ? Icons.arrow_drop_up
-                                  : Icons.arrow_drop_down,
-                            ),
-                            globalKey: widget.participantsPopupKeys[meal
-                                .restaurant.id]!, // Use the meal's specific key
-                            onPressed: () {
-                              final mealId = meal.restaurant.id;
-                              setState(() {
-                                widget.participantsPopupOpenState[mealId] =
-                                    true;
-                              });
-                              final participantOptions =
-                                  widget.profiles.map((p) => p.name).toList();
-                              final currentlySelected = widget.profiles
-                                  .where((p) => widget
-                                      .selectedParticipantsMap[mealId]!
-                                      .contains(p.id))
-                                  .map((p) => p.name)
-                                  .toList();
-                              CheckboxPopup(
-                                options: participantOptions,
-                                selected: currentlySelected,
-                                onSelected: (List<String> selectedNames) {
-                                  // Update the selected participants map based on names
-                                  setState(() {
-                                    widget.selectedParticipantsMap[mealId] =
-                                        widget.profiles
-                                            .where((profile) => selectedNames
-                                                .contains(profile.name))
-                                            .map((profile) => profile.id)
-                                            .toList();
-
-                                    // Update the actual meal participants to reflect changes
-                                    meal.participants.clear();
-                                    meal.participants.addAll(widget
-                                        .selectedParticipantsMap[mealId]!);
-                                  });
-                                },
-                                format: (s) => s.toString(),
-                              )
-                                  .showPopup(context,
-                                      widget.participantsPopupKeys[mealId]!)
-                                  .then((_) {
-                                setState(() {
-                                  widget.participantsPopupOpenState[
-                                      mealId] = false;
-                                });
-                              });
-                            },
-                          ),
-                        ),
-                      ],
-                    ),
+                      ),
+                      if(isMobile)
+                        Row(
+                          children: [
+                            Expanded(child: actionsRow),
+                            participants,
+                          ],)
+                    ],
                   ),
                 );
               }))
