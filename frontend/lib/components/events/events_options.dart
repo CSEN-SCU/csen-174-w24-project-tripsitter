@@ -9,7 +9,7 @@ import 'package:tripsitter/classes/profile.dart';
 import 'package:tripsitter/classes/ticketmaster.dart';
 import 'package:tripsitter/classes/trip.dart';
 import 'package:tripsitter/components/events/event_info_dialog.dart';
-import 'package:tripsitter/components/events/events_map.dart';
+import 'package:tripsitter/components/map.dart';
 import 'package:tripsitter/helpers/api.dart';
 import 'package:tripsitter/helpers/data.dart';
 import 'package:tripsitter/helpers/locators.dart';
@@ -350,14 +350,21 @@ class _EventsOptionsState extends State<EventsOptions>
                     padding: const EdgeInsets.all(8.0),
                     child: LayoutBuilder(
                       builder: (context, constraints) {
-                        return EventsMap(
-                          height: constraints.maxHeight - 50,
+                        return TripsitterMap<TicketmasterEvent>(
                           trip: trip,
-                          profiles: widget.profiles,
-                          events: (_sortDirection ? events : events.reversed)
+                          extras: const [
+                            MarkerType.airport,
+                            MarkerType.hotel,
+                            MarkerType.restaurant
+                          ],
+                          isSelected: (dynamic event) => trip.activities
+                                      .map((e) => e.event.id)
+                                      .contains((event as TicketmasterEvent).id),
+                          getLat: (dynamic e) => (e as TicketmasterEvent).venues.first.latitude ?? 0,
+                          getLon: (dynamic e) => (e as TicketmasterEvent).venues.first.longitude ?? 0,
+                          items: (_sortDirection ? events : events.reversed)
                               .where(filterEvents)
                               .toList(),
-                          setState: widget.setState,
                         );
                       },
                     ),

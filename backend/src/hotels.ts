@@ -52,7 +52,7 @@ export async function getHotels(req: Request, res: Response){
         longitude,
         radius: 10
     }));
-    const hotelIds = hotels.data.map((hotel: any) => hotel.hotelId).slice(0,50);
+    const hotelIds = hotels.data.map((hotel: any) => hotel.hotelId).slice(0,100);
 
     let results: any[] = [];
     let promises = [];

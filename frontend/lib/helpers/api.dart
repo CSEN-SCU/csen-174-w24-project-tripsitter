@@ -12,6 +12,7 @@ import 'package:tripsitter/classes/profile.dart';
 import 'package:tripsitter/classes/ticketmaster.dart';
 import 'package:tripsitter/classes/hotels.dart';
 import 'package:tripsitter/classes/trip.dart';
+import 'package:tripsitter/classes/yelp.dart';
 
 class TripsitterApi {
   static const String baseUrl = '127.0.0.1:5001';
@@ -26,6 +27,7 @@ class TripsitterApi {
   static const String searchAirlinesUrl = '$baseApiUrl/search/airlines';
   static const String searchAirportsUrl = '$baseApiUrl/search/airports';
   static const String searchHotelsUrl = '$baseApiUrl/search/hotels';
+  static const String searchRestaurantsUrl = '$baseApiUrl/search/restaurants';
   static const String airlineLogoUrl = "$baseApiUrl/airline-logo";
   static const String eventsSearchUrl = "$baseApiUrl/search/events";
   static const String searchRentalCarsUrl = "$baseApiUrl/search/cars";
@@ -100,6 +102,20 @@ class TripsitterApi {
     } else {
       throw Exception('Failed to load hotels');
     }
+  }
+
+  static Future<List<YelpRestaurant>> getRestaurants(City city) async {
+    Map<String,String> coords = {'lat': city.lat.toString(), 'lon': city.lon.toString()};
+    Uri uri = useHttps ? Uri.https(baseUrl,searchRestaurantsUrl, coords) : Uri.http(baseUrl, searchRestaurantsUrl, coords);
+    http.Response response = await http.get(uri);
+    if (response.statusCode == 200) {
+      List<dynamic> data = jsonDecode(response.body);
+      List<YelpRestaurant> restaurants = data.map((json) => YelpRestaurant.fromJson(json)).toList();
+      return restaurants;
+    } else {
+      throw Exception('Failed to load restaurants');
+    }
+
   }
 
   static Future<void> addUser(String email, String tripId) async {
