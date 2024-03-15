@@ -183,22 +183,24 @@ class TripsitterMapState extends State<TripsitterMap> {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 520,
-      child: Stack(
-        children: [
-          MapboxMap(
-            styleString: isLight ? MapboxStyles.LIGHT : MapboxStyles.DARK,
-            accessToken: mapboxApiKey,
-            onMapCreated: _onMapCreated,
-            initialCameraPosition: CameraPosition(
-              target: LatLng(
-                  widget.trip.destination.lat, widget.trip.destination.lon),
-              zoom: 10.0,
+    return Expanded(
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Stack(
+          children: [
+            MapboxMap(
+              styleString: isLight ? MapboxStyles.LIGHT : MapboxStyles.DARK,
+              accessToken: mapboxApiKey,
+              onMapCreated: _onMapCreated,
+              initialCameraPosition: CameraPosition(
+                target: LatLng(
+                    widget.trip.destination.lat, widget.trip.destination.lon),
+                zoom: 10.0,
+              ),
             ),
-          ),
-          ..._markers,
-        ],
+            ..._markers,
+          ],
+        ),
       ),
     );
   }

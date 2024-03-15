@@ -437,21 +437,18 @@ class _MyStatefulWidgetState extends State<TripCenterConsole>
                               color: Colors.white,
                             ),
                             child: Stack(children: [
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: TripsitterMap<int>(
-                                  items: [],
-                                  trip: widget.trip, 
-                                  getLat: (r) => 0.0, 
-                                  getLon: (r) => 0.0, 
-                                  isSelected: (r) => false, 
-                                  extras: const [
-                                    MarkerType.activity,
-                                    MarkerType.hotel,
-                                    MarkerType.restaurant,
-                                    MarkerType.airport,
-                                  ]
-                                ),
+                              TripsitterMap<int>(
+                                items: [],
+                                trip: widget.trip, 
+                                getLat: (r) => 0.0, 
+                                getLon: (r) => 0.0, 
+                                isSelected: (r) => false, 
+                                extras: const [
+                                  MarkerType.activity,
+                                  MarkerType.hotel,
+                                  MarkerType.restaurant,
+                                  MarkerType.airport,
+                                ]
                               ),
                               const Positioned(
                                 top: 10.0,
