@@ -196,8 +196,8 @@ class _TripSummaryState extends State<TripSummary> {
                   child: Text(calendarLoading ?? "Add to Calendar")),
             ElevatedButton(
                 onPressed: () async {
-                  pw.Document pdf =
-                      await generateItineraryPDF(widget.trip, widget.profiles);
+                  pw.Document pdf = await generateItineraryPDF(
+                      widget.trip, widget.profiles, widget.uid);
                   if (kIsWeb) {
                     var savedFile = await pdf.save();
                     List<int> fileInts = List.from(savedFile);

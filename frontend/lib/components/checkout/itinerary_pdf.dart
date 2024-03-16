@@ -1,39 +1,397 @@
+import 'package:collection/collection.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show Uint8List, rootBundle;
+import 'package:googleapis/script/v1.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
+import 'package:tripsitter/classes/flights.dart';
 import 'package:tripsitter/classes/profile.dart';
 import 'package:tripsitter/classes/trip.dart';
 import 'package:intl/intl.dart';
-import 'package:printing/printing.dart';
+import 'package:tripsitter/helpers/formatters.dart';
 
 Future<pw.Document> generateItineraryPDF(
-    Trip trip, List<UserProfile> profiles) async {
+    Trip trip, List<UserProfile> profiles, String uid) async {
   final doc = pw.Document(pageMode: PdfPageMode.outlines);
 
   // Load the font
-  final fontData = await rootBundle.load("fonts/Roboto-Black.ttf");
-  final ttf = pw.Font.ttf(fontData.buffer.asByteData());
+  final robotoBlackData = await rootBundle.load("fonts/Roboto-Black.ttf");
+  final robotoLightData = await rootBundle.load("fonts/Roboto-Light.ttf");
+  final blackTtf = pw.Font.ttf(robotoBlackData.buffer.asByteData());
+  final lightTtf = pw.Font.ttf(robotoLightData.buffer.asByteData());
+  final titleStyle = pw.TextStyle(fontSize: 24, font: blackTtf);
+  final sectionTitleStyle = pw.TextStyle(fontSize: 18, font: blackTtf);
+  final heavyStyle = pw.TextStyle(fontSize: 11, font: blackTtf);
+  final contentStyle = pw.TextStyle(fontSize: 11, font: lightTtf);
+
+  // Helper functions to format dates and times for the PDF.
+  final dateFormatter = DateFormat('E, MMM d, y');
+  final timeFormatter = DateFormat('h:mm a');
+
+  // Load icons
+  final tripSitterIconData = await rootBundle.load('tripsitter_logo.png');
+  final flightIconData = await rootBundle.load('/icons/flight_icon.png');
+  final hotelIconData = await rootBundle.load('/icons/hotel_icon.png');
+  final carIconData = await rootBundle.load('/icons/car_icon.png');
+  final activityIconData = await rootBundle.load('/icons/activity_icon.png');
+  final tripSitterLogo =
+      pw.MemoryImage(tripSitterIconData.buffer.asUint8List());
+  final flightIcon = pw.MemoryImage(flightIconData.buffer.asUint8List());
+  final hotelIcon = pw.MemoryImage(hotelIconData.buffer.asUint8List());
+  final carIcon = pw.MemoryImage(carIconData.buffer.asUint8List());
+  final activityIcon = pw.MemoryImage(activityIconData.buffer.asUint8List());
 
   doc.addPage(pw.MultiPage(
-      pageFormat: PdfPageFormat.a4,
-      margin: pw.EdgeInsets.all(32),
-      build: (pw.Context context) {
-        return [
-          pw.Header(
-              level: 0,
-              child: pw.Text(trip.name,
-                  style: pw.TextStyle(fontSize: 24, font: ttf))),
-          pw.Paragraph(
-              text:
-                  "Destination: ${trip.destination.name}, ${trip.destination.country}",
-              style: pw.TextStyle(font: ttf)),
-          pw.Paragraph(
-              text:
-                  "Dates: ${DateFormat('MMM d, yyyy').format(trip.startDate)} - ${DateFormat('MMM d, yyyy').format(trip.endDate)}",
-              style: pw.TextStyle(font: ttf)),
-          // Add more sections as needed, using the `ttf` font for text
-        ];
-      }));
+    pageFormat: PdfPageFormat.a4,
+    margin: pw.EdgeInsets.all(32),
+    build: (pw.Context context) {
+      return [
+        pw.Column(crossAxisAlignment: pw.CrossAxisAlignment.start, children: [
+          pw.Container(
+            decoration: pw.BoxDecoration(
+              border: pw.Border(
+                  bottom: pw.BorderSide(width: 2, color: PdfColors.grey)),
+            ),
+            padding: pw.EdgeInsets.only(
+                bottom: 3), // Space between text and underline
+            child: pw.Row(
+                mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                children: [
+                  pw.Text(trip.name, style: titleStyle),
+                  pw.Image(tripSitterLogo, width: 40, height: 40),
+                ]),
+          ),
+          pw.SizedBox(
+              height:
+                  10), // Add some space between the title/logo and the details
+          pw.Text(
+              "Destination: ${trip.destination.name}, ${trip.destination.country}",
+              style: contentStyle),
+          pw.Text(
+              "Dates: ${DateFormat('MMM d, yyyy').format(trip.startDate)} - ${DateFormat('MMM d, yyyy').format(trip.endDate)}",
+              style: contentStyle),
+          pw.Text(
+              "Attendees: ${profiles.where((profile) => trip.uids.contains(profile.id)).map((profile) => profile.name).join(', ')}",
+              style: contentStyle),
+        ]),
+
+        // Flights
+        if (trip.flights.isNotEmpty) ...[
+          pw.Container(
+            decoration: pw.BoxDecoration(
+              border: pw.Border(
+                  bottom: pw.BorderSide(width: 2, color: PdfColors.grey)),
+            ),
+            padding: pw.EdgeInsets.only(
+                bottom: 3), // Space between text and underline
+            margin: pw.EdgeInsets.symmetric(vertical: 10),
+            child: pw.Row(
+              crossAxisAlignment: pw.CrossAxisAlignment.end,
+              children: [
+                pw.Text('Flights', style: sectionTitleStyle),
+                pw.SizedBox(width: 5),
+                pw.Image(flightIcon, width: 24, height: 24),
+              ],
+            ),
+          ),
+          ...trip.flights.map((flight) {
+            final price = flight
+                .price; // Adjust according to how you get the total price for a flight.
+            final memberNames = flight.members
+                .map((id) =>
+                    profiles
+                        .firstWhereOrNull((profile) => profile.id == id)
+                        ?.name ??
+                    'Unknown')
+                .join(', ');
+            // Use a counter to differentiate between "Departing" and "Returning".
+            int itineraryCounter = 0;
+
+            return pw.Column(
+              children: [
+                pw.Row(
+                  mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                  children: [
+                    pw.Expanded(
+                      child: pw.Column(
+                        crossAxisAlignment: pw.CrossAxisAlignment.start,
+                        children: [
+                          pw.Text(
+                              "${flight.departureAirport} -> ${flight.arrivalAirport}" +
+                                  (flight.pnr != null
+                                      ? " (Confirmation: ${flight.pnr})"
+                                      : ""),
+                              style: heavyStyle),
+                          pw.Text(memberNames, style: contentStyle),
+                          ...flight.selected?.itineraries.map((it) {
+                                String flightPhase = itineraryCounter == 0
+                                    ? 'Departing:'
+                                    : 'Returning:';
+                                itineraryCounter++;
+                                String planesText =
+                                    "Plane${it.segments.length > 1 ? 's' : ''}: ${it.segments.map((e) => "${Airline.fromCode(e.carrierCode)?.name ?? e.carrierCode} ${e.number}").join(", ")}";
+                                return pw.Column(
+                                  crossAxisAlignment:
+                                      pw.CrossAxisAlignment.start,
+                                  children: [
+                                    pw.Row(children: [
+                                      pw.Text("$flightPhase ",
+                                          style: heavyStyle),
+                                      pw.Text(
+                                          "${dateFormatter.format(it.segments.first.departure.at)} from ${timeFormatter.format(it.segments.first.departure.at)} - ${timeFormatter.format(it.segments.last.arrival.at)}" +
+                                              "${(it.segments.first.departure.at.day != it.segments.last.arrival.at.day || it.segments.first.departure.at.year != it.segments.last.arrival.at.year || it.segments.first.departure.at.month != it.segments.last.arrival.at.month) ? " (+1)" : ""}",
+                                          style: contentStyle),
+                                    ]),
+                                    pw.Text(planesText, style: contentStyle)
+                                  ],
+                                );
+                              }).toList() ??
+                              [],
+                        ],
+                      ),
+                    ),
+                    pw.Text(
+                        price != null
+                            ? "\$${price.toStringAsFixed(2)}"
+                            : "Unknown price",
+                        style: heavyStyle),
+                  ],
+                ),
+                pw.Divider(),
+              ],
+            );
+          }).toList(),
+        ],
+
+        // Hotels
+        if (trip.hotels.isNotEmpty) ...[
+          pw.Container(
+            decoration: pw.BoxDecoration(
+              border: pw.Border(
+                  bottom: pw.BorderSide(width: 2, color: PdfColors.grey)),
+            ),
+            padding: pw.EdgeInsets.only(
+                bottom: 3), // Space between text and underline
+            margin: pw.EdgeInsets.symmetric(vertical: 10),
+            child: pw.Row(
+              crossAxisAlignment: pw.CrossAxisAlignment.end,
+              children: [
+                pw.Text('Hotels', style: sectionTitleStyle),
+                pw.SizedBox(width: 5),
+                pw.Image(hotelIcon, width: 24, height: 24),
+              ],
+            ),
+          ),
+          ...trip.hotels.map(
+            (hotel) {
+              final price = hotel.price;
+              final memberNames = hotel.members
+                  .map((id) =>
+                      profiles
+                          .firstWhereOrNull((profile) => profile.id == id)
+                          ?.name ??
+                      'Unknown')
+                  .join(', ');
+              return pw.Column(
+                children: [
+                  pw.Row(
+                    mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                    children: [
+                      pw.Expanded(
+                        child: pw.Column(
+                          crossAxisAlignment: pw.CrossAxisAlignment.start,
+                          children: [
+                            pw.Text(
+                              "${hotel.name}" +
+                                  (hotel.pnr != null
+                                      ? " (Confirmation: ${hotel.pnr})"
+                                      : ""),
+                              style: heavyStyle,
+                            ),
+                            pw.Text(
+                              memberNames,
+                              style: contentStyle,
+                            ),
+                            pw.Text(
+                              "${dateFormatter.format(DateTime.parse(hotel.selectedOffer!.checkInDate))} - " +
+                                  "${dateFormatter.format(DateTime.parse(hotel.selectedOffer!.checkOutDate))}",
+                              style: contentStyle,
+                            ),
+                            pw.Text(
+                              hotel.selectedInfo!.name,
+                              style: contentStyle,
+                            ),
+                          ],
+                        ),
+                      ),
+                      pw.Text(
+                        price != null
+                            ? "\$${price.toStringAsFixed(2)}"
+                            : "Unknown price",
+                        style: heavyStyle,
+                      ),
+                    ],
+                  ),
+                  pw.Divider(),
+                ],
+              );
+            },
+          ),
+        ],
+
+        // Rental Cars
+        if (trip.rentalCars.isNotEmpty) ...[
+          pw.Container(
+            decoration: pw.BoxDecoration(
+              border: pw.Border(
+                  bottom: pw.BorderSide(width: 2, color: PdfColors.grey)),
+            ),
+            padding: pw.EdgeInsets.only(
+                bottom: 3), // Space between text and underline
+            margin: pw.EdgeInsets.symmetric(vertical: 10),
+            child: pw.Row(
+              crossAxisAlignment: pw.CrossAxisAlignment.end,
+              children: [
+                pw.Text('Rental Cars', style: sectionTitleStyle),
+                pw.SizedBox(width: 5),
+                pw.Image(carIcon, width: 24, height: 24),
+              ],
+            ),
+          ),
+          ...trip.rentalCars.map(
+            (rentalCar) {
+              final price = rentalCar.price;
+              final memberNames = rentalCar.members
+                  .map((id) =>
+                      profiles
+                          .firstWhereOrNull((profile) => profile.id == id)
+                          ?.name ??
+                      'Unknown')
+                  .join(', ');
+              return pw.Column(
+                children: [
+                  pw.Row(
+                    mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                    children: [
+                      pw.Expanded(
+                        child: pw.Column(
+                          crossAxisAlignment: pw.CrossAxisAlignment.start,
+                          children: [
+                            pw.Text(
+                              rentalCar.name,
+                              style: heavyStyle,
+                            ),
+                            pw.Text(
+                              memberNames,
+                              style: contentStyle,
+                            ),
+                            pw.Text(
+                              "${rentalCar.selected!.sipp.fromSipp()} ${rentalCar.selected?.carName} or similar",
+                              style: contentStyle,
+                            ),
+                            pw.Text(
+                              "Pickup at ${rentalCar.selected!.provider.providerName} @ ${rentalCar.selected?.pu}, Dropoff at ${rentalCar.selected?.doo}",
+                              style: contentStyle,
+                            ),
+                          ],
+                        ),
+                      ),
+                      pw.Text(
+                        price != null
+                            ? "\$${price.toStringAsFixed(2)}"
+                            : "Unknown price",
+                        style: heavyStyle,
+                      ),
+                    ],
+                  ),
+                  pw.Divider(),
+                ],
+              );
+            },
+          ),
+        ],
+
+        // Activities
+        if (trip.activities.isNotEmpty) ...[
+          pw.Container(
+            decoration: pw.BoxDecoration(
+              border: pw.Border(
+                  bottom: pw.BorderSide(width: 2, color: PdfColors.grey)),
+            ),
+            padding: pw.EdgeInsets.only(
+                bottom: 3), // Space between text and underline
+            margin: pw.EdgeInsets.symmetric(vertical: 10),
+            child: pw.Row(
+              crossAxisAlignment: pw.CrossAxisAlignment.end,
+              children: [
+                pw.Text('Activities', style: sectionTitleStyle),
+                pw.SizedBox(width: 5),
+                pw.Image(activityIcon, width: 24, height: 24),
+              ],
+            ),
+          ),
+          ...trip.activities.map(
+            (activity) {
+              final price = activity.price;
+              final memberNames = activity.participants
+                  .map((id) =>
+                      profiles
+                          .firstWhereOrNull((profile) => profile.id == id)
+                          ?.name ??
+                      'Unknown')
+                  .join(', ');
+              return pw.Column(
+                children: [
+                  pw.Row(
+                    mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                    children: [
+                      pw.Expanded(
+                        child: pw.Column(
+                          crossAxisAlignment: pw.CrossAxisAlignment.start,
+                          children: [
+                            pw.Text(
+                              activity.event.name,
+                              style: heavyStyle,
+                            ),
+                            pw.Text(
+                              memberNames,
+                              style: contentStyle,
+                            ),
+                            pw.Text(
+                              "${activity.event.startTime.getFormattedDate()} at ${activity.event.startTime.getFormattedTime()}",
+                              style: contentStyle,
+                            ),
+                            pw.Text(
+                              activity.event.venues.firstOrNull?.name ??
+                                  "Unknown location",
+                              style: contentStyle,
+                            ),
+                          ],
+                        ),
+                      ),
+                      pw.Text(
+                        price != null
+                            ? "\$${price.toStringAsFixed(2)}"
+                            : "Unknown price",
+                        style: heavyStyle,
+                      ),
+                    ],
+                  ),
+                  pw.Divider(),
+                ],
+              );
+            },
+          ),
+        ],
+
+        // Summary
+        pw.Paragraph(
+          text: "Total: \$${trip.totalPrice.toStringAsFixed(2)}",
+          style: titleStyle,
+        ),
+      ];
+    },
+  ));
 
   return doc;
 }
