@@ -163,6 +163,7 @@ class _RestaurantsItineraryState extends State<RestaurantsItinerary> {
                             meal.participants.clear();
                             meal.participants.addAll(widget
                                 .selectedParticipantsMap[mealId]!);
+                            widget.trip.save();
                           });
                         },
                         format: (s) => s.toString(),

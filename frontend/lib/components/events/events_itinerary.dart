@@ -161,6 +161,7 @@ class _EventsItineraryState extends State<EventsItinerary> {
                         activity.participants.clear();
                         activity.participants.addAll(widget
                             .selectedParticipantsMap[activityId]!);
+                        widget.trip.save();
                       });
                     },
                     format: (s) => s.toString(),
