@@ -37,7 +37,7 @@ class RestaurantSummary extends StatelessWidget {
                 Text(restaurant.categories
                     .map((category) => category.title)
                     .join(", ")),
-                Text(restaurant.location.address1),
+                Text(restaurant.location.displayAddress.join(", ")),
               ]),
         ),
         if (!split)
@@ -59,11 +59,22 @@ class RestaurantSummary extends StatelessWidget {
               child: Column(
             mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.end,
+            // crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Text(meal.restaurant.price == null
                   ? " "
                   : "${meal.restaurant.price}"),
+              if (showBooking)
+                ElevatedButton(
+                  style: ButtonStyle(
+                      padding: MaterialStateProperty.all(
+                          const EdgeInsets.symmetric(
+                              horizontal: 5, vertical: 0))),
+                  onPressed: () {
+                    launchUrl(Uri.parse(meal.restaurant.url));
+                  },
+                  child: const Text("Reserve On Yelp"),
+                ),
             ],
           )),
         )

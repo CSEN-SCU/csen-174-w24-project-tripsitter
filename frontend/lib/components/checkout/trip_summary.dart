@@ -342,14 +342,15 @@ class _TripSummaryState extends State<TripSummary> {
                         .where((r) => r.participants.contains(widget.uid))
                     : widget.trip.meals)
                 .isNotEmpty) ...[
-              SummaryHeader("Restaurants: ", icon: Icons.restaurant_rounded),
+              SummaryHeader("Restaurants:", icon: Icons.restaurant_rounded),
               for (var meal in (split
                   ? widget.trip.meals
                       .where((r) => r.participants.contains(widget.uid))
                   : widget.trip.meals))
                 RestaurantSummary(
                     meal: meal,
-                    price: split ? meal.userPrice(widget.uid) : meal.price),
+                    price: split ? meal.userPrice(widget.uid) : meal.price,
+                    showBooking: widget.showBooking),
               Container(height: 10)
             ],
             Padding(

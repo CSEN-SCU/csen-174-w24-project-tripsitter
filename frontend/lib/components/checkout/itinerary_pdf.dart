@@ -19,12 +19,26 @@ Future<pw.Document> generateItineraryPDF(
   // Load the font
   final robotoBlackData = await rootBundle.load("fonts/Roboto-Black.ttf");
   final robotoLightData = await rootBundle.load("fonts/Roboto-Light.ttf");
+  final robotoItalicData =
+      await rootBundle.load("fonts/Roboto-LightItalic.ttf");
   final blackTtf = pw.Font.ttf(robotoBlackData.buffer.asByteData());
   final lightTtf = pw.Font.ttf(robotoLightData.buffer.asByteData());
-  final titleStyle = pw.TextStyle(fontSize: 24, font: blackTtf);
+  final italicTtf = pw.Font.ttf(robotoItalicData.buffer.asByteData());
+  final titleStyle = pw.TextStyle(fontSize: 26, font: blackTtf);
   final sectionTitleStyle = pw.TextStyle(fontSize: 18, font: blackTtf);
   final heavyStyle = pw.TextStyle(fontSize: 11, font: blackTtf);
   final contentStyle = pw.TextStyle(fontSize: 11, font: lightTtf);
+  final heavyLinkStyle = pw.TextStyle(
+      fontSize: 11,
+      font: blackTtf,
+      color: PdfColors.blue,
+      decoration: pw.TextDecoration.underline);
+  final linkStyle = pw.TextStyle(
+      fontSize: 11,
+      font: lightTtf,
+      color: PdfColors.blue,
+      decoration: pw.TextDecoration.underline);
+  final italicizedContentStyle = pw.TextStyle(fontSize: 11, font: italicTtf);
 
   // Helper functions to format dates and times for the PDF.
   final dateFormatter = DateFormat('E, MMM d, y');
@@ -74,11 +88,7 @@ Future<pw.Document> generateItineraryPDF(
           pw.UrlLink(
               destination: 'https://tripsitter-travel.web.app/trip/${trip.id}',
               child: pw.Text("View this trip on TripSitter",
-                  style: pw.TextStyle(
-                      fontSize: 11,
-                      font: blackTtf,
-                      color: PdfColors.blue,
-                      decoration: pw.TextDecoration.underline))),
+                  style: heavyLinkStyle)),
           pw.Row(children: [
             pw.Text("Destination: ", style: heavyStyle),
             pw.Text("${trip.destination.name}, ${trip.destination.country}",
@@ -225,25 +235,22 @@ Future<pw.Document> generateItineraryPDF(
                           crossAxisAlignment: pw.CrossAxisAlignment.start,
                           children: [
                             pw.Text(
-                              "${hotel.name}" +
-                                  (hotel.pnr != null
-                                      ? " (Confirmation: ${hotel.pnr})"
-                                      : ""),
-                              style: heavyStyle,
-                            ),
-                            pw.Text(
-                              memberNames,
-                              style: contentStyle,
-                            ),
+                                "${hotel.name}" +
+                                    (hotel.pnr != null
+                                        ? " (Confirmation: ${hotel.pnr})"
+                                        : ""),
+                                style: heavyStyle),
+                            pw.Text(memberNames, style: contentStyle),
                             pw.Text(
                               "${dateFormatter.format(DateTime.parse(hotel.selectedOffer!.checkInDate))} - " +
                                   "${dateFormatter.format(DateTime.parse(hotel.selectedOffer!.checkOutDate))}",
                               style: contentStyle,
                             ),
-                            pw.Text(
-                              hotel.selectedInfo!.name,
-                              style: contentStyle,
-                            ),
+                            pw.UrlLink(
+                                destination:
+                                    "https://www.google.com/maps/search/${hotel.selectedInfo!.latitude.toString()},${hotel.selectedInfo!.longitude.toString()}?hl=en&source=opensearch",
+                                child: pw.Text(hotel.selectedInfo!.name,
+                                    style: linkStyle)),
                           ],
                         ),
                       ),
@@ -310,33 +317,22 @@ Future<pw.Document> generateItineraryPDF(
                                       "https://skyscanner.com${rentalCar.selected!.dplnk}",
                                   child: pw.Text(
                                       "View/Purchase on ${rentalCar.selected?.provider.providerName}",
-                                      style: pw.TextStyle(
-                                          fontSize: 11,
-                                          font: blackTtf,
-                                          color: PdfColors.blue,
-                                          decoration:
-                                              pw.TextDecoration.underline))),
+                                      style: heavyLinkStyle)),
+                            pw.Text(memberNames, style: contentStyle),
                             pw.Text(
-                              memberNames,
-                              style: contentStyle,
-                            ),
+                                "${rentalCar.selected!.sipp.fromSipp()} ${rentalCar.selected?.carName} or similar",
+                                style: contentStyle),
                             pw.Text(
-                              "${rentalCar.selected!.sipp.fromSipp()} ${rentalCar.selected?.carName} or similar",
-                              style: contentStyle,
-                            ),
-                            pw.Text(
-                              "Pickup at ${rentalCar.selected!.provider.providerName} @ ${rentalCar.selected?.pu}, Dropoff at ${rentalCar.selected?.doo}",
-                              style: contentStyle,
-                            ),
+                                "Pickup at ${rentalCar.selected!.provider.providerName} @ ${rentalCar.selected?.pu}, Dropoff at ${rentalCar.selected?.doo}",
+                                style: contentStyle),
                           ],
                         ),
                       ),
                       pw.Text(
-                        price != null
-                            ? "\$${price.toStringAsFixed(2)}"
-                            : "Unknown price",
-                        style: heavyStyle,
-                      ),
+                          price != null
+                              ? "\$${price.toStringAsFixed(2)}"
+                              : "Unknown price",
+                          style: heavyStyle),
                     ],
                   ),
                   pw.Divider(),
@@ -397,35 +393,25 @@ Future<pw.Document> generateItineraryPDF(
                               pw.UrlLink(
                                   destination: activity.event.url!,
                                   child: pw.Text(
-                                      "View/Purchase on TicketMaster",
-                                      style: pw.TextStyle(
-                                          fontSize: 11,
-                                          font: blackTtf,
-                                          color: PdfColors.blue,
-                                          decoration:
-                                              pw.TextDecoration.underline))),
+                                      "View/Purchase on Ticketmaster",
+                                      style: heavyLinkStyle)),
+                            pw.Text(memberNames, style: contentStyle),
                             pw.Text(
-                              memberNames,
-                              style: contentStyle,
-                            ),
-                            pw.Text(
-                              "${activity.event.startTime.getFormattedDate()} at ${activity.event.startTime.getFormattedTime()}",
-                              style: contentStyle,
-                            ),
-                            pw.Text(
-                              activity.event.venues.firstOrNull?.name ??
-                                  "Unknown location",
-                              style: contentStyle,
-                            ),
+                                "${activity.event.startTime.getFormattedDate()} at ${activity.event.startTime.getFormattedTime()}",
+                                style: contentStyle),
+                            pw.UrlLink(
+                                destination:
+                                    "https://www.google.com/maps/search/${activity.event.venues.first.latitude.toString()},${activity.event.venues.first.longitude.toString()}?hl=en&source=opensearch",
+                                child: pw.Text(activity.event.venues.first.name,
+                                    style: linkStyle)),
                           ],
                         ),
                       ),
                       pw.Text(
-                        price != null
-                            ? "\$${price.toStringAsFixed(2)}"
-                            : "Unknown price",
-                        style: heavyStyle,
-                      ),
+                          price != null
+                              ? "\$${price.toStringAsFixed(2)}"
+                              : "Unknown price",
+                          style: heavyStyle),
                     ],
                   ),
                   pw.Divider(),
@@ -485,21 +471,18 @@ Future<pw.Document> generateItineraryPDF(
                             pw.UrlLink(
                                 destination: meal.restaurant.url!,
                                 child: pw.Text("View/Reserve on Yelp",
-                                    style: pw.TextStyle(
-                                        fontSize: 11,
-                                        font: blackTtf,
-                                        color: PdfColors.blue,
-                                        decoration:
-                                            pw.TextDecoration.underline))),
-                            pw.Text(
-                              memberNames,
-                              style: contentStyle,
-                            ),
-                            pw.Text(
-                              meal.restaurant.location.displayAddress
-                                  .join(", "),
-                              style: contentStyle,
-                            ),
+                                    style: heavyLinkStyle)),
+                            pw.Text(memberNames, style: contentStyle),
+                            pw.UrlLink(
+                                destination:
+                                    "https://www.google.com/maps/search/" +
+                                        meal.restaurant.location.displayAddress
+                                            .join(", ") +
+                                        "?hl=en&source=opensearch",
+                                child: pw.Text(
+                                    meal.restaurant.location.displayAddress
+                                        .join(", "),
+                                    style: linkStyle)),
                           ],
                         ),
                       ),
@@ -526,7 +509,7 @@ Future<pw.Document> generateItineraryPDF(
 
         pw.Paragraph(
           text:
-              "Generated by TripSitter on ${dateFormatter.format(DateTime.now())} at ${timeFormatter.format(DateTime.now())}. ",
+              "Generated by TripSitter on ${dateFormatter.format(DateTime.now())} at ${timeFormatter.format(DateTime.now())}",
           style: heavyStyle,
         )
       ];
