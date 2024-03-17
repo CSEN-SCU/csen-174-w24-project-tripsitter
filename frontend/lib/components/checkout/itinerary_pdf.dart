@@ -61,18 +61,32 @@ Future<pw.Document> generateItineraryPDF(
                   pw.Image(tripSitterLogo, width: 40, height: 40),
                 ]),
           ),
-          pw.SizedBox(
-              height:
-                  10), // Add some space between the title/logo and the details
-          pw.Text(
-              "Destination: ${trip.destination.name}, ${trip.destination.country}",
-              style: contentStyle),
-          pw.Text(
-              "Dates: ${DateFormat('MMM d, yyyy').format(trip.startDate)} - ${DateFormat('MMM d, yyyy').format(trip.endDate)}",
-              style: contentStyle),
-          pw.Text(
-              "Attendees: ${profiles.where((profile) => trip.uids.contains(profile.id)).map((profile) => profile.name).join(', ')}",
-              style: contentStyle),
+          pw.SizedBox(height: 10),
+          pw.UrlLink(
+              destination: 'https://tripsitter-travel.web.app/trip/${trip.id}',
+              child: pw.Text("View this trip on TripSitter",
+                  style: pw.TextStyle(
+                      fontSize: 11,
+                      font: blackTtf,
+                      color: PdfColors.blue,
+                      decoration: pw.TextDecoration.underline))),
+          pw.Row(children: [
+            pw.Text("Destination", style: heavyStyle),
+            pw.Text("${trip.destination.name}, ${trip.destination.country}",
+                style: contentStyle)
+          ]),
+          pw.Row(children: [
+            pw.Text("Dates: ", style: heavyStyle),
+            pw.Text(
+                "${DateFormat('MMM d, yyyy').format(trip.startDate)} - ${DateFormat('MMM d, yyyy').format(trip.endDate)}",
+                style: contentStyle)
+          ]),
+          pw.Row(children: [
+            pw.Text("Members: ", style: heavyStyle),
+            pw.Text(
+                "${profiles.where((profile) => trip.uids.contains(profile.id)).map((profile) => profile.name).join(', ')}",
+                style: contentStyle)
+          ]),
         ]),
 
         // Flights

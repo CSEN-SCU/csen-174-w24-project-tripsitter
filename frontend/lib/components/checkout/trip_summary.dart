@@ -190,29 +190,34 @@ class _TripSummaryState extends State<TripSummary> {
                 "${widget.trip.destination.name}, ${widget.trip.destination.country}",
                 style: sectionHeaderStyle.copyWith(fontSize: 15)),
             Container(height: 20),
-            if (widget.showBooking)
-              ElevatedButton(
-                  onPressed: createCalendarEvents,
-                  child: Text(calendarLoading ?? "Add to Calendar")),
-            ElevatedButton(
-                onPressed: () async {
-                  pw.Document pdf = await generateItineraryPDF(
-                      widget.trip, widget.profiles, widget.uid);
-                  if (kIsWeb) {
-                    var savedFile = await pdf.save();
-                    List<int> fileInts = List.from(savedFile);
-                    AnchorElement(
-                        href:
-                            "data:application/octet-stream;charset=utf-16le;base64,${base64.encode(fileInts)}")
-                      ..setAttribute("download", "${widget.trip.name}.pdf")
-                      ..click();
-                  } else {
-                    await Printing.sharePdf(
-                        bytes: await pdf.save(),
-                        filename: "${widget.trip.name}.pdf");
-                  }
-                },
-                child: Text("Itinerary to PDF")),
+            Row(
+              children: [
+                if (widget.showBooking)
+                  ElevatedButton(
+                      onPressed: createCalendarEvents,
+                      child: Text(calendarLoading ?? "Add to Calendar")),
+                SizedBox(width: 20),
+                ElevatedButton(
+                    onPressed: () async {
+                      pw.Document pdf = await generateItineraryPDF(
+                          widget.trip, widget.profiles, widget.uid);
+                      if (kIsWeb) {
+                        var savedFile = await pdf.save();
+                        List<int> fileInts = List.from(savedFile);
+                        AnchorElement(
+                            href:
+                                "data:application/octet-stream;charset=utf-16le;base64,${base64.encode(fileInts)}")
+                          ..setAttribute("download", "${widget.trip.name}.pdf")
+                          ..click();
+                      } else {
+                        await Printing.sharePdf(
+                            bytes: await pdf.save(),
+                            filename: "${widget.trip.name}.pdf");
+                      }
+                    },
+                    child: Text("Itinerary to PDF")),
+              ],
+            ),
             if ((split
                     ? widget.trip.flights
                         .where((f) => f.members.contains(widget.uid))
