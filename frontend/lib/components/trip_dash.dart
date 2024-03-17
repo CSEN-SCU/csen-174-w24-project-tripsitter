@@ -129,7 +129,7 @@ class _TripDashBoardState extends State<TripDashBoard> {
                                               filled: true,
                                               fillColor: Colors.grey[300],
                                               border: InputBorder.none,
-                                              labelText: 'Hometown',
+                                              labelText: 'Destination',
                                             ),
                                           ),
                                           initialValue: TextEditingValue(
@@ -205,11 +205,16 @@ class _TripDashBoardState extends State<TripDashBoard> {
                                           showDatePicker(
                                                   context: context,
                                                   initialDate: trip.startDate,
-                                                  firstDate: DateTime.now(),
+                                                  firstDate: trip.startDate.isAfter(DateTime.now())
+                                                      ? DateTime.now()
+                                                      : trip.startDate,
                                                   lastDate: trip.endDate)
                                               .then((date) {
                                             if (date != null) {
-                                              trip.updateStartDate(date);
+                                              trip.updateStartDate(date).then((value) {
+                                                setState(() {
+                                                });
+                                              });
                                             }
                                           });
                                         },
@@ -238,7 +243,10 @@ class _TripDashBoardState extends State<TripDashBoard> {
                                                   lastDate: DateTime(2101))
                                               .then((date) {
                                             if (date != null) {
-                                              trip.updateEndDate(date);
+                                              trip.updateEndDate(date).then((value) {
+                                                setState(() {
+                                                });
+                                              });
                                             }
                                           });
                                         },
