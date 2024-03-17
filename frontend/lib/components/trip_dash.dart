@@ -70,88 +70,9 @@ class _TripDashBoardState extends State<TripDashBoard> {
                   color: const Color.fromARGB(255, 255, 255, 255),
                   width: constraints.maxWidth,
                   height: constraints.maxHeight * 0.1,
-                  child: Wrap(
-                    // crossAxisAlignment: CrossAxisAlignment.start,
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Expanded(
-                        child: Align(
-                          alignment: Alignment.topRight,
-                          child: Padding(
-                            padding: const EdgeInsets.only(left: 80.0),
-                            child: Container(
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.only(
-                                    bottomLeft: Radius.circular(25.0),
-                                  ),
-                                  color: HexColor("#DFE8FF"),
-                                ),
-                                padding: EdgeInsets.all(8.0),
-                                child: Row(
-                                  children: [
-                                    SizedBox(width: 30.0),
-                                    Icon(
-                                      Icons.calendar_month_outlined,
-                                      color: Colors.black,
-                                      size: 30,
-                                    ),
-                                    Padding(
-                                      padding: EdgeInsets.only(
-                                          left: 15.0, right: 15.0),
-                                      child: GestureDetector(
-                                        onTap: () {
-                                          showDatePicker(
-                                                  context: context,
-                                                  initialDate: trip.startDate,
-                                                  firstDate: DateTime.now(),
-                                                  lastDate: trip.endDate)
-                                              .then((date) {
-                                            if (date != null) {
-                                              trip.updateStartDate(date);
-                                            }
-                                          });
-                                        },
-                                        child: Text(
-                                          DateFormat('MMM d')
-                                              .format(trip.startDate),
-                                          style: TextStyle(
-                                              color: Colors.black, fontSize: 15),
-                                        ),
-                                      ),
-                                    ),
-                                    Icon(
-                                      Icons.keyboard_double_arrow_right_rounded,
-                                      color: Colors.black,
-                                      size: 36,
-                                    ),
-                                    Padding(
-                                      padding: EdgeInsets.only(
-                                          left: 15.0, right: 15.0),
-                                      child: GestureDetector(
-                                        onTap: () {
-                                          showDatePicker(
-                                                  context: context,
-                                                  initialDate: trip.endDate,
-                                                  firstDate: trip.startDate,
-                                                  lastDate: DateTime(2101))
-                                              .then((date) {
-                                            if (date != null) {
-                                              trip.updateEndDate(date);
-                                            }
-                                          });
-                                        },
-                                        child: Text(
-                                          DateFormat('MMM d')
-                                              .format(trip.endDate),
-                                          style: TextStyle(
-                                              color: Colors.black, fontSize: 15),
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                )),
-                          ),
-                        ),
-                      ),
                       SizedBox(width: 20.0),
                       SizedBox(
                         width: 300,
@@ -255,6 +176,85 @@ class _TripDashBoardState extends State<TripDashBoard> {
                           ),
                         ),
                       ],),
+                      Expanded(
+                        child: Align(
+                          alignment: Alignment.topRight,
+                          child: Padding(
+                            padding: const EdgeInsets.only(left: 80.0),
+                            child: Container(
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.only(
+                                    bottomLeft: Radius.circular(25.0),
+                                  ),
+                                  color: HexColor("#DFE8FF"),
+                                ),
+                                padding: EdgeInsets.all(8.0),
+                                child: Row(
+                                  children: [
+                                    SizedBox(width: 30.0),
+                                    Icon(
+                                      Icons.calendar_month_outlined,
+                                      color: Colors.black,
+                                      size: 30,
+                                    ),
+                                    Padding(
+                                      padding: EdgeInsets.only(
+                                          left: 15.0, right: 15.0),
+                                      child: GestureDetector(
+                                        onTap: () {
+                                          showDatePicker(
+                                                  context: context,
+                                                  initialDate: trip.startDate,
+                                                  firstDate: DateTime.now(),
+                                                  lastDate: trip.endDate)
+                                              .then((date) {
+                                            if (date != null) {
+                                              trip.updateStartDate(date);
+                                            }
+                                          });
+                                        },
+                                        child: Text(
+                                          DateFormat('MMM d')
+                                              .format(trip.startDate),
+                                          style: TextStyle(
+                                              color: Colors.black, fontSize: 15),
+                                        ),
+                                      ),
+                                    ),
+                                    Icon(
+                                      Icons.keyboard_double_arrow_right_rounded,
+                                      color: Colors.black,
+                                      size: 36,
+                                    ),
+                                    Padding(
+                                      padding: EdgeInsets.only(
+                                          left: 15.0, right: 15.0),
+                                      child: GestureDetector(
+                                        onTap: () {
+                                          showDatePicker(
+                                                  context: context,
+                                                  initialDate: trip.endDate,
+                                                  firstDate: trip.startDate,
+                                                  lastDate: DateTime(2101))
+                                              .then((date) {
+                                            if (date != null) {
+                                              trip.updateEndDate(date);
+                                            }
+                                          });
+                                        },
+                                        child: Text(
+                                          DateFormat('MMM d')
+                                              .format(trip.endDate),
+                                          style: TextStyle(
+                                              color: Colors.black, fontSize: 15),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                )),
+                          ),
+                        ),
+                      ),
                       
                     ],
                   ),
