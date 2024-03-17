@@ -2,22 +2,23 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:tripsitter/classes/profile.dart';
-import 'package:tripsitter/classes/ticketmaster.dart';
 import 'package:tripsitter/classes/trip.dart';
+import 'package:tripsitter/classes/yelp.dart';
 import 'package:tripsitter/helpers/styles.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-class ActivitySummary extends StatelessWidget {
-  final Activity activity;
+class RestaurantSummary extends StatelessWidget {
+  final Meal meal;
   final double? price;
   final bool showBooking;
-  const ActivitySummary(
-      {required this.activity,
+  const RestaurantSummary(
+      {required this.meal,
       required this.price,
       this.showBooking = false,
-      super.key});
+      Key? key})
+      : super(key: key);
 
-  TicketmasterEvent get event => activity.event;
+  YelpRestaurant get restaurant => meal.restaurant;
 
   @override
   Widget build(BuildContext context) {
@@ -32,17 +33,18 @@ class ActivitySummary extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(event.name, style: summaryHeaderStyle),
-                Text(
-                    "${event.startTime.getFormattedDate()}, ${event.startTime.getFormattedTime()}"),
-                Text(event.venues.firstOrNull?.name ?? "Unknown location"),
+                Text(restaurant.name, style: summaryHeaderStyle),
+                Text(restaurant.categories
+                    .map((category) => category.title)
+                    .join(", ")),
+                Text(restaurant.location.displayAddress.join(", ")),
               ]),
         ),
         if (!split)
           Expanded(
               flex: 1,
               child: Column(
-                children: activity.participants
+                children: meal.participants
                     .map((e) =>
                         profiles
                             .firstWhereOrNull((profile) => profile.id == e)
@@ -59,19 +61,19 @@ class ActivitySummary extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             // crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              Text(price == null
-                  ? "Unknown price"
-                  : "\$${price!.toStringAsFixed(2)}"),
-              if (showBooking && event.url != null)
+              Text(meal.restaurant.price == null
+                  ? " "
+                  : "${meal.restaurant.price}"),
+              if (showBooking)
                 ElevatedButton(
                   style: ButtonStyle(
                       padding: MaterialStateProperty.all(
                           const EdgeInsets.symmetric(
-                              horizontal: 8, vertical: 0))),
+                              horizontal: 5, vertical: 0))),
                   onPressed: () {
-                    launchUrl(Uri.parse(event.url!));
+                    launchUrl(Uri.parse(meal.restaurant.url));
                   },
-                  child: const Text("Purchase"),
+                  child: const Text("Reserve On Yelp"),
                 ),
             ],
           )),
