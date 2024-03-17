@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:animated_list_plus/animated_list_plus.dart';
 import 'package:animated_list_plus/transitions.dart';
 import 'package:collection/collection.dart';
@@ -8,17 +6,17 @@ import 'package:provider/provider.dart';
 import 'package:tripsitter/classes/airport.dart';
 import 'package:tripsitter/classes/filterbutton.dart';
 import 'package:tripsitter/classes/profile.dart';
-import 'package:tripsitter/classes/ticketmaster.dart';
 import 'package:tripsitter/classes/trip.dart';
-import 'package:tripsitter/components/events/event_info_dialog.dart';
+import 'package:tripsitter/classes/yelp.dart';
 import 'package:tripsitter/components/map.dart';
+import 'package:tripsitter/components/restaurants/restaurant_info_dialog.dart';
 import 'package:tripsitter/helpers/api.dart';
 import 'package:tripsitter/helpers/data.dart';
 import 'package:tripsitter/helpers/locators.dart';
 import 'package:tripsitter/popups/checkbox_popup.dart';
 import 'package:tripsitter/popups/select_popup.dart';
 
-class EventsOptions extends StatefulWidget {
+class RestaurantsOptions extends StatefulWidget {
   final Trip trip;
   final List<UserProfile> profiles;
   final Map<String, GlobalKey> participantsPopupKeys;
@@ -26,7 +24,7 @@ class EventsOptions extends StatefulWidget {
   final Map<String, bool> participantsPopupOpenState;
   final Function? setState;
 
-  const EventsOptions({
+  const RestaurantsOptions({
     required this.trip,
     required this.profiles,
     required this.participantsPopupKeys,
@@ -37,10 +35,10 @@ class EventsOptions extends StatefulWidget {
   });
 
   @override
-  State<EventsOptions> createState() => _EventsOptionsState();
+  State<RestaurantsOptions> createState() => _RestaurantsOptionsState();
 }
 
-enum EventSortOption {
+enum RestaurantSortOption {
   price,
   distanceAirport,
   distanceHotel;
@@ -48,19 +46,19 @@ enum EventSortOption {
   @override
   String toString() {
     switch (this) {
-      case EventSortOption.price:
+      case RestaurantSortOption.price:
         return 'Price';
-      case EventSortOption.distanceAirport:
+      case RestaurantSortOption.distanceAirport:
         return 'Distance to Airport';
-      case EventSortOption.distanceHotel:
+      case RestaurantSortOption.distanceHotel:
         return 'Distance to Hotel';
     }
   }
 }
 
-class _EventsOptionsState extends State<EventsOptions>
+class _RestaurantsOptionsState extends State<RestaurantsOptions>
     with TickerProviderStateMixin {
-  List<TicketmasterEvent> events = [];
+  List<YelpRestaurant> restaurants = [];
   Trip get trip => widget.trip;
 
   late AnimationController controller;
@@ -83,7 +81,7 @@ class _EventsOptionsState extends State<EventsOptions>
     controller.repeat(reverse: true);
     super.initState();
     super.initState();
-    getEvents();
+    getRestaurants();
     getAirports(context).then((value) {
       if (widget.trip.flights.isEmpty ||
           widget.trip.flights.first.selected == null) return;
@@ -98,67 +96,58 @@ class _EventsOptionsState extends State<EventsOptions>
     super.dispose();
   }
 
-  List<String> selectedGenres = [];
+  List<String> selectedCategorys = [];
   bool _sortDirection = true;
-  bool _isGenreOpen = false;
+  bool _isCategoryOpen = false;
   final GlobalKey _sortKey = GlobalKey();
   final GlobalKey _genreKey = GlobalKey();
-  EventSortOption _selectedSort = EventSortOption.price;
+  RestaurantSortOption _selectedSort = RestaurantSortOption.price;
 
-  Future<void> getEvents() async {
-    debugPrint("Getting events for trip ${trip.id}");
-    List<TicketmasterEvent> call =
-        await TripsitterApi.getEvents(TicketmasterQuery(
-      lat: trip.destination.lat,
-      long: trip.destination.lon,
-      startDateTime: trip.startDate,
-      endDateTime: trip.endDate,
-    ));
-    call.sort(compareEvents);
+  Future<void> getRestaurants() async {
+    debugPrint("Getting restaurants for trip ${trip.id}");
+    List<YelpRestaurant> call =
+        await TripsitterApi.getRestaurants(trip.destination);
+    call.sort(compareRestaurants);
 
-    Set<String> genres = {};
-    for (TicketmasterEvent e in call) {
-      for (TicketmasterClassification c in e.classifications) {
-        if (c.genre != null) {
-          genres.add(c.genre!.name);
-        }
+    Set<String> categories = {};
+    for (YelpRestaurant e in call) {
+      for (YelpCategory c in e.categories) {
+        categories.add(c.title);
       }
     }
-    debugPrint(genres.toList().toString());
-    // After fetching events, initialize GlobalKeys for each
+    debugPrint(categories.toList().toString());
+    // After fetching restaurants, initialize GlobalKeys for each
     setState(() {
-      selectedGenres = genres.toList();
-      events = call;
+      selectedCategorys = categories.toList();
+      restaurants = call;
     });
 
     isLoaded = true;
   }
 
-  void _showGenrePopup() async {
-    if (events.isEmpty) return;
+  void _showCategoryPopup() async {
+    if (restaurants.isEmpty) return;
     setState(() {
-      _isGenreOpen = true;
+      _isCategoryOpen = true;
     });
 
-    Set<String> genres = {};
-    for (TicketmasterEvent e in events) {
-      for (TicketmasterClassification c in e.classifications) {
-        if (c.genre != null) {
-          genres.add(c.genre!.name);
-        }
+    Set<String> categories = {};
+    for (YelpRestaurant e in restaurants) {
+      for (YelpCategory c in e.categories) {
+        categories.add(c.title);
       }
     }
 
-    final genresList = genres.toList();
-    genresList.sort((a, b) => a.compareTo(b));
+    final categoriesList = categories.toList();
+    categoriesList.sort((a, b) => a.compareTo(b));
 
     final popup = CheckboxPopup(
-      options: genresList,
+      options: categoriesList,
       format: (String option) => option[0] + option.substring(1).toLowerCase(),
-      selected: selectedGenres,
+      selected: selectedCategorys,
       onSelected: (List<String> newSelected) {
         setState(() {
-          selectedGenres = newSelected;
+          selectedCategorys = newSelected;
           // getFlights(reset: false);
         });
       },
@@ -166,26 +155,26 @@ class _EventsOptionsState extends State<EventsOptions>
 
     popup.showPopup(context, _genreKey).then((_) {
       setState(() {
-        _isGenreOpen = false;
+        _isCategoryOpen = false;
       });
     });
   }
 
-  bool filterEvents(TicketmasterEvent event) {
+  bool filterRestaurants(YelpRestaurant restaurant) {
     double distanceFromAirport = 0;
     if (arrivalAirport != null) {
       distanceFromAirport = distance(
-          event.venues.first.latitude ?? 0,
-          event.venues.first.longitude ?? 0,
+          restaurant.coordinates.latitude,
+          restaurant.coordinates.longitude,
           arrivalAirport!.lat,
           arrivalAirport!.lon);
     }
     if (distanceFromAirport > 150) {
       return false;
     }
-    if (selectedGenres.isEmpty) return true;
-    for (TicketmasterClassification c in event.classifications) {
-      if (c.genre != null && selectedGenres.contains(c.genre!.name)) {
+    if (selectedCategorys.isEmpty) return true;
+    for (YelpCategory c in restaurant.categories) {
+      if (selectedCategorys.contains(c.title)) {
         return true;
       }
     }
@@ -194,69 +183,58 @@ class _EventsOptionsState extends State<EventsOptions>
 
   Airport? arrivalAirport;
 
-  int compareEvents(TicketmasterEvent a, TicketmasterEvent b) {
+  int compareRestaurants(YelpRestaurant a, YelpRestaurant b) {
     switch (_selectedSort) {
-      case EventSortOption.price:
-        return a.prices.isEmpty
+      case RestaurantSortOption.price:
+        return a.price == null
             ? 1
-            : b.prices.isEmpty
+            : b.price == null
                 ? -1
-                : a.prices
-                    .map((p) => p.min)
-                    .reduce(min)
-                    .compareTo(b.prices.map((p) => p.min).reduce(min));
-      case EventSortOption.distanceAirport:
+                : a.price!.compareTo(b.price!);
+      case RestaurantSortOption.distanceAirport:
         if (arrivalAirport == null) return 0;
-        return a.venues.isEmpty
-            ? 1
-            : b.venues.isEmpty
-                ? -1
-                : distance(
-                        a.venues.first.latitude ?? 0,
-                        a.venues.first.longitude ?? 0,
+        return distance(
+                        a.coordinates.latitude,
+                        a.coordinates.longitude,
                         arrivalAirport!.lat,
                         arrivalAirport!.lon)
                     .compareTo(distance(
-                        b.venues.first.latitude ?? 0,
-                        b.venues.first.longitude ?? 0,
+                        b.coordinates.latitude,
+                        b.coordinates.longitude,
                         arrivalAirport!.lat,
                         arrivalAirport!.lon));
-      case EventSortOption.distanceHotel:
+      case RestaurantSortOption.distanceHotel:
         if (trip.hotels.isEmpty || trip.hotels.first.selectedInfo == null)
           return 0;
-        return a.venues.isEmpty
-            ? 1
-            : b.venues.isEmpty
-                ? -1
-                : distance(
-                        a.venues.first.latitude ?? 0,
-                        a.venues.first.longitude ?? 0,
+        return distance(
+                        a.coordinates.latitude,
+                        a.coordinates.longitude,
                         trip.hotels.first.selectedInfo!.latitude ?? 0,
                         trip.hotels.first.selectedInfo!.longitude ?? 0)
                     .compareTo(distance(
-                        b.venues.first.latitude ?? 0,
-                        b.venues.first.longitude ?? 0,
+                        b.coordinates.latitude ?? 0,
+                        b.coordinates.longitude ?? 0,
                         trip.hotels.first.selectedInfo!.latitude ?? 0,
                         trip.hotels.first.selectedInfo!.longitude ?? 0));
       // return a.venues.isEmpty
       //     ? 1
       //     : b.venues.isEmpty
       //         ? -1
-      //         : a.venues.firstOrNull?.distanceToHotel.compareTo(
-      //             b.venues.firstOrNull?.distanceToHotel);
+      //         : a.coordinatesOrNull?.distanceToHotel.compareTo(
+      //             b.coordinatesOrNull?.distanceToHotel);
     }
   }
 
   void _showSortPopup() {
     setState(() {});
 
-    final popup = SelectOnePopup<EventSortOption>(
-      options: EventSortOption.values,
+    final popup = SelectOnePopup<RestaurantSortOption>(
+      options: RestaurantSortOption.values,
       selected: _selectedSort,
-      onSelected: (EventSortOption value) {
+      onSelected: (RestaurantSortOption value) {
         setState(() {
           _selectedSort = value;
-          events.sort(compareEvents);
+          restaurants.sort(compareRestaurants);
         });
       },
     );
@@ -270,40 +248,42 @@ class _EventsOptionsState extends State<EventsOptions>
   Widget build(BuildContext context) {
     bool isMobile = Provider.of<bool>(context, listen: false);
     int rowIndex = 0;
-    // Initialize a counter variable before mapping the events to TableRows
+    // Initialize a counter variable before mapping the restaurants to TableRows
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Text("Choose Activities",
+        // Text("Choose Restaurants",
         //     style: Theme.of(context)
         //         .textTheme
         //         .displayMedium
         //         ?.copyWith(fontWeight: FontWeight.bold)),
         Wrap(
           spacing: 80,
+          alignment: WrapAlignment.start,
           children: [
-            const Text("Choose Activities",
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+            const Text("Choose Restaurants",
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),),
             Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(0, 10, 0, 0),
-                child: Text("Toggle Map Mode",
-                    style: Theme.of(context).textTheme.displayMedium?.copyWith(
-                          decoration: TextDecoration.none,
-                          fontSize: 12,
-                        )),
-              ),
-              Switch(
-                value: mapSelected,
-                onChanged: (bool value) {
-                  setState(() {
-                    mapSelected = value;
-                  });
-                },
-              ),
-            ],)
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(0, 10, 0, 0),
+                  child: Text("Toggle Map Mode",
+                      style: Theme.of(context).textTheme.displayMedium?.copyWith(
+                            decoration: TextDecoration.none,
+                            fontSize: 12,
+                          )),
+                ),
+                Switch(
+                  value: mapSelected,
+                  onChanged: (bool value) {
+                    setState(() {
+                      mapSelected = value;
+                    });
+                  },
+                ),
+              ],
+            )
           ],
         ),
         Row(
@@ -313,18 +293,17 @@ class _EventsOptionsState extends State<EventsOptions>
                 spacing: 10,
                 children: <Widget>[
                   FilterButton(
-                      text: 'Genre',
+                      text: 'Category',
                       globalKey: _genreKey,
-                      onPressed: _showGenrePopup,
+                      onPressed: _showCategoryPopup,
                       icon: Icon(
-                        _isGenreOpen
+                        _isCategoryOpen
                             ? Icons.arrow_drop_up
                             : Icons.arrow_drop_down,
                       )),
                 ],
               ),
             ),
-            if(!mapSelected)
             FilterButton(
                 color: Colors.grey[100]!,
                 text: _selectedSort.toString(),
@@ -355,139 +334,109 @@ class _EventsOptionsState extends State<EventsOptions>
                 ),
               )
             : mapSelected
-                ? TripsitterMap<TicketmasterEvent>(
-                    trip: trip,
-                    extras: const [
-                      MarkerType.airport,
-                      MarkerType.hotel,
-                      MarkerType.restaurant
-                    ],
-                    isSelected: (dynamic event) => trip.activities
-                                .map((e) => e.event.id)
-                                .contains((event as TicketmasterEvent).id),
-                    getLat: (dynamic e) => (e as TicketmasterEvent).venues.first.latitude ?? 0,
-                    getLon: (dynamic e) => (e as TicketmasterEvent).venues.first.longitude ?? 0,
-                    items: (_sortDirection ? events : events.reversed)
-                        .where(filterEvents)
-                        .toList()
+                ? TripsitterMap<YelpRestaurant>(
+                  items: (_sortDirection
+                      ? restaurants
+                      : restaurants.reversed)
+                  .where(filterRestaurants).toList(), 
+                  isSelected: (dynamic r) => trip.meals
+                      .map((e) => e.restaurant.id)
+                      .contains((r as YelpRestaurant).id),
+                  extras: const [
+                    MarkerType.airport,
+                    MarkerType.hotel,
+                    MarkerType.activity
+                  ],
+                  trip: trip, 
+                  getLat: (dynamic r) => (r as YelpRestaurant).coordinates.latitude, 
+                  getLon: (dynamic r) => (r as YelpRestaurant).coordinates.longitude
                 )
                 : Expanded(
-                  child: ImplicitlyAnimatedList<TicketmasterEvent>(
+                  child: ImplicitlyAnimatedList<YelpRestaurant>(
                     insertDuration: const Duration(milliseconds: 350),
                     removeDuration: const Duration(milliseconds: 350),
                     updateDuration: const Duration(milliseconds: 350),
                     areItemsTheSame: (a, b) => a.id == b.id,
-                    items: (_sortDirection ? events : events.reversed)
-                            .where(filterEvents).toList(),
-                    itemBuilder: (context, animation, event, i){
+                    items: (_sortDirection
+                                        ? restaurants
+                                        : restaurants.reversed)
+                                    .where(filterRestaurants).toList(),
+                    itemBuilder: (context, animation, restaurant, i){
                           Color bgColor = rowIndex % 2 == 0
                               ? Colors.grey[200]! // Light gray color
                               : Colors.white; // White color
                     
                           // Increment the row index for the next iteration
                           rowIndex++;
-                          return SizeFadeTransition(
-                            sizeFraction: 0.8,
-                            curve: Curves.easeInOut,
-                            animation: animation,
-                            child: Container(
-                              color: bgColor,
-                              child: ListTile(
-                                  leading: isMobile ? null : event.images.isEmpty
-                                          ? const Icon(Icons.star)
-                                          : Padding(
-                                            padding: const EdgeInsets.all(2.0),
-                                            child: AspectRatio(aspectRatio: 1.0, child: Image.network(event.images.first.url)),
-                                          ),
-                                  title: isMobile ? Wrap(
-                                    spacing: 5.0,
-                                    children: [
-                                      Text(event.name),
-                                      Text(event.prices.isEmpty ? "" : "(From \$${event.prices.map((p) => p.min).reduce(min)}/person)")
-                                    ],
-                                  ) : Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Expanded(
-                                        flex: 3,
-                                        child: Column(
-                                          children: [
-                                            Text(event.name),
-                                            Text(event.prices.isEmpty ? "" : "From \$${event.prices.map((p) => p.min).reduce(min)}/person"),
-                                          ],
-                                        ),
-                                      ),
-                                      Expanded(
-                                        flex: 2,
-                                        child: Text(
-                                          '${event.venues.firstOrNull?.name}\nStarts ${event.startTime.localDate} ${event.startTime.localTime}'
-                                        ),
-                                      )
-                                    ],
-                                  ),
-                                  subtitle: isMobile ? Wrap(
-                                    spacing: 5.0,
-                                    children: [
-                                      Text(event.venues.firstOrNull?.name ?? ""),
-                                      Text("(Starts ${event.startTime.localDate} ${event.startTime.localTime})")
-                                    ],
-                                  ) : null,
-                                  trailing: Row(
+                      return SizeFadeTransition(
+                        sizeFraction: 0.8,
+                        curve: Curves.easeInOut,
+                        animation: animation,
+                        child: Container(
+                          color: bgColor,
+                          child: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: ListTile(
+                              leading: CircleAvatar(backgroundImage: NetworkImage(restaurant.imageUrl)),
+                              title: Text(restaurant.name),
+                              subtitle: Text(
+                                  "${restaurant.price ?? ""}\n★ ${restaurant.rating.toString()}"),
+                              trailing: Column(
+                                children: [
+                                  Row(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
                                       IconButton(
-                                        padding: EdgeInsets.zero,
-                                        icon: const Icon(Icons.info),
-                                        onPressed: () {
-                                          showDialog(
-                                            context: context,
-                                            builder: (BuildContext context) {
-                                              return EventPopup(event);
-                                            },
-                                          );
-                                        }
-                                      ),
+                                          icon: const Icon(Icons.info),
+                                          onPressed: () {
+                                            showDialog(
+                                              context: context,
+                                              builder: (BuildContext context) {
+                                                return RestaurantPopup(restaurant);
+                                              },
+                                            );
+                                          }),
                                       Builder(builder: (context) {
-                                        bool selected = trip.activities
-                                            .map((e) => e.event.id)
-                                            .contains(event.id);
+                                        bool selected = trip.meals
+                                            .map((e) => e.restaurant.id)
+                                            .contains(restaurant.id);
                                         return GestureDetector(
                                           onTap: selected
                                               ? () async {
-                                                print("Removing activity");
-                                                  await trip.removeActivity(trip
-                                                      .activities
-                                                      .firstWhere((a) =>
-                                                          a.event.id == event.id));
+                                                print("Removing restaurant");
+                                                  await trip.removeMeal(trip
+                                                      .meals
+                                                      .firstWhere((e) =>
+                                                          e.restaurant.id == restaurant.id));
                                                   setState(() {});
                                                   if (widget.setState != null) {
                                                     widget.participantsPopupOpenState[
-                                                        event.id] = true;
+                                                        restaurant.id] = true;
                                                     widget.selectedParticipantsMap
-                                                        .remove(event.id);
+                                                        .remove(restaurant.id);
                                                     widget.participantsPopupKeys
-                                                        .remove(event.id);
+                                                        .remove(restaurant.id);
                                                     widget.setState!();
                                                   }
                                                 }
                                               : () async {
-                                                  print("Adding activity");
-                                                  await trip.addActivity(
-                                                      event,
+                                                  print("Adding restaurant");
+                                                  await trip.addMeal(
+                                                      restaurant,
                                                       widget.profiles
                                                           .map((e) => e.id)
                                                           .toList());
                                                   setState(() {});
                                                   if (widget.setState != null) {
                                                     widget.participantsPopupOpenState[
-                                                        event.id] = false;
+                                                        restaurant.id] = false;
                                                     widget.selectedParticipantsMap[
-                                                            event.id] =
+                                                            restaurant.id] =
                                                         widget.profiles
                                                             .map((e) => e.id)
                                                             .toList();
                                                     widget.participantsPopupKeys[
-                                                        event.id] = GlobalKey();
+                                                        restaurant.id] = GlobalKey();
                                                     widget.setState!();
                                                   }
                                                 },
@@ -511,15 +460,18 @@ class _EventsOptionsState extends State<EventsOptions>
                                             //         color: Colors.black)),
                                           ),
                                         );
-                                      })
+                                      }),
                                     ],
                                   ),
-                                ),
+                                ],
+                              ),
                             ),
-                          );
-                        })
+                          ),
+                        ),
+                      );
+                    }
                   ),
-
+                ),
       ],
     );
   }

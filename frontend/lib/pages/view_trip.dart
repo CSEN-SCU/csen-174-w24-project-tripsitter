@@ -8,11 +8,13 @@ import 'package:tripsitter/components/cars/select_cars.dart';
 import 'package:tripsitter/components/checkout/trip_summary.dart';
 import 'package:tripsitter/components/comments.dart';
 import 'package:tripsitter/components/hotels/select_hotels.dart';
+import 'package:tripsitter/components/map.dart';
 import 'package:tripsitter/components/mobile_wrapper.dart';
 import 'package:tripsitter/components/events/select_events.dart';
 import 'package:tripsitter/components/flights/select_flight.dart';
 import 'package:provider/provider.dart';
 import 'package:tripsitter/components/navbar.dart';
+import 'package:tripsitter/components/restaurants/select_restaurants.dart';
 import 'package:tripsitter/components/trip_dash.dart';
 import 'package:tripsitter/components/trip_side_column.dart';
 import 'package:tripsitter/components/checkout/checkout.dart';
@@ -107,7 +109,29 @@ class ViewTrip extends StatelessWidget {
                                   title: const Text("Activities"),
                                   onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => MobileWrapper(title: "Select Activites", child: SelectEvents(trip, profiles)))),
                                 ),
+                                ListTile(
+                                  leading: const Icon(Icons.restaurant),
+                                  title: const Text("Restaurants"),
+                                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => MobileWrapper(title: "Select Restaurants", child: SelectRestaurants(trip, profiles)))),
+                                ),
                               ],
+                              ListTile(
+                                leading: const Icon(Icons.map),
+                                title: const Text("Trip Map"),
+                                onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => MobileWrapper(title: "Trip Map", child: TripsitterMap<int>(
+                                  items: [],
+                                  trip: trip,
+                                  getLat: (r) => 0.0, 
+                                  getLon: (r) => 0.0, 
+                                  isSelected: (r) => false, 
+                                  extras: const [
+                                    MarkerType.activity,
+                                    MarkerType.hotel,
+                                    MarkerType.restaurant,
+                                    MarkerType.airport,
+                                  ]
+                                )))),
+                              ),
                             if(trip.frozen)
                               ListTile(
                                 leading: const Icon(Icons.list),

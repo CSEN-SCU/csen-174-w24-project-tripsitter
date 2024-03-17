@@ -8,11 +8,13 @@ import 'package:tripsitter/components/cars/select_cars.dart';
 import 'package:tripsitter/components/events/select_events.dart';
 import "package:tripsitter/components/hotels/select_hotels.dart";
 import 'package:tripsitter/components/flights/select_flight.dart';
+import "package:tripsitter/components/restaurants/select_restaurants.dart";
 import "package:tripsitter/components/trip_center_console.dart";
 
 class PageType {
   static const String hotel = "Hotels";
   static const String flights = "Flights";
+  static const String restaurants = "Restaurants";
   static const String rentalCar = "Rental Cars";
   static const String activities = "Activities";
   static const String cities = "Cities";
@@ -65,6 +67,8 @@ class TripConsoleDotState extends State<TripConsoleDot> {
         return SelectHotels(widget.trip, profiles);
       case PageType.flights:
         return SelectFlight(widget.trip, profiles);
+      case PageType.restaurants:
+        return SelectRestaurants(widget.trip, profiles);
       case PageType.rentalCar:
         return SelectCars(widget.trip, profiles);
       case PageType.activities:
@@ -94,7 +98,7 @@ class TripConsoleDotState extends State<TripConsoleDot> {
               const Positioned(
                 top: 10.0,
                 right: 10.0,
-                child: CloseButton(),
+                child: TsCloseButton(),
               ),
             ]),
           ),
@@ -109,6 +113,8 @@ class TripConsoleDotState extends State<TripConsoleDot> {
         return Icons.hotel_rounded;
       case PageType.flights:
         return Icons.flight_takeoff_rounded;
+      case PageType.restaurants:
+        return Icons.restaurant_rounded;
       case PageType.rentalCar:
         return Icons.directions_car_rounded;
       case PageType.activities:
@@ -176,8 +182,8 @@ class TripConsoleDotState extends State<TripConsoleDot> {
   }
 }
 
-class CloseButton extends StatelessWidget {
-  const CloseButton({super.key});
+class TsCloseButton extends StatelessWidget {
+  const TsCloseButton({super.key});
 
   @override
   Widget build(BuildContext context) {

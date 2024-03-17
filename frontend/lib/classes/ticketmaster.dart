@@ -400,8 +400,8 @@ class TicketmasterPrice {
     return TicketmasterPrice(
       type: json['type'],
       currency: json['currency'],
-      min: json['min'],
-      max: json['max'],
+      min: double.parse(json['min'].toString()),
+      max: double.parse(json['max'].toString()),
     );
   }
 

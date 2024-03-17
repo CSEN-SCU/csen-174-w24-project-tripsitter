@@ -1,6 +1,8 @@
+import 'dart:io';
 import 'dart:math';
 
 import 'package:collection/collection.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:mapbox_gl/mapbox_gl.dart';
 import 'package:tripsitter/classes/ticketmaster.dart';
@@ -8,10 +10,17 @@ import 'package:tripsitter/classes/trip.dart';
 import 'package:tripsitter/helpers/locators.dart';
 import 'package:tripsitter/helpers/data.dart';
 
-class TripsitterMap extends StatefulWidget {
-  final List<TicketmasterEvent>? events;
+class TripsitterMap<T> extends StatefulWidget {
+  final List<T> items;
   final Trip trip;
-  const TripsitterMap({this.events, required this.trip, super.key});
+  final List<MarkerType> extras;
+
+  final double Function(T item) getLat;
+  final double Function(T item) getLon;
+  final bool Function(T item) isSelected;
+  final bool Function(T item)? isOption;
+  final bool Function(T item)? isOther;
+  const TripsitterMap({required this.items, required this.trip, required this.getLat, required this.getLon, required this.isSelected, required this.extras, this.isOption, this.isOther, super.key});
 
   @override
   State createState() => TripsitterMapState();
@@ -25,9 +34,9 @@ class TripsitterMapState extends State<TripsitterMap> {
   int markersCount = 0;
 
   final List<Marker> _markers = [];
-  final List<_MarkerState> _markerStates = [];
+  final List<MarkerState> _markerStates = [];
 
-  void _addMarkerStates(_MarkerState markerState) {
+  void addMarkerStates(MarkerState markerState) {
     _markerStates.add(markerState);
   }
 
@@ -37,14 +46,15 @@ class TripsitterMapState extends State<TripsitterMap> {
 
     var params = <LatLng>[];
 
-    widget.events?.forEach((event) {
-      double lat = event.venues[0].latitude ?? 0.0;
-      double lng = event.venues[0].longitude ?? 0.0;
+    for (var item in widget.items) {
+      double lat = widget.getLat(item);
+      double lng = widget.getLon(item);
       params.add(LatLng(lat, lng));
-    });
+    }
 
     controller.toScreenLocationBatch(params).then((value) {
-      widget.events?.forEachIndexed((i, event) {
+      if(widget.items.isEmpty) return;
+      widget.items.forEachIndexed((i, item) {
         var point = Point<double>(value[i].x as double, value[i].y as double);
         var eventDistance = distance(
           widget.trip.destination.lat,
@@ -54,12 +64,12 @@ class TripsitterMapState extends State<TripsitterMap> {
         );
         var isNearby = eventDistance < 50.0;
         if (isNearby) {
-          _addMarker(point, params[i]);
+          addMarker(point, params[i], isSelected: widget.isSelected(item), isOption: widget.isOption?.call(item) ?? false, isOther: widget.isOther?.call(item) ?? false);
           markersCount++;
         }
       });
     });
-    if (widget.trip.hotels.isNotEmpty) {
+    if (widget.trip.hotels.isNotEmpty && widget.extras.contains(MarkerType.hotel)) {
       var selectionLists =
           widget.trip.hotels.where((s) => s.selectedInfo != null).toList();
       for (var element in selectionLists) {
@@ -67,14 +77,15 @@ class TripsitterMapState extends State<TripsitterMap> {
             .toScreenLocation(LatLng(element.selectedInfo?.latitude ?? 0.0,
                 element.selectedInfo?.longitude ?? 0.0))
             .then((value) {
-          _addHotelMarker(
+          addMarker(
               Point<double>(value.x as double, value.y as double),
               LatLng(element.selectedInfo?.latitude ?? 0.0,
-                  element.selectedInfo?.longitude ?? 0.0));
+                  element.selectedInfo?.longitude ?? 0.0),
+              type: MarkerType.hotel);
         });
       }
     }
-    if (widget.trip.flights.isNotEmpty) {
+    if (widget.trip.flights.isNotEmpty && widget.extras.contains(MarkerType.airport)) {
       var airports = await getAirports(context);
       for (var element in widget.trip.flights) {
         for (var airport in airports) {
@@ -82,30 +93,44 @@ class TripsitterMapState extends State<TripsitterMap> {
             controller
                 .toScreenLocation(LatLng(airport.lat, airport.lon))
                 .then((value) {
-              _addAirportMarker(
+              addMarker(
                   Point<double>(value.x as double, value.y as double),
-                  LatLng(airport.lat, airport.lon));
+                  LatLng(airport.lat, airport.lon), type: MarkerType.airport);
             });
           }
         }
       }
-      // var selectionLists =
-      //     widget.trip.flights.where((s) => s.arrivalAirport != null).toList();
-      // debugPrint("Selected Hotel Groups:");
-      // debugPrint(selectionLists);
-      // selectionLists.forEach((element) {
-      //   debugPrint(element);
-      //   controller
-      //       .toScreenLocation(LatLng(element.selectedInfo?.latitude ?? 0.0,
-      //           element.selectedInfo?.longitude ?? 0.0))
-      //       .then((value) {
-      //     debugPrint(element.selectedInfo);
-      //     _addHotelMarker(
-      //         Point<double>(value.x as double, value.y as double),
-      //         LatLng(element.selectedInfo?.latitude ?? 0.0,
-      //             element.selectedInfo?.longitude ?? 0.0));
-      //   });
-      // });
+    }
+    if (widget.trip.meals.isNotEmpty && widget.extras.contains(MarkerType.restaurant)) {
+      for (Meal meal in widget.trip.meals) {
+        LatLng latLng = LatLng(meal.restaurant.coordinates.latitude,
+                meal.restaurant.coordinates.longitude);
+        controller
+            .toScreenLocation(latLng)
+            .then((value) {
+          addMarker(
+              Point<double>(value.x as double, value.y as double),
+              latLng,
+              type: MarkerType.restaurant);
+        });
+      }
+    }
+
+    if (widget.trip.activities.isNotEmpty && widget.extras.contains(MarkerType.activity)) {
+      for (Activity activity in widget.trip.activities) {
+        for(TicketmasterVenue venue in activity.event.venues) {
+            LatLng latLng = LatLng(venue.latitude ?? 0.0,
+                  venue.longitude ?? 0.0);
+          controller
+              .toScreenLocation(latLng)
+              .then((value) {
+            addMarker(
+                Point<double>(value.x as double, value.y as double),
+                latLng,
+                type: MarkerType.activity);
+          });
+        }
+      }
     }
 
     controller.addListener(() {
@@ -123,52 +148,33 @@ class TripsitterMapState extends State<TripsitterMap> {
     }
 
     mapController?.toScreenLocationBatch(coordinates).then((points) {
+      if(_markerStates.isEmpty) return;
       _markerStates.asMap().forEach((i, value) {
         _markerStates[i].updatePosition(points[i]);
       });
     });
   }
 
-  void _addMarker(
+  void addMarker(
     Point<double> point,
     LatLng coordinates,
+    {
+      MarkerType type = MarkerType.item,
+      bool isSelected = false,
+      bool isOption = false,
+      bool isOther = false,
+    }
   ) {
     setState(() {
       _markers.add(
         Marker(
           coordinate: coordinates,
           initialPosition: point,
-          addMarkerState: _addMarkerStates,
-          isHotel: false,
-          isAirport: false,
-        ),
-      );
-    });
-  }
-
-  void _addHotelMarker(Point<double> point, LatLng coordinates) {
-    setState(() {
-      _markers.add(
-        Marker(
-          coordinate: coordinates,
-          initialPosition: point,
-          addMarkerState: _addMarkerStates,
-          isHotel: true,
-          isAirport: false,
-        ),
-      );
-    });
-  }
-
-  void _addAirportMarker(Point<double> point, LatLng coordinates) {
-    setState(() {
-      _markers.add(
-        Marker(
-          coordinate: coordinates,
-          initialPosition: point,
-          addMarkerState: _addMarkerStates,
-          isHotel: false,
-          isAirport: true,
+          addMarkerState: addMarkerStates,
+          isSelected: isSelected,
+          isOther: isOther,
+          isOption: isOption,
+          type: type
         ),
       );
     });
@@ -179,79 +185,112 @@ class TripsitterMapState extends State<TripsitterMap> {
     super.initState();
   }
 
+  void _onCameraIdleCallback() {
+    _updateMarkerPosition();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Stack(
-        children: [
-          MapboxMap(
-            styleString: isLight ? MapboxStyles.LIGHT : MapboxStyles.DARK,
-            accessToken: mapboxApiKey,
-            onMapCreated: _onMapCreated,
-            initialCameraPosition: CameraPosition(
-              target: LatLng(
-                  widget.trip.destination.lat, widget.trip.destination.lon),
-              zoom: 10.0,
+    return Expanded(
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Stack(
+          children: [
+            MapboxMap(
+              styleString: isLight ? MapboxStyles.LIGHT : MapboxStyles.DARK,
+              trackCameraPosition: true,
+              accessToken: mapboxApiKey,
+              onMapCreated: _onMapCreated,
+              onCameraIdle: _onCameraIdleCallback,
+              initialCameraPosition: CameraPosition(
+                target: LatLng(
+                    widget.trip.destination.lat, widget.trip.destination.lon),
+                zoom: 10.0,
+              ),
             ),
-          ),
-          ..._markers,
-        ],
+            ..._markers,
+          ],
+        ),
       ),
     );
   }
 }
 
+enum MarkerType {
+  item,
+  hotel,
+  airport,
+  restaurant,
+  activity
+}
+
 class Marker extends StatefulWidget {
   final Point initialPosition;
   final LatLng coordinate;
-  final void Function(_MarkerState) addMarkerState;
-  bool isHotel = false;
-  bool isAirport = false;
+  final void Function(MarkerState) addMarkerState;
+  final MarkerType type;
+  final bool isSelected, isOther, isOption;
 
   Marker({
     required this.coordinate,
     required this.initialPosition,
     required this.addMarkerState,
-    required this.isHotel,
-    required this.isAirport,
+    required this.isSelected,
+    required this.isOther,
+    required this.isOption,
+    this.type = MarkerType.item,
     super.key,
   });
 
   @override
   // ignore: no_logic_in_create_state
   State<StatefulWidget> createState() {
-    final state = _MarkerState(initialPosition, isHotel, isAirport);
+    final state = MarkerState();
     addMarkerState(state);
     return state;
   }
 }
 
-class _MarkerState extends State with TickerProviderStateMixin {
+class MarkerState extends State<Marker> with TickerProviderStateMixin {
   final double _iconSize = 30.0;
 
-  Point _position;
-  bool isHotel;
-  bool isAirport;
+  MarkerType get type => widget.type;
+  late Point<num> _position;
 
-  _MarkerState(
-    this._position,
-    this.isHotel,
-    this.isAirport,
-  );
+  @override
+  void initState() {
+    super.initState();
+    _position = widget.initialPosition;
+  }
+
+  Icon getIcon() {
+    switch (type) {
+      case MarkerType.item:
+        return Icon(Icons.location_on, color: widget.isSelected ? Colors.blue : (widget.isOption ? Colors.green : (widget.isOther ? Colors.redAccent : Colors.black)), size: _iconSize);
+      case MarkerType.hotel:
+        return Icon(Icons.hotel, color: Colors.redAccent, size: _iconSize * 1.5);
+      case MarkerType.airport:
+        return Icon(Icons.airplanemode_active, color: Colors.redAccent, size: _iconSize * 1.5);
+      case MarkerType.restaurant:
+        return Icon(Icons.restaurant, color: Colors.redAccent, size: _iconSize * 1.5);
+      case MarkerType.activity:
+        return Icon(Icons.local_activity, color: Colors.redAccent, size: _iconSize * 1.5);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     var ratio = 1.0;
-    var icon = Icon(Icons.place, size: _iconSize, color: Colors.black);
-    if (isHotel) {
-      icon = Icon(Icons.hotel, size: _iconSize * 2, color: Colors.redAccent);
-    } else if (isAirport) {
-      icon = Icon(Icons.local_airport,
-          size: _iconSize * 2, color: Colors.redAccent);
+
+    //web does not support Platform._operatingSystem
+    if (!kIsWeb) {
+      // iOS returns logical pixel while Android returns screen pixel
+      ratio = Platform.isIOS ? 1.0 : MediaQuery.of(context).devicePixelRatio;
     }
+    Icon icon = getIcon();
     return Positioned(
-      left: _position.x / ratio - (isHotel ? _iconSize * 2 : _iconSize) / 2,
-      top: _position.y / ratio - (isHotel ? _iconSize * 2 : _iconSize) / 2,
+      left: _position.x / ratio - (type == MarkerType.item ? _iconSize : _iconSize * 1.5) / 2,
+      top: _position.y / ratio - (type == MarkerType.item ? _iconSize : _iconSize * 1.5) / 2,
       child: icon,
     );
   }

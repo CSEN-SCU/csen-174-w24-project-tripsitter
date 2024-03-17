@@ -11,6 +11,8 @@ import 'package:tripsitter/classes/profile.dart';
 import 'package:tripsitter/classes/ticketmaster.dart';
 import 'dart:async';
 
+import 'package:tripsitter/classes/yelp.dart';
+
 class Trip {
   final String _id;
   final List<String> _uids;
@@ -27,6 +29,7 @@ class Trip {
   List<HotelGroup> _hotels;
   List<RentalCarGroup> _rentalCars;
   List<Activity> _activities;
+  List<Meal> _meals;
   List<TripComment> _comments;
 
   Trip({
@@ -43,6 +46,7 @@ class Trip {
     required List<FlightGroup> flights,
     required List<HotelGroup> hotels,
     required List<RentalCarGroup> rentalCars,
+    required List<Meal> meals,
     required List<Activity> activities,
     required List<TripComment> comments,
   }) : _id = id,
@@ -58,6 +62,7 @@ class Trip {
        _flights = flights,
        _hotels = hotels,
        _rentalCars = rentalCars,
+        _meals = meals,
        _comments = comments,
        _activities = activities;
   
@@ -72,6 +77,7 @@ class Trip {
   List<HotelGroup> get hotels => _hotels;
   List<RentalCarGroup> get rentalCars => _rentalCars;
   List<Activity> get activities => _activities;
+  List<Meal> get meals => _meals;
   Map<String, bool> get paymentsComplete => _paymentsComplete;
   bool get usingSplitPayments => _usingSplitPayments;
   bool get frozen => _frozen;
@@ -192,6 +198,7 @@ class Trip {
       "hotels": _hotels.map((hotel) => hotel.toJson()).toList(),
       "rentalCars": _rentalCars.map((rentalCar) => rentalCar.toJson()).toList(),
       "activities": _activities.map((activity) => activity.toJson()).toList(),
+      "meals": _meals.map((meal) => meal.toJson()).toList(),
       "frozen": _frozen,
       "comments": _comments.map((comment) => comment.toJson()).toList(),
     };
@@ -228,12 +235,14 @@ class Trip {
       hotels: List.empty(growable: true),
       rentalCars: List.empty(growable: true),
       activities: List.empty(growable: true),
+      meals: List.empty(growable: true),
     );
 
     t._flights = (data['flights'] as List).map((flight) => FlightGroup.fromJson(flight, t._save)).toList();
     t._hotels = (data['hotels'] as List).map((hotel) => HotelGroup.fromJson(hotel, t._save)).toList();
     t._rentalCars = (data['rentalCars'] as List).map((rentalCar) => RentalCarGroup.fromJson(rentalCar, t._save)).toList();
     t._activities = (data['activities'] as List).map((activity) => Activity.fromJson(activity, t._save)).toList();
+    t._meals = ((data['meals'] ?? []) as List).map((meal) => Meal.fromJson(meal, t._save)).toList();
 
     return t;
   }
@@ -327,6 +336,21 @@ class Trip {
 
   Future<void> removeActivity(Activity activity) async {
     _activities.remove(activity);
+    await _save();
+  }
+
+  Future<void> addMeal(YelpRestaurant restaurant, List<String> uids) async {
+    _meals.add(Meal(
+      comments: List<TripComment>.empty(growable: true),
+      restaurant: restaurant,
+      participants: uids,
+      save: _save,
+    ));
+    await _save();
+  }
+
+  Future<void> removeMeal(Meal meal) async {
+    _meals.remove(meal);
     await _save();
   }
 
@@ -774,6 +798,65 @@ class Activity {
     return Activity(
       comments: (json['comments'] as List).map((comment) => TripComment.fromJson(comment)).toList(),
       event: TicketmasterEvent.fromJson(json['event']),
+      participants: (json['participants'] as List).map((item) => item as String).toList(),
+      save: save
+    );
+  } 
+
+  Future<void> addComment(TripComment comment) async {
+    _comments.add(comment);
+    await _save();
+  }
+
+  Future<void> removeComment(TripComment comment) async {
+    _comments.remove(comment);
+    await _save();
+  }
+}
+
+
+class Meal {
+  final YelpRestaurant _restaurant;
+  final List<String> _participants;
+  final List<TripComment> _comments;
+  Future<void> Function() _save;
+
+  Meal({
+    required YelpRestaurant restaurant,
+    required List<String> participants,
+    required List<TripComment> comments,
+    required Future<void> Function() save,
+  }) : _restaurant = restaurant,
+       _participants = participants,
+        _comments = comments,
+       _save = save;
+
+  Map<String, dynamic> toJson() {
+    return {
+      "restaurant": _restaurant.toJson(),
+      "participants": _participants,
+      "comments": _comments.map((comment) => comment.toJson()).toList(),
+    };
+  }
+
+  YelpRestaurant get restaurant => _restaurant;
+  List<String> get participants => _participants;
+  List<TripComment> get comments => _comments;
+
+  Future<void> addParticipant(String uid) async {
+    _participants.add(uid);
+    await _save();
+  }
+
+  Future<void> removeParticipant(String uid) async {
+    _participants.remove(uid);
+    await _save();
+  }
+
+  factory Meal.fromJson(Map<String, dynamic> json, Future<void> Function() save){
+    return Meal(
+      comments: (json['comments'] as List).map((comment) => TripComment.fromJson(comment)).toList(),
+      restaurant: YelpRestaurant.fromJson(json['restaurant']),
       participants: (json['participants'] as List).map((item) => item as String).toList(),
       save: save
     );
