@@ -1,3 +1,5 @@
+import 'package:animated_list_plus/animated_list_plus.dart';
+import 'package:animated_list_plus/transitions.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -247,7 +249,8 @@ class _RestaurantsOptionsState extends State<RestaurantsOptions>
     bool isMobile = Provider.of<bool>(context, listen: false);
     int rowIndex = 0;
     // Initialize a counter variable before mapping the restaurants to TableRows
-    return ListView(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // Text("Choose Restaurants",
         //     style: Theme.of(context)
@@ -255,25 +258,32 @@ class _RestaurantsOptionsState extends State<RestaurantsOptions>
         //         .displayMedium
         //         ?.copyWith(fontWeight: FontWeight.bold)),
         Wrap(
+          spacing: 80,
+          alignment: WrapAlignment.start,
           children: [
             const Text("Choose Restaurants",
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(80, 10, 0, 0),
-              child: Text("Toggle Map Mode",
-                  style: Theme.of(context).textTheme.displayMedium?.copyWith(
-                        decoration: TextDecoration.none,
-                        fontSize: 12,
-                      )),
-            ),
-            Switch(
-              value: mapSelected,
-              onChanged: (bool value) {
-                setState(() {
-                  mapSelected = value;
-                });
-              },
-            ),
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(0, 10, 0, 0),
+                  child: Text("Toggle Map Mode",
+                      style: Theme.of(context).textTheme.displayMedium?.copyWith(
+                            decoration: TextDecoration.none,
+                            fontSize: 12,
+                          )),
+                ),
+                Switch(
+                  value: mapSelected,
+                  onChanged: (bool value) {
+                    setState(() {
+                      mapSelected = value;
+                    });
+                  },
+                ),
+              ],
+            )
           ],
         ),
         Row(
@@ -324,39 +334,48 @@ class _RestaurantsOptionsState extends State<RestaurantsOptions>
                 ),
               )
             : mapSelected
-                ? Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: LayoutBuilder(
-                      builder: (context, constraints) {
-                        return TripsitterMap<YelpRestaurant>(
-                          items: (_sortDirection
-                              ? restaurants
-                              : restaurants.reversed)
-                          .where(filterRestaurants).toList(), 
-                          isSelected: (dynamic r) => trip.meals
-                              .map((e) => e.restaurant.id)
-                              .contains((r as YelpRestaurant).id),
-                          extras: const [
-                            MarkerType.airport,
-                            MarkerType.hotel,
-                            MarkerType.activity
-                          ],
-                          trip: trip, 
-                          getLat: (dynamic r) => (r as YelpRestaurant).coordinates.latitude, 
-                          getLon: (dynamic r) => (r as YelpRestaurant).coordinates.longitude
-                        );
-                      },
-                    ),
-                  )
-                : Column(
-                    children: [
-                      for (YelpRestaurant restaurant in (_sortDirection
-                              ? restaurants
-                              : restaurants.reversed)
-                          .where(filterRestaurants))
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Card(
+                ? TripsitterMap<YelpRestaurant>(
+                  items: (_sortDirection
+                      ? restaurants
+                      : restaurants.reversed)
+                  .where(filterRestaurants).toList(), 
+                  isSelected: (dynamic r) => trip.meals
+                      .map((e) => e.restaurant.id)
+                      .contains((r as YelpRestaurant).id),
+                  extras: const [
+                    MarkerType.airport,
+                    MarkerType.hotel,
+                    MarkerType.activity
+                  ],
+                  trip: trip, 
+                  getLat: (dynamic r) => (r as YelpRestaurant).coordinates.latitude, 
+                  getLon: (dynamic r) => (r as YelpRestaurant).coordinates.longitude
+                )
+                : Expanded(
+                  child: ImplicitlyAnimatedList<YelpRestaurant>(
+                    insertDuration: const Duration(milliseconds: 350),
+                    removeDuration: const Duration(milliseconds: 350),
+                    updateDuration: const Duration(milliseconds: 350),
+                    areItemsTheSame: (a, b) => a.id == b.id,
+                    items: (_sortDirection
+                                        ? restaurants
+                                        : restaurants.reversed)
+                                    .where(filterRestaurants).toList(),
+                    itemBuilder: (context, animation, restaurant, i){
+                          Color bgColor = rowIndex % 2 == 0
+                              ? Colors.grey[200]! // Light gray color
+                              : Colors.white; // White color
+                    
+                          // Increment the row index for the next iteration
+                          rowIndex++;
+                      return SizeFadeTransition(
+                        sizeFraction: 0.8,
+                        curve: Curves.easeInOut,
+                        animation: animation,
+                        child: Container(
+                          color: bgColor,
+                          child: Padding(
+                            padding: const EdgeInsets.all(8.0),
                             child: ListTile(
                               leading: CircleAvatar(backgroundImage: NetworkImage(restaurant.imageUrl)),
                               title: Text(restaurant.name),
@@ -381,13 +400,14 @@ class _RestaurantsOptionsState extends State<RestaurantsOptions>
                                         bool selected = trip.meals
                                             .map((e) => e.restaurant.id)
                                             .contains(restaurant.id);
-                                        return ElevatedButton(
-                                          onPressed: selected
+                                        return GestureDetector(
+                                          onTap: selected
                                               ? () async {
+                                                print("Removing restaurant");
                                                   await trip.removeMeal(trip
                                                       .meals
-                                                      .firstWhere((a) =>
-                                                          a.restaurant.id == restaurant.id));
+                                                      .firstWhere((e) =>
+                                                          e.restaurant.id == restaurant.id));
                                                   setState(() {});
                                                   if (widget.setState != null) {
                                                     widget.participantsPopupOpenState[
@@ -400,6 +420,7 @@ class _RestaurantsOptionsState extends State<RestaurantsOptions>
                                                   }
                                                 }
                                               : () async {
+                                                  print("Adding restaurant");
                                                   await trip.addMeal(
                                                       restaurant,
                                                       widget.profiles
@@ -419,16 +440,25 @@ class _RestaurantsOptionsState extends State<RestaurantsOptions>
                                                     widget.setState!();
                                                   }
                                                 },
-                                          style: ButtonStyle(
-                                              backgroundColor:
-                                                  MaterialStateProperty.all<Color>(
-                                                      selected
-                                                          ? const Color.fromARGB(
-                                                              255, 127, 166, 198)
-                                                          : Colors.grey[300]!)),
-                                          child: Text('Select${selected ? 'ed' : ''}',
-                                              style: const TextStyle(
-                                                  color: Colors.black)),
+                                          child: Checkbox(
+                                            value: selected,
+                                            onChanged: null,
+                                            fillColor: MaterialStateProperty.all<Color>(
+                                                selected
+                                                    ? const Color.fromARGB(
+                                                        255, 127, 166, 198)
+                                                    : Colors.grey[300]!),
+                                            // style: ButtonStyle(
+                                            //     backgroundColor:
+                                            //         MaterialStateProperty.all<Color>(
+                                            //             selected
+                                            //                 ? const Color.fromARGB(
+                                            //                     255, 127, 166, 198)
+                                            //                 : Colors.grey[300]!)),
+                                            // child: Text('Select${selected ? 'ed' : ''}',
+                                            //     style: const TextStyle(
+                                            //         color: Colors.black)),
+                                          ),
                                         );
                                       }),
                                     ],
@@ -438,8 +468,10 @@ class _RestaurantsOptionsState extends State<RestaurantsOptions>
                             ),
                           ),
                         ),
-                    ],
+                      );
+                    }
                   ),
+                ),
       ],
     );
   }

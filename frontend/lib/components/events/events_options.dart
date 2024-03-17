@@ -1,5 +1,7 @@
 import 'dart:math';
 
+import 'package:animated_list_plus/animated_list_plus.dart';
+import 'package:animated_list_plus/transitions.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -269,7 +271,8 @@ class _EventsOptionsState extends State<EventsOptions>
     bool isMobile = Provider.of<bool>(context, listen: false);
     int rowIndex = 0;
     // Initialize a counter variable before mapping the events to TableRows
-    return ListView(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // Text("Choose Activities",
         //     style: Theme.of(context)
@@ -277,25 +280,30 @@ class _EventsOptionsState extends State<EventsOptions>
         //         .displayMedium
         //         ?.copyWith(fontWeight: FontWeight.bold)),
         Wrap(
+          spacing: 80,
           children: [
             const Text("Choose Activities",
                 style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(80, 10, 0, 0),
-              child: Text("Toggle Map Mode",
-                  style: Theme.of(context).textTheme.displayMedium?.copyWith(
-                        decoration: TextDecoration.none,
-                        fontSize: 12,
-                      )),
-            ),
-            Switch(
-              value: mapSelected,
-              onChanged: (bool value) {
-                setState(() {
-                  mapSelected = value;
-                });
-              },
-            ),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(0, 10, 0, 0),
+                child: Text("Toggle Map Mode",
+                    style: Theme.of(context).textTheme.displayMedium?.copyWith(
+                          decoration: TextDecoration.none,
+                          fontSize: 12,
+                        )),
+              ),
+              Switch(
+                value: mapSelected,
+                onChanged: (bool value) {
+                  setState(() {
+                    mapSelected = value;
+                  });
+                },
+              ),
+            ],)
           ],
         ),
         Row(
@@ -316,6 +324,7 @@ class _EventsOptionsState extends State<EventsOptions>
                 ],
               ),
             ),
+            if(!mapSelected)
             FilterButton(
                 color: Colors.grey[100]!,
                 text: _selectedSort.toString(),
@@ -346,146 +355,171 @@ class _EventsOptionsState extends State<EventsOptions>
                 ),
               )
             : mapSelected
-                ? Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: LayoutBuilder(
-                      builder: (context, constraints) {
-                        return TripsitterMap<TicketmasterEvent>(
-                          trip: trip,
-                          extras: const [
-                            MarkerType.airport,
-                            MarkerType.hotel,
-                            MarkerType.restaurant
-                          ],
-                          isSelected: (dynamic event) => trip.activities
-                                      .map((e) => e.event.id)
-                                      .contains((event as TicketmasterEvent).id),
-                          getLat: (dynamic e) => (e as TicketmasterEvent).venues.first.latitude ?? 0,
-                          getLon: (dynamic e) => (e as TicketmasterEvent).venues.first.longitude ?? 0,
-                          items: (_sortDirection ? events : events.reversed)
-                              .where(filterEvents)
-                              .toList(),
-                        );
-                      },
-                    ),
-                  )
-                : Table(
-                    columnWidths: const <int, TableColumnWidth>{
-                        0: FixedColumnWidth(75),
-                        1: FlexColumnWidth(1),
-                        2: FlexColumnWidth(1),
-                        3: FixedColumnWidth(50),
-                        4: FixedColumnWidth(150),
-                      },
-                    defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-                    children: (_sortDirection ? events : events.reversed)
+                ? TripsitterMap<TicketmasterEvent>(
+                    trip: trip,
+                    extras: const [
+                      MarkerType.airport,
+                      MarkerType.hotel,
+                      MarkerType.restaurant
+                    ],
+                    isSelected: (dynamic event) => trip.activities
+                                .map((e) => e.event.id)
+                                .contains((event as TicketmasterEvent).id),
+                    getLat: (dynamic e) => (e as TicketmasterEvent).venues.first.latitude ?? 0,
+                    getLon: (dynamic e) => (e as TicketmasterEvent).venues.first.longitude ?? 0,
+                    items: (_sortDirection ? events : events.reversed)
                         .where(filterEvents)
-                        .map((event) {
-                      Color bgColor = rowIndex % 2 == 0
-                          ? Colors.grey[200]! // Light gray color
-                          : Colors.white; // White color
-
-                      // Increment the row index for the next iteration
-                      rowIndex++;
-                      return TableRow(
-                          decoration: BoxDecoration(color: bgColor),
-                          children: [
-                            TableCell(
-                                child: Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: event.images.isEmpty
-                                  ? const Icon(Icons.star)
-                                  : Image.network(event.images.first.url,
-                                      height: 50),
-                            )),
-                            TableCell(
-                                child: Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Text(event.prices.isEmpty
-                                  ? event.name
-                                  : "${event.name}\nFrom \$${event.prices.map((p) => p.min).reduce(min)}/person"),
-                            )),
-                            TableCell(
-                                child: Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Text(
-                                  '${event.venues.firstOrNull?.name}\nStarts ${event.startTime.localDate} ${event.startTime.localTime}'),
-                            )),
-                            TableCell(
-                                child: Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: IconButton(
-                                  icon: const Icon(Icons.info),
-                                  onPressed: () {
-                                    showDialog(
-                                      context: context,
-                                      builder: (BuildContext context) {
-                                        return EventPopup(event);
-                                      },
-                                    );
-                                  }),
-                            )),
-                            TableCell(
-                              child: Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Builder(builder: (context) {
-                                  bool selected = trip.activities
-                                      .map((e) => e.event.id)
-                                      .contains(event.id);
-                                  return ElevatedButton(
-                                    onPressed: selected
-                                        ? () async {
-                                            await trip.removeActivity(trip
-                                                .activities
-                                                .firstWhere((a) =>
-                                                    a.event.id == event.id));
-                                            setState(() {});
-                                            if (widget.setState != null) {
-                                              widget.participantsPopupOpenState[
-                                                  event.id] = true;
-                                              widget.selectedParticipantsMap
-                                                  .remove(event.id);
-                                              widget.participantsPopupKeys
-                                                  .remove(event.id);
-                                              widget.setState!();
-                                            }
-                                          }
-                                        : () async {
-                                            await trip.addActivity(
-                                                event,
-                                                widget.profiles
-                                                    .map((e) => e.id)
-                                                    .toList());
-                                            setState(() {});
-                                            if (widget.setState != null) {
-                                              widget.participantsPopupOpenState[
-                                                  event.id] = false;
-                                              widget.selectedParticipantsMap[
-                                                      event.id] =
-                                                  widget.profiles
-                                                      .map((e) => e.id)
-                                                      .toList();
-                                              widget.participantsPopupKeys[
-                                                  event.id] = GlobalKey();
-                                              widget.setState!();
-                                            }
-                                          },
-                                    style: ButtonStyle(
-                                        backgroundColor:
-                                            MaterialStateProperty.all<Color>(
+                        .toList()
+                )
+                : Expanded(
+                  child: ImplicitlyAnimatedList<TicketmasterEvent>(
+                    insertDuration: const Duration(milliseconds: 350),
+                    removeDuration: const Duration(milliseconds: 350),
+                    updateDuration: const Duration(milliseconds: 350),
+                    areItemsTheSame: (a, b) => a.id == b.id,
+                    items: (_sortDirection ? events : events.reversed)
+                            .where(filterEvents).toList(),
+                    itemBuilder: (context, animation, event, i){
+                          Color bgColor = rowIndex % 2 == 0
+                              ? Colors.grey[200]! // Light gray color
+                              : Colors.white; // White color
+                    
+                          // Increment the row index for the next iteration
+                          rowIndex++;
+                          return SizeFadeTransition(
+                            sizeFraction: 0.8,
+                            curve: Curves.easeInOut,
+                            animation: animation,
+                            child: Container(
+                              color: bgColor,
+                              child: ListTile(
+                                  leading: isMobile ? null : event.images.isEmpty
+                                          ? const Icon(Icons.star)
+                                          : Padding(
+                                            padding: const EdgeInsets.all(2.0),
+                                            child: AspectRatio(aspectRatio: 1.0, child: Image.network(event.images.first.url)),
+                                          ),
+                                  title: isMobile ? Wrap(
+                                    spacing: 5.0,
+                                    children: [
+                                      Text(event.name),
+                                      Text(event.prices.isEmpty ? "" : "(From \$${event.prices.map((p) => p.min).reduce(min)}/person)")
+                                    ],
+                                  ) : Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Expanded(
+                                        flex: 3,
+                                        child: Column(
+                                          children: [
+                                            Text(event.name),
+                                            Text(event.prices.isEmpty ? "" : "From \$${event.prices.map((p) => p.min).reduce(min)}/person"),
+                                          ],
+                                        ),
+                                      ),
+                                      Expanded(
+                                        flex: 2,
+                                        child: Text(
+                                          '${event.venues.firstOrNull?.name}\nStarts ${event.startTime.localDate} ${event.startTime.localTime}'
+                                        ),
+                                      )
+                                    ],
+                                  ),
+                                  subtitle: isMobile ? Wrap(
+                                    spacing: 5.0,
+                                    children: [
+                                      Text(event.venues.firstOrNull?.name ?? ""),
+                                      Text("(Starts ${event.startTime.localDate} ${event.startTime.localTime})")
+                                    ],
+                                  ) : null,
+                                  trailing: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      IconButton(
+                                        padding: EdgeInsets.zero,
+                                        icon: const Icon(Icons.info),
+                                        onPressed: () {
+                                          showDialog(
+                                            context: context,
+                                            builder: (BuildContext context) {
+                                              return EventPopup(event);
+                                            },
+                                          );
+                                        }
+                                      ),
+                                      Builder(builder: (context) {
+                                        bool selected = trip.activities
+                                            .map((e) => e.event.id)
+                                            .contains(event.id);
+                                        return GestureDetector(
+                                          onTap: selected
+                                              ? () async {
+                                                print("Removing activity");
+                                                  await trip.removeActivity(trip
+                                                      .activities
+                                                      .firstWhere((a) =>
+                                                          a.event.id == event.id));
+                                                  setState(() {});
+                                                  if (widget.setState != null) {
+                                                    widget.participantsPopupOpenState[
+                                                        event.id] = true;
+                                                    widget.selectedParticipantsMap
+                                                        .remove(event.id);
+                                                    widget.participantsPopupKeys
+                                                        .remove(event.id);
+                                                    widget.setState!();
+                                                  }
+                                                }
+                                              : () async {
+                                                  print("Adding activity");
+                                                  await trip.addActivity(
+                                                      event,
+                                                      widget.profiles
+                                                          .map((e) => e.id)
+                                                          .toList());
+                                                  setState(() {});
+                                                  if (widget.setState != null) {
+                                                    widget.participantsPopupOpenState[
+                                                        event.id] = false;
+                                                    widget.selectedParticipantsMap[
+                                                            event.id] =
+                                                        widget.profiles
+                                                            .map((e) => e.id)
+                                                            .toList();
+                                                    widget.participantsPopupKeys[
+                                                        event.id] = GlobalKey();
+                                                    widget.setState!();
+                                                  }
+                                                },
+                                          child: Checkbox(
+                                            value: selected,
+                                            onChanged: null,
+                                            fillColor: MaterialStateProperty.all<Color>(
                                                 selected
                                                     ? const Color.fromARGB(
                                                         255, 127, 166, 198)
-                                                    : Colors.grey[300]!)),
-                                    child: Text('Select${selected ? 'ed' : ''}',
-                                        style: const TextStyle(
-                                            color: Colors.black)),
-                                  );
-                                }),
-                              ),
+                                                    : Colors.grey[300]!),
+                                            // style: ButtonStyle(
+                                            //     backgroundColor:
+                                            //         MaterialStateProperty.all<Color>(
+                                            //             selected
+                                            //                 ? const Color.fromARGB(
+                                            //                     255, 127, 166, 198)
+                                            //                 : Colors.grey[300]!)),
+                                            // child: Text('Select${selected ? 'ed' : ''}',
+                                            //     style: const TextStyle(
+                                            //         color: Colors.black)),
+                                          ),
+                                        );
+                                      })
+                                    ],
+                                  ),
+                                ),
                             ),
-                          ]);
-                    }).toList()),
+                          );
+                        })
+                  ),
+
       ],
     );
   }

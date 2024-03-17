@@ -96,84 +96,86 @@ class _TripDashBoardState extends State<TripDashBoard> {
                         ),
                       ),
                       SizedBox(width: 20.0),
-                      Padding(
-                        padding: EdgeInsets.only(top: 11.0),
-                        child: Icon(
-                          Icons.pin_drop_outlined,
-                          size: 26,
-                          color: accentColor,
+                      Row(children: [
+                        Padding(
+                          padding: EdgeInsets.only(top: 11.0),
+                          child: Icon(
+                            Icons.pin_drop_outlined,
+                            size: 26,
+                            color: accentColor,
+                          ),
                         ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: GestureDetector(
-                          onTap: () {
-                            showDialog(context: context, builder:(context) {
-                              return AlertDialog(
-                                title: Text("Change Destination"),
-                                content: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Text("Enter a new destination"),
-                                    Padding(
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: Autocomplete<City>(
-                                        fieldViewBuilder: (context, textEditingController, focusNode,
-                                                onFieldSubmitted) =>
-                                            TextFormField(
-                                          controller: textEditingController,
-                                          focusNode: focusNode,
-                                          onFieldSubmitted: (_) {},
-                                          decoration: InputDecoration(
-                                            filled: true,
-                                            fillColor: Colors.grey[300],
-                                            border: InputBorder.none,
-                                            labelText: 'Hometown',
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: GestureDetector(
+                            onTap: () {
+                              showDialog(context: context, builder:(context) {
+                                return AlertDialog(
+                                  title: Text("Change Destination"),
+                                  content: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Text("Enter a new destination"),
+                                      Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: Autocomplete<City>(
+                                          fieldViewBuilder: (context, textEditingController, focusNode,
+                                                  onFieldSubmitted) =>
+                                              TextFormField(
+                                            controller: textEditingController,
+                                            focusNode: focusNode,
+                                            onFieldSubmitted: (_) {},
+                                            decoration: InputDecoration(
+                                              filled: true,
+                                              fillColor: Colors.grey[300],
+                                              border: InputBorder.none,
+                                              labelText: 'Hometown',
+                                            ),
                                           ),
+                                          initialValue: TextEditingValue(
+                                              text: "${trip.destination.name}, ${trip.destination.country}"),
+                                          displayStringForOption: (option) =>
+                                              "${option.name}, ${option.country}",
+                                          optionsBuilder: (TextEditingValue value) {
+                                            if (value.text == '') {
+                                              return const Iterable<City>.empty();
+                                            }
+                                            return cities.where((t) {
+                                              return t.name
+                                                  .toLowerCase()
+                                                  .contains(value.text.toLowerCase());
+                                            });
+                                          },
+                                          onSelected: (selected) async {
+                                            await trip.updateDestination(selected);
+                                            Navigator.pop(context);
+                                          },
                                         ),
-                                        initialValue: TextEditingValue(
-                                            text: "${trip.destination.name}, ${trip.destination.country}"),
-                                        displayStringForOption: (option) =>
-                                            "${option.name}, ${option.country}",
-                                        optionsBuilder: (TextEditingValue value) {
-                                          if (value.text == '') {
-                                            return const Iterable<City>.empty();
-                                          }
-                                          return cities.where((t) {
-                                            return t.name
-                                                .toLowerCase()
-                                                .contains(value.text.toLowerCase());
-                                          });
-                                        },
-                                        onSelected: (selected) async {
-                                          await trip.updateDestination(selected);
-                                          Navigator.pop(context);
-                                        },
                                       ),
+                                    ],
+                                  ),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () {
+                                        Navigator.pop(context);
+                                      },
+                                      child: Text("Cancel"),
                                     ),
                                   ],
-                                ),
-                                actions: [
-                                  TextButton(
-                                    onPressed: () {
-                                      Navigator.pop(context);
-                                    },
-                                    child: Text("Cancel"),
-                                  ),
-                                ],
-                              );
-                            });
-                          },
-                          child: Text(
-                            "${trip.destination.name}, ${trip.destination.country}",
-                            style: TextStyle(
-                              fontSize: 24,
-                              fontStyle: FontStyle.italic,
-                              color: accentColor,
+                                );
+                              });
+                            },
+                            child: Text(
+                              "${trip.destination.name}, ${trip.destination.country}",
+                              style: TextStyle(
+                                fontSize: 24,
+                                fontStyle: FontStyle.italic,
+                                color: accentColor,
+                              ),
                             ),
                           ),
                         ),
-                      ),
+                      ],),
                       Expanded(
                         child: Align(
                           alignment: Alignment.topRight,
@@ -252,7 +254,8 @@ class _TripDashBoardState extends State<TripDashBoard> {
                                 )),
                           ),
                         ),
-                      )
+                      ),
+                      
                     ],
                   ),
                 ),

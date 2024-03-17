@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
@@ -437,21 +438,18 @@ class _MyStatefulWidgetState extends State<TripCenterConsole>
                               color: Colors.white,
                             ),
                             child: Stack(children: [
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: TripsitterMap<int>(
-                                  items: [],
-                                  trip: widget.trip, 
-                                  getLat: (r) => 0.0, 
-                                  getLon: (r) => 0.0, 
-                                  isSelected: (r) => false, 
-                                  extras: const [
-                                    MarkerType.activity,
-                                    MarkerType.hotel,
-                                    MarkerType.restaurant,
-                                    MarkerType.airport,
-                                  ]
-                                ),
+                              TripsitterMap<int>(
+                                items: [],
+                                trip: widget.trip, 
+                                getLat: (r) => 0.0, 
+                                getLon: (r) => 0.0, 
+                                isSelected: (r) => false, 
+                                extras: const [
+                                  MarkerType.activity,
+                                  MarkerType.hotel,
+                                  MarkerType.restaurant,
+                                  MarkerType.airport,
+                                ]
                               ),
                               const Positioned(
                                 top: 10.0,
@@ -473,7 +471,7 @@ class _MyStatefulWidgetState extends State<TripCenterConsole>
                     child: showImage ? CircleAvatar(
                       radius: 0.5 * positions["City"]!.size,
                       key: ValueKey(true),
-                      backgroundImage: NetworkImage(cityImage!)
+                      backgroundImage: MemoryImage(base64Decode(cityImage!.split("data:image/jpeg;base64,")[1]))
                     ) : Container(
                     key: ValueKey(false),
                       width: positions["City"]!.size,

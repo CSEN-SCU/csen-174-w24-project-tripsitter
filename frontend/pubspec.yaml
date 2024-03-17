@@ -57,7 +57,7 @@ dependencies:
   http: ^1.2.0
   intl: ^0.19.0
   hexcolor: ^3.0.1
-  google_fonts: ^6.1.0
+  google_fonts: 6.1.0
   google_sign_in: ^6.2.1
   image_picker: ^1.0.7
   csv: ^5.1.1
@@ -74,6 +74,8 @@ dependencies:
   timezone: ^0.9.2
 
 dev_dependencies:
+  flutter_launcher_icons: "^0.13.1"
+
   flutter_test:
     sdk: flutter
 
@@ -127,3 +129,18 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/custom-fonts/#from-packages
+
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  remove_alpha_ios: true
+  image_path: "assets/app_logo.png"
+  min_sdk_android: 21 # android min sdk min:16, default 21
+  web:
+    generate: true
+    image_path: "assets/tripsitter_logo.png"
+    background_color: "#c6d6ff"
+    theme_color: "#c6d6ff"
+  macos:
+    generate: true
+    image_path: "assets/app_logo.png"
