@@ -10,7 +10,7 @@ class FlightDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text("Flight Details"),
+      title: const Text("Flight Details"),
       content: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -54,7 +54,7 @@ class FlightDialog extends StatelessWidget {
           onPressed: () {
             Navigator.of(context).pop();
           },
-          child: Text("Close"),
+          child: const Text("Close"),
         )
       ],
     );

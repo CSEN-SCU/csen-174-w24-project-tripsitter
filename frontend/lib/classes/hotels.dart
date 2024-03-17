@@ -1,3 +1,7 @@
+import 'package:collection/collection.dart';
+import 'package:tripsitter/classes/profile.dart';
+import 'package:tripsitter/classes/trip.dart';
+
 class HotelQuery {
   String? cityCode;
   double? latitude;
@@ -69,8 +73,9 @@ class HotelInfo {
   final String dupeId;
   final String name;
   final String cityCode;
-  final double latitude;
-  final double longitude;
+  final double? latitude;
+  final double? longitude;
+  final List<TripComment> comments;
 
   const HotelInfo({
     required this.type,
@@ -81,6 +86,7 @@ class HotelInfo {
     required this.cityCode,
     required this.latitude,
     required this.longitude,
+    required this.comments
   });
 
   factory HotelInfo.fromJson(Map<String, dynamic> json) {
@@ -91,13 +97,14 @@ class HotelInfo {
       dupeId: json['dupeId'],
       name: json['name'],
       cityCode: json['cityCode'],
-      latitude: json['latitude'].toDouble(),
-      longitude: json['longitude'].toDouble(),
+      latitude: json['latitude']?.toDouble(),
+      longitude: json['longitude']?.toDouble(),
+      comments: json["comments"] != null ? List<TripComment>.from(json["comments"].map((x) => TripComment.fromJson(x))) : List.empty(growable: true),
     );
   }
 
-  Map<String, dynamic> toJson() {
-    return {
+  Map<String, dynamic> toJson({bool includeComments = true}) {
+    Map<String,dynamic> json = {
       'type': type,
       'hotelId': hotelId,
       'chainCode': chainCode,
@@ -107,6 +114,18 @@ class HotelInfo {
       'latitude': latitude,
       'longitude': longitude,
     };
+    if(includeComments){
+      json['comments'] = comments.map((comment) => comment.toJson()).toList();
+    }
+    return json;
+  }
+
+  Future<void> addComment(TripComment comment) async {
+    comments.add(comment);
+  }
+
+  Future<void> removeComment(TripComment comment) async {
+    comments.remove(comment);
   }
 }
 
@@ -121,6 +140,11 @@ class HotelOffer {
   final HotelPrice price;
   final HotelPolicies? policies;
   final String self;
+
+  @override
+  bool operator ==(other) {
+    return identical(this, other) || (other is HotelOffer && other.id == id);
+  }
 
   const HotelOffer({
     required this.id,
@@ -437,4 +461,38 @@ class HotelCancellations {
     }
     return json;
   }
+}
+
+class HotelBooking {
+  final String offerId;
+  final List<TravelerInfo> guests;
+
+  HotelBooking({
+    required this.offerId,
+    required this.guests,
+  });
+
+  factory HotelBooking.fromHotelGroup(HotelGroup group, List<UserProfile> profiles) {
+    List<TravelerInfo> guests = [];
+    for(int i = 0; i < group.members.length; i++) {
+      UserProfile? p = profiles.firstWhereOrNull((profile) => profile.id == group.members[i]);
+      if(p != null) {
+        guests.add(TravelerInfo.fromUserProfile(p, i));
+      }
+    }
+    return HotelBooking(
+      offerId: group.selectedOffer!.id,
+      guests: guests,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'data': {
+        'offerId': offerId,
+        'guests': guests.map((guest) => guest.toHotelJson()).toList(),
+      }
+    };
+  }
+  
 }

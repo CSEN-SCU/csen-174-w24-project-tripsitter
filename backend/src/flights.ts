@@ -1,7 +1,8 @@
 import { Request, Response } from "express";
 
 import amadeus from "./amadeusClient";
-var flightData = require('./flightData.json');
+// var flightData = require('./flightData.json');
+const MAPS_API_KEY = process.env.MAPS_API_KEY!
 
 const axios = require('axios');
 const fs = require('fs');
@@ -89,31 +90,31 @@ const path = require('path');
 */ 
 
 export async function searchFlights(req: Request, res: Response){
-    // const origin = req.query.origin;
-    // const destination = req.query.destination;
-    // const departureDate = req.query.departureDate;
-    // const returnDate = req.query.returnDate;
-    // const adults = req.query.adults;
-    // const children = req.query.children;
-    // const currency = req.query.currency ?? "USD";
-    // const travelClass = req.query.travelClass ?? "ECONOMY";
-    // if(!origin || !destination || !departureDate || !adults) {
-    //   res.status(400).send('Missing required query parameters');
-    //   return;
-    // }
+  // res.send(flightData); return;
+    const origin = req.query.origin;
+    const destination = req.query.destination;
+    const departureDate = req.query.departureDate;
+    const returnDate = req.query.returnDate;
+    const adults = req.query.adults;
+    const children = req.query.children;
+    const currency = req.query.currency ?? "USD";
+    const travelClass = req.query.travelClass ?? "ECONOMY";
+    if(!origin || !destination || !departureDate || !adults) {
+      res.status(400).send('Missing required query parameters');
+      return;
+    }
     // Docs: https://developers.amadeus.com/self-service/category/flights/api-doc/flight-offers-search
-    // let flightSearch = await amadeus.shopping.flightOffersSearch.get({
-    //   originLocationCode: origin,
-    //   destinationLocationCode: destination,
-    //   departureDate: departureDate,
-    //   returnDate: returnDate,
-    //   adults: adults,
-    //   children: children,
-    //   currencyCode: currency,
-    //   travelClass: travelClass,
-    // });
-  // const offers = flightSearch.data;
-  const offers = flightData;
+    let flightSearch = await amadeus.shopping.flightOffersSearch.get({
+      originLocationCode: origin,
+      destinationLocationCode: destination,
+      departureDate: departureDate,
+      returnDate: returnDate,
+      adults: adults,
+      children: children,
+      currencyCode: currency,
+      travelClass: travelClass,
+    });
+  const offers = flightSearch.data;
   res.send(offers);
   }
 
@@ -172,4 +173,79 @@ export async function getAirlineLogo(req: Request, res: Response) {
       res.status(500).send('Internal Server Error');
     }
   }
+}
+
+export async function bookFlight(req: Request, res: Response){
+  const body = req.body;
+  // Docs: https://developers.amadeus.com/self-service/category/air/api-doc/flight-create-orders
+  const confirmation = await amadeus.shopping.flightOffers.pricing.post(
+    JSON.stringify({
+        'data': {
+            'type': 'flight-offers-pricing',
+            'flightOffers': body.data.flightOffers,
+        }
+    })
+  ).then((response: any) => response).catch(function (response: any) {
+    console.log(response);
+    res.send(response);
+  });
+  const updatedOffers = confirmation.result.data.flightOffers;
+  console.log(JSON.stringify(confirmation.result));
+  body.data.flightOffers = updatedOffers;
+  body.remarks = {
+    general: [
+      {
+        subType: "GENERAL_MISCELLANEOUS",
+        text: "Flight booked through TripSitter",
+      },
+    ],
+  };
+  body.ticketingAgreement = {
+    option: "DELAY_TO_CANCEL",
+    delay: "6D",
+  };
+  body.contacts = [
+    {
+      addresseeName: {
+        firstName: "TripSitter",
+        lastName: "Travel",
+      },
+      companyName: "TripSitter",
+      purpose: "STANDARD",
+      phones: [
+        {
+          deviceType: "MOBILE",
+          countryCallingCode: "1",
+          number: "415-555-1234",
+        },
+      ],
+      emailAddress: "test@example.com",
+      address: {
+        lines: ["500 El Camino Real"],
+        postalCode: "95053",
+        cityName: "Santa Clara",
+        countryCode: "US",
+      },
+    },
+  ]
+  console.log(JSON.stringify(body));
+  // res.send(priceResult);
+  await amadeus.booking.flightOrders.post(JSON.stringify(body))
+  .then(function (response: any) {
+    res.send(response.result);
+  }).catch(function (response: any) {
+    res.send(response);
+  });
+  // res.send(order.result);
+}
+
+export async function getAirportTimezone(req: Request, res: Response){
+  const lat = req.query.lat;
+  const lon = req.query.lon;
+  const now = new Date();
+  const ts = Math.floor(now.getTime() / 1000);
+  const url = `https://maps.googleapis.com/maps/api/timezone/json?location=${lat}%2C${lon}&timestamp=${ts}&key=${MAPS_API_KEY}`;
+  const response = await axios.get(url);
+  const timezone = response.data;
+  res.send(timezone);
 }

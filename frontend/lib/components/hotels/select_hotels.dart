@@ -1,13 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:tripsitter/classes/hotels.dart';
 import 'package:tripsitter/classes/profile.dart';
 import 'package:tripsitter/classes/trip.dart';
 import 'package:tripsitter/components/hotels/hotels_groups.dart';
 import 'package:tripsitter/components/hotels/hotels_options.dart';
-import 'package:tripsitter/helpers/api.dart';
-import 'package:tripsitter/helpers/formatters.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 class SelectHotels extends StatefulWidget {
   final Trip trip;
@@ -63,7 +59,7 @@ class _SelectHotelsState extends State<SelectHotels> {
                 )
               )
             ),
-            Container(
+            SizedBox(
               width: constraints.maxWidth * 0.65,
               child: HotelOptions(
                 currentGroup: currentGroup, 

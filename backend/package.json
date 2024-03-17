@@ -24,6 +24,7 @@
     "firebase-functions": "^4.2.0",
     "fs": "^0.0.1-security",
     "ngeohash": "^0.6.3",
+    "stripe": "^14.17.0",
     "tinyduration": "^3.3.0"
   },
   "devDependencies": {

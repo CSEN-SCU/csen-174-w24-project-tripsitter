@@ -9,7 +9,7 @@ export async function searchEvents(req: Request, res: Response) {
     const geocode = geohash.encode(lat, long);
     console.log(geocode);
     console.log(startDateTime, endDateTime);
-    let url = `https://app.ticketmaster.com/discovery/v2/events.json?apikey=${TICKETMASTER_KEY}&geoPoint=${geocode}&startDateTime=${startDateTime}&endDateTime=${endDateTime}&source=ticketmaster&size=100&sort=distance,date,asc`;
+    let url = `https://app.ticketmaster.com/discovery/v2/events.json?apikey=${TICKETMASTER_KEY}&geoPoint=${geocode}&startDateTime=${startDateTime}&endDateTime=${endDateTime}&source=ticketmaster&size=15&sort=distance,date,asc`;
     if(query) {
         url += `&keyword=${query}`;
     }
@@ -41,7 +41,7 @@ export async function searchEvents(req: Request, res: Response) {
             type: e.type,
             distanceUnits: e.units,
             url: e.url,
-            venues: e._embedded?.venues?.map((v: any) => {    
+            venues: e._embedded?.venues?.map((v: any) => {
                 return {
                     id: v.id,
                     name: v.name,

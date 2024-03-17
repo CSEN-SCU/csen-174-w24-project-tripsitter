@@ -3,13 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:tripsitter/classes/airport.dart';
 import 'package:tripsitter/classes/city.dart';
 
-List<City>? _citiesCache = null;
+List<City>? _citiesCache;
 
 Future<void> _loadCities(BuildContext context) async {
     var result = await DefaultAssetBundle.of(context).loadString(
     "assets/worldcities.csv",
     );
-    List<List<dynamic>> list = CsvToListConverter().convert(result, eol: "\n");
+    List<List<dynamic>> list = const CsvToListConverter().convert(result, eol: "\n");
     list.removeAt(0);
     _citiesCache = list.map((e) => City.fromArray(e)).toList();
 }
@@ -21,13 +21,13 @@ Future<List<City>> getCities(BuildContext context) async {
   return _citiesCache ?? [];
 }
 
-List<Airport>? _airportsCache = null;
+List<Airport>? _airportsCache;
 
 Future<void> _loadAmadeusAirports(BuildContext context) async {
   var result = await DefaultAssetBundle.of(context).loadString(
     "assets/airports.csv",
   );
-  List<List<dynamic>> list = CsvToListConverter().convert(result, eol: "\n");
+  List<List<dynamic>> list = const CsvToListConverter().convert(result, eol: "\n");
   list.removeAt(0);
   _airportsCache = list.map((e) => Airport.fromArray(e)).toList();
 }

@@ -1,6 +1,3 @@
 {
-    "editor.formatOnSave": false,
-    "[dart]": {
-        "editor.formatOnSave": false
-    }
+    "cmake.configureOnOpen": false
 }

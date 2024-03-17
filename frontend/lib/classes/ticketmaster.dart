@@ -272,7 +272,7 @@ class TicketmasterDateTime {
     return {
       'localDate': localDate,
       'localTime': localTime,
-      'dateTimeUtc': dateTimeUtc?.toIso8601String(),
+      'dateTime': dateTimeUtc?.toIso8601String(),
       'dateTBD': dateTBD,
       'dateTBA': dateTBA,
       'timeTBA': timeTBA,
@@ -400,8 +400,8 @@ class TicketmasterPrice {
     return TicketmasterPrice(
       type: json['type'],
       currency: json['currency'],
-      min: json['min'],
-      max: json['max'],
+      min: double.parse(json['min'].toString()),
+      max: double.parse(json['max'].toString()),
     );
   }
 
