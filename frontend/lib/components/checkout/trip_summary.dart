@@ -22,6 +22,7 @@ import 'package:tripsitter/components/checkout/car_summary.dart';
 import 'package:tripsitter/components/checkout/flight_summary.dart';
 import 'package:tripsitter/components/checkout/hotel_summary.dart';
 import 'package:tripsitter/components/checkout/itinerary_pdf.dart';
+import 'package:tripsitter/components/checkout/restaurant_summary.dart';
 import 'package:tripsitter/components/map.dart';
 import 'package:tripsitter/components/trip_console_dot.dart';
 import 'package:tripsitter/helpers/api.dart';
@@ -240,25 +241,27 @@ class _TripSummaryState extends State<TripSummary> {
                     },
                     child: const Text("Show Trip Map")),
                 SizedBox(width: 20),
-                ElevatedButton(
-                    onPressed: () async {
-                      pw.Document pdf = await generateItineraryPDF(
-                          widget.trip, widget.profiles, widget.uid);
-                      if (kIsWeb) {
-                        var savedFile = await pdf.save();
-                        List<int> fileInts = List.from(savedFile);
-                        AnchorElement(
-                            href:
-                                "data:application/octet-stream;charset=utf-16le;base64,${base64.encode(fileInts)}")
-                          ..setAttribute("download", "${widget.trip.name}.pdf")
-                          ..click();
-                      } else {
-                        await Printing.sharePdf(
-                            bytes: await pdf.save(),
-                            filename: "${widget.trip.name}.pdf");
-                      }
-                    },
-                    child: Text("Itinerary to PDF")),
+                if (widget.showBooking)
+                  ElevatedButton(
+                      onPressed: () async {
+                        pw.Document pdf = await generateItineraryPDF(
+                            widget.trip, widget.profiles, widget.uid);
+                        if (kIsWeb) {
+                          var savedFile = await pdf.save();
+                          List<int> fileInts = List.from(savedFile);
+                          AnchorElement(
+                              href:
+                                  "data:application/octet-stream;charset=utf-16le;base64,${base64.encode(fileInts)}")
+                            ..setAttribute(
+                                "download", "${widget.trip.name}.pdf")
+                            ..click();
+                        } else {
+                          await Printing.sharePdf(
+                              bytes: await pdf.save(),
+                              filename: "${widget.trip.name}.pdf");
+                        }
+                      },
+                      child: Text("Itinerary to PDF")),
               ],
             ),
             if ((split
@@ -267,7 +270,7 @@ class _TripSummaryState extends State<TripSummary> {
                     : widget.trip.flights)
                 .isNotEmpty) ...[
               SummaryHeader(
-                  "Flights: \$${split ? widget.trip.userFlightsPrice(widget.uid) : widget.trip.flightsPrice}${split ? "" : " total"}",
+                  "Flights: \$${(split ? widget.trip.userFlightsPrice(widget.uid) : widget.trip.flightsPrice).toStringAsFixed(2)}${split ? "" : " total"}",
                   icon: Icons.flight_takeoff_rounded),
               for (var flight in (split
                   ? widget.trip.flights
@@ -284,7 +287,7 @@ class _TripSummaryState extends State<TripSummary> {
                     : widget.trip.hotels)
                 .isNotEmpty) ...[
               SummaryHeader(
-                  "Hotels: \$${split ? widget.trip.userHotelsPrice(widget.uid) : widget.trip.hotelsPrice}${split ? "" : " total"}",
+                  "Hotels: \$${(split ? widget.trip.userHotelsPrice(widget.uid) : widget.trip.hotelsPrice).toStringAsFixed(2)}${split ? "" : " total"}",
                   icon: Icons.hotel_rounded),
               for (var hotel in (split
                   ? widget.trip.hotels
@@ -301,7 +304,7 @@ class _TripSummaryState extends State<TripSummary> {
                     : widget.trip.rentalCars)
                 .isNotEmpty) ...[
               SummaryHeader(
-                  "Rental Cars: \$${split ? widget.trip.userRentalCarsPrice(widget.uid) : widget.trip.rentalCarsPrice}${split ? "" : " total"}",
+                  "Rental Cars: \$${(split ? widget.trip.userRentalCarsPrice(widget.uid) : widget.trip.rentalCarsPrice).toStringAsFixed(2)}${split ? "" : " total"}",
                   icon: Icons.directions_car_rounded),
               for (var rentalCar in (split
                   ? widget.trip.rentalCars
@@ -332,6 +335,21 @@ class _TripSummaryState extends State<TripSummary> {
                     price:
                         split ? activity.userPrice(widget.uid) : activity.price,
                     showBooking: widget.showBooking),
+              Container(height: 10)
+            ],
+            if ((split
+                    ? widget.trip.meals
+                        .where((r) => r.participants.contains(widget.uid))
+                    : widget.trip.meals)
+                .isNotEmpty) ...[
+              SummaryHeader("Restaurants: ", icon: Icons.restaurant_rounded),
+              for (var meal in (split
+                  ? widget.trip.meals
+                      .where((r) => r.participants.contains(widget.uid))
+                  : widget.trip.meals))
+                RestaurantSummary(
+                    meal: meal,
+                    price: split ? meal.userPrice(widget.uid) : meal.price),
               Container(height: 10)
             ],
             Padding(

@@ -1,71 +1,73 @@
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:tripsitter/classes/profile.dart';
+import 'package:tripsitter/classes/trip.dart';
+import 'package:tripsitter/classes/yelp.dart';
+import 'package:tripsitter/helpers/styles.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class RestaurantSummary extends StatelessWidget {
-  final String name;
-  final String address;
-  final String cuisine;
-  final double rating;
+  final Meal meal;
+  final double? price;
+  final bool showBooking;
+  const RestaurantSummary(
+      {required this.meal,
+      required this.price,
+      this.showBooking = false,
+      Key? key})
+      : super(key: key);
 
-  const RestaurantSummary({
-    required this.name,
-    required this.address,
-    required this.cuisine,
-    required this.rating,
-  });
+  YelpRestaurant get restaurant => meal.restaurant;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        border: Border.all(color: Colors.grey),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            name,
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          SizedBox(height: 8),
-          Text(
-            address,
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.grey,
-            ),
-          ),
-          SizedBox(height: 8),
-          Text(
-            cuisine,
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.grey,
-            ),
-          ),
-          SizedBox(height: 8),
-          Row(
+    List<UserProfile> profiles = Provider.of<List<UserProfile>>(context);
+    bool split = Provider.of<bool>(context);
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Row(children: [
+        Expanded(
+          flex: 2,
+          child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(restaurant.name, style: summaryHeaderStyle),
+                Text(restaurant.categories
+                    .map((category) => category.title)
+                    .join(", ")),
+                Text(restaurant.location.address1),
+              ]),
+        ),
+        if (!split)
+          Expanded(
+              flex: 1,
+              child: Column(
+                children: meal.participants
+                    .map((e) =>
+                        profiles
+                            .firstWhereOrNull((profile) => profile.id == e)
+                            ?.name ??
+                        "")
+                    .map((e) => Text(e))
+                    .toList(),
+              )),
+        SizedBox(
+          width: 130,
+          child: Center(
+              child: Column(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              Icon(
-                Icons.star,
-                color: Colors.yellow,
-              ),
-              SizedBox(width: 4),
-              Text(
-                rating.toString(),
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.grey,
-                ),
-              ),
+              Text(meal.restaurant.price == null
+                  ? " "
+                  : "${meal.restaurant.price}"),
             ],
-          ),
-        ],
-      ),
+          )),
+        )
+      ]),
     );
   }
 }

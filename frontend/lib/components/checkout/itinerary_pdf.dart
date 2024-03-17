@@ -36,12 +36,16 @@ Future<pw.Document> generateItineraryPDF(
   final hotelIconData = await rootBundle.load('/icons/hotel_icon.png');
   final carIconData = await rootBundle.load('/icons/car_icon.png');
   final activityIconData = await rootBundle.load('/icons/activity_icon.png');
+  final restaurantIconData =
+      await rootBundle.load('/icons/restaurant_icon.png');
   final tripSitterLogo =
       pw.MemoryImage(tripSitterIconData.buffer.asUint8List());
   final flightIcon = pw.MemoryImage(flightIconData.buffer.asUint8List());
   final hotelIcon = pw.MemoryImage(hotelIconData.buffer.asUint8List());
   final carIcon = pw.MemoryImage(carIconData.buffer.asUint8List());
   final activityIcon = pw.MemoryImage(activityIconData.buffer.asUint8List());
+  final restaurantIcon =
+      pw.MemoryImage(restaurantIconData.buffer.asUint8List());
 
   doc.addPage(pw.MultiPage(
     pageFormat: PdfPageFormat.a4,
@@ -420,6 +424,89 @@ Future<pw.Document> generateItineraryPDF(
                         price != null
                             ? "\$${price.toStringAsFixed(2)}"
                             : "Unknown price",
+                        style: heavyStyle,
+                      ),
+                    ],
+                  ),
+                  pw.Divider(),
+                ],
+              );
+            },
+          ),
+        ],
+
+        // Restaurants
+        if (trip.meals.isNotEmpty) ...[
+          pw.Container(
+            decoration: pw.BoxDecoration(
+              border: pw.Border(
+                  bottom: pw.BorderSide(width: 2, color: PdfColors.grey)),
+            ),
+            padding: pw.EdgeInsets.only(
+                bottom: 3), // Space between text and underline
+            margin: pw.EdgeInsets.symmetric(vertical: 10),
+            child: pw.Row(
+              crossAxisAlignment: pw.CrossAxisAlignment.end,
+              children: [
+                pw.Text('Restaurants', style: sectionTitleStyle),
+                pw.SizedBox(width: 5),
+                pw.Column(
+                  children: [
+                    pw.Image(restaurantIcon, width: 20, height: 20),
+                    pw.SizedBox(height: 2)
+                  ],
+                )
+              ],
+            ),
+          ),
+          ...trip.meals.map(
+            (meal) {
+              final price = meal.price;
+              final memberNames = meal.participants
+                  .map((id) =>
+                      profiles
+                          .firstWhereOrNull((profile) => profile.id == id)
+                          ?.name ??
+                      'Unknown')
+                  .join(', ');
+              return pw.Column(
+                children: [
+                  pw.Row(
+                    mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                    children: [
+                      pw.Expanded(
+                        child: pw.Column(
+                          crossAxisAlignment: pw.CrossAxisAlignment.start,
+                          children: [
+                            pw.Text(
+                              meal.restaurant.name,
+                              style: heavyStyle,
+                            ),
+                            pw.UrlLink(
+                                destination: meal.restaurant.url!,
+                                child: pw.Text("View/Reserve on Yelp",
+                                    style: pw.TextStyle(
+                                        fontSize: 11,
+                                        font: blackTtf,
+                                        color: PdfColors.blue,
+                                        decoration:
+                                            pw.TextDecoration.underline))),
+                            pw.Text(
+                              memberNames,
+                              style: contentStyle,
+                            ),
+                            pw.Text(
+                              meal.restaurant.location.displayAddress
+                                  .join(", "),
+                              style: contentStyle,
+                            ),
+                          ],
+                        ),
+                      ),
+                      pw.Text(
+                        meal.restaurant.price != null
+                            ? meal.restaurant.price!
+                            : " ",
                         style: heavyStyle,
                       ),
                     ],
