@@ -279,29 +279,11 @@ class FlightOffer {
   }
 
   Map<String, dynamic> toJson({bool includeComments = false}) {
-    // Map<String, dynamic> json = {
-    //   'type': type,
-    //   'id': id,
-    //   'source': source,
-    //   'instantTicketingRequired': instantTicketingRequired,
-    //   'nonHomogeneous': nonHomogeneous,
-    //   'oneWay': oneWay,
-    //   'lastTicketingDate': lastTicketingDate,
-    //   'lastTicketingDateTime': lastTicketingDateTime,
-    //   'numberOfBookableSeats': numberOfBookableSeats,
-    //   'itineraries':
-    //       itineraries.map((itinerary) => itinerary.toJson()).toList(),
-    //   'price': price.toJson(),
-    //   'pricingOptions': pricingOptions.toJson(),
-    //   'validatingAirlineCodes': validatingAirlineCodes,
-    //   'travelerPricings': travelerPricings
-    //       .map((travelerPricing) => travelerPricing.toJson())
-    //       .toList(),
-    // };
-    // if(includeComments){
-    //   json["comments"] = comments.map((e) => e.toJson()).toList();
-    // }
-    return json;
+    Map<String, dynamic> js = {...json};
+    if(includeComments){
+      js["comments"] = comments.map((e) => e.toJson()).toList();
+    }
+    return js;
   }
 
   @override
