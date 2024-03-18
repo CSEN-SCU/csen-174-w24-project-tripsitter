@@ -1,5 +1,3 @@
-import 'dart:html';
-
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show Uint8List, rootBundle;
@@ -17,10 +15,10 @@ Future<pw.Document> generateItineraryPDF(
   final doc = pw.Document(pageMode: PdfPageMode.outlines);
 
   // Load the font
-  final robotoBlackData = await rootBundle.load("fonts/Roboto-Black.ttf");
-  final robotoLightData = await rootBundle.load("fonts/Roboto-Light.ttf");
+  final robotoBlackData = await rootBundle.load("assets/fonts/Roboto-Black.ttf");
+  final robotoLightData = await rootBundle.load("assets/fonts/Roboto-Light.ttf");
   final robotoItalicData =
-      await rootBundle.load("fonts/Roboto-LightItalic.ttf");
+      await rootBundle.load("assets/fonts/Roboto-LightItalic.ttf");
   final blackTtf = pw.Font.ttf(robotoBlackData.buffer.asByteData());
   final lightTtf = pw.Font.ttf(robotoLightData.buffer.asByteData());
   final italicTtf = pw.Font.ttf(robotoItalicData.buffer.asByteData());
@@ -45,13 +43,13 @@ Future<pw.Document> generateItineraryPDF(
   final timeFormatter = DateFormat('h:mm a');
 
   // Load icons
-  final tripSitterIconData = await rootBundle.load('tripsitter_logo.png');
-  final flightIconData = await rootBundle.load('/icons/flight_icon.png');
-  final hotelIconData = await rootBundle.load('/icons/hotel_icon.png');
-  final carIconData = await rootBundle.load('/icons/car_icon.png');
-  final activityIconData = await rootBundle.load('/icons/activity_icon.png');
+  final tripSitterIconData = await rootBundle.load('assets/tripsitter_logo.png');
+  final flightIconData = await rootBundle.load('assets//icons/flight_icon.png');
+  final hotelIconData = await rootBundle.load('assets//icons/hotel_icon.png');
+  final carIconData = await rootBundle.load('assets//icons/car_icon.png');
+  final activityIconData = await rootBundle.load('assets//icons/activity_icon.png');
   final restaurantIconData =
-      await rootBundle.load('/icons/restaurant_icon.png');
+      await rootBundle.load('assets//icons/restaurant_icon.png');
   final tripSitterLogo =
       pw.MemoryImage(tripSitterIconData.buffer.asUint8List());
   final flightIcon = pw.MemoryImage(flightIconData.buffer.asUint8List());
