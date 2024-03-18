@@ -2,19 +2,23 @@ import 'package:animated_list_plus/animated_list_plus.dart';
 import 'package:animated_list_plus/transitions.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:tripsitter/classes/airport.dart';
 import 'package:tripsitter/classes/car.dart';
 import 'package:tripsitter/classes/filterbutton.dart';
 import 'package:tripsitter/classes/trip.dart';
 import 'package:tripsitter/components/cars/car_info_dialog.dart';
 import 'package:tripsitter/helpers/api.dart';
+import 'package:tripsitter/helpers/data.dart';
 import 'package:tripsitter/helpers/formatters.dart';
+import 'package:tripsitter/helpers/locators.dart';
 import 'package:tripsitter/popups/checkbox_popup.dart';
 
 class CarOptions extends StatefulWidget {
+  final Trip trip;
   final RentalCarGroup? currentGroup;
   final Function setState;
   const CarOptions(
-      {required this.currentGroup, required this.setState, super.key});
+      {required this.trip, required this.currentGroup, required this.setState, super.key});
 
   @override
   State<CarOptions> createState() => _CarOptionsState();
@@ -32,13 +36,25 @@ class _CarOptionsState extends State<CarOptions> {
   List<RentalCarOffer> cars = [];
 
   void getCars() async {
+
+    String? airportCode = widget.trip.flights.firstOrNull?.arrivalAirport;
+    var airports = await getAirports(context);
+    Airport? airport;
+    if (airportCode != null) {
+      airport = airports.firstWhere((element) => element.iataCode == airportCode);
+    }
+    else {
+      airport = await getNearestAirport(widget.trip.destination, context);
+    }
+    
     RentalCarQuery query = RentalCarQuery(
-      name: 'San Francisco',
-      lat: 37.6193,
-      lon: -122.3816,
-      pickUp: DateTime(2024, 4, 1, 12, 0),
-      dropOff: DateTime(2024, 4, 3, 10, 0),
+      name: "${widget.trip.destination.name}, ${widget.trip.destination.country}",
+      lat: airport.lat,
+      lon: airport.lon,
+      pickUp: widget.trip.startDate,
+      dropOff: widget.trip.endDate,
     );
+    print(query.toJson());
     cars = await TripsitterApi.searchRentalCars(query);
     cars.sort((a, b) => a.price.compareTo(b.price));
     final Set<String> rentalCompanies = {};

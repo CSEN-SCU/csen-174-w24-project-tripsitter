@@ -53,7 +53,7 @@ class RentalCarOffer {
   final int doRnId;
   final String pickupMethod;
   final String officeId;
-  final VndrRating vndrRating;
+  final VndrRating? vndrRating;
   final int seat;
   final RentalCarProvider provider;
   
@@ -90,7 +90,8 @@ class RentalCarOffer {
     required this.comments,
   });
 
-  factory RentalCarOffer.fromJson(Map<String, dynamic> json) => RentalCarOffer(
+  factory RentalCarOffer.fromJson(Map<String, dynamic> json) { 
+    return RentalCarOffer(
         sipp: json["sipp"],
         puRnId: json["pu_rn_id"],
         guid: json["guid"],
@@ -113,10 +114,11 @@ class RentalCarOffer {
         doRnId: json["do_rn_id"],
         pickupMethod: json["pickup_method"],
         officeId: json["office_id"],
-        vndrRating: VndrRating.fromJson(json["vndr_rating"]),
+        vndrRating: json["vndr_rating"] == null ? null : VndrRating.fromJson(json["vndr_rating"]),
         seat: json["seat"],
         provider: RentalCarProvider.fromJson(json["provider"]),
       );
+  }
 
   Map<String, dynamic> toJson({bool includeComments = true}){
     Map<String,dynamic> json = {
@@ -141,10 +143,12 @@ class RentalCarOffer {
         "do_rn_id": doRnId,
         "pickup_method": pickupMethod,
         "office_id": officeId,
-        "vndr_rating": vndrRating.toJson(),
         "seat": seat,
         "provider": provider.toJson(),
       };
+    if(vndrRating != null) {
+      json["vndr_rating"] = vndrRating!.toJson();
+    }
     if(includeComments){
       json["comments"] = comments.map((e) => e.toJson()).toList();
     }
@@ -161,7 +165,7 @@ class RentalCarOffer {
 }
 
 class RentalCarAdds {
-  final bool unlimMlg;
+  final bool? unlimMlg;
 
   RentalCarAdds({
     required this.unlimMlg,

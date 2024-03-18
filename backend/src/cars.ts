@@ -29,8 +29,8 @@ function parseQuotes(data: any) {
     return data.quotes.map((q: any) => {
         let map = {...q};
         map["provider"] = data.providers[q.prv_id];
-        console.log(q.group);
-        console.log(data.groups[q.group]);
+        // console.log(q.group);
+        // console.log(data.groups[q.group]);
         map["group"] = data.groups[q.group];
         return map;
     })
@@ -54,6 +54,9 @@ export async function getRentalCars(req: Request, res: Response) {
     const lon = Number(lonStr);
 
     const options = (await getEntityList(name)).data;
+
+    // wait 2 seconds
+    await new Promise(resolve => setTimeout(resolve, 2000));
     // find option with closest distance to provided lat lon
     options.sort((a: any, b: any) => {
         const aLat = Number(a.location.split(", ")[0]);

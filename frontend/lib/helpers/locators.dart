@@ -6,7 +6,7 @@ import 'package:tripsitter/classes/airport.dart';
 import 'package:tripsitter/classes/city.dart';
 import 'package:tripsitter/helpers/data.dart';
 
-Future<String> getNearestAirport(City city, BuildContext context) async {
+Future<Airport> getNearestAirport(City city, BuildContext context) async {
   List<Airport> airports = await getAirports(context);
   airports = airports.where((element) => element.scale < 6).toList();
   airports.sort((a, b) {
@@ -14,7 +14,7 @@ Future<String> getNearestAirport(City city, BuildContext context) async {
     double bDist = distance(city.lat, city.lon, b.lat, b.lon);
     return aDist.compareTo(bDist);
   });
-  return airports.first.iataCode;
+  return airports.first;
 }
 
 Future<List<Airport>> getNearbyAirports(String code, BuildContext context) async {

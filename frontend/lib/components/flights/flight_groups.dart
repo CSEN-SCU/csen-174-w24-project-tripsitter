@@ -50,7 +50,7 @@ class _FlightGroupsState extends State<FlightGroups> {
 
   Future<void> createFlightGroups() async {
     String destinationAirport =
-        await getNearestAirport(trip.destination, context);
+        (await getNearestAirport(trip.destination, context)).iataCode;
     for (var profile in profiles) {
       FlightGroup? existingGroup = trip.flights.firstWhereOrNull(
         (element) => element.members.contains(profile.id),
@@ -60,7 +60,7 @@ class _FlightGroupsState extends State<FlightGroups> {
       }
       if (profile.hometown != null) {
         var nearestAirport =
-            await getNearestAirport(profile.hometown!, context);
+            (await getNearestAirport(profile.hometown!, context)).iataCode;
         FlightGroup? existing = trip.flights.firstWhereOrNull(
           (element) => element.departureAirport == nearestAirport,
         );
