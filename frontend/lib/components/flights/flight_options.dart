@@ -374,7 +374,8 @@ class _FlightOptionsState extends State<FlightOptions> {
                           onPressed: () {
                             showDialog(
                                 context: context,
-                                builder: (context) => FlightDialog(flight));
+                                builder: (context) =>
+                                    FlightDialog(flight.itineraries.first));
                           },
                         )),
                         TableCell(
