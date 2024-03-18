@@ -290,176 +290,191 @@ class _CarOptionsState extends State<CarOptions> {
     return widget.currentGroup == null
         ? const Center(
             child: Text("Select or create a group to choose a rental car"))
-        : Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Column(
-              children: [
-                Text("Rental Cars for ${widget.currentGroup!.name}",
-                    style: const TextStyle(
-                        fontSize: 24, fontWeight: FontWeight.bold)),
-                Row(
-                  children: [
-                    Expanded(
-                      child: Wrap(
-                        spacing: 10,
-                        children: <Widget>[
-                          FilterButton(
-                              text: 'Company',
-                              globalKey: _companyKey,
-                              onPressed: () => _showCompanyPopup(),
-                              icon: Icon(
-                                _isCompanyOpen
-                                    ? Icons.arrow_drop_up
-                                    : Icons.arrow_drop_down,
-                              )),
-                          FilterButton(
-                              text: 'Size',
-                              globalKey: _sizeKey,
-                              onPressed: _showSizePopup,
-                              icon: Icon(
-                                _isSizeOpen
-                                    ? Icons.arrow_drop_up
-                                    : Icons.arrow_drop_down,
-                              )),
-                          FilterButton(
-                              text: 'Drive',
-                              globalKey: _driveKey,
-                              onPressed: _showDrivePopup,
-                              icon: Icon(
-                                _isDriveOpen
-                                    ? Icons.arrow_drop_up
-                                    : Icons.arrow_drop_down,
-                              )),
-                          FilterButton(
-                              text: 'Fuel',
-                              globalKey: _fuelKey,
-                              onPressed: _showFuelPopup,
-                              icon: Icon(
-                                _isFuelOpen
-                                    ? Icons.arrow_drop_up
-                                    : Icons.arrow_drop_down,
-                              )),
-                        ],
-                      ),
-                    ),
-                    FilterButton(
-                        color: Colors.grey[50]!,
-                        text: 'Sort by Price',
-                        globalKey: _sortKey,
-                        onPressed: () {},
-                        icon: IconButton(
-                          onPressed: () {
-                            setState(() {
-                              _selectedSort = !_selectedSort;
-                            });
-                          },
-                          icon: Icon(_selectedSort
-                              ? Icons.arrow_upward
-                              : Icons.arrow_downward),
-                        )),
-                  ],
-                ),
-                const SizedBox(height: 5),
-                Expanded(
-                  child: ImplicitlyAnimatedList<RentalCarOffer>(
-                    insertDuration: const Duration(milliseconds: 350),
-                    removeDuration: const Duration(milliseconds: 350),
-                    updateDuration: const Duration(milliseconds: 350),
-                    areItemsTheSame: (a, b) => a.guid == b.guid,
-                    items: (_selectedSort ? cars : cars.reversed)
-                        .where(filterCar)
-                        .toList(),
-                    itemBuilder: (context, animation, car, i) =>
-                        SizeFadeTransition(
-                      sizeFraction: 0.8,
-                      curve: Curves.easeInOut,
-                      animation: animation,
-                      child: ListTile(
-                        tileColor: i % 2 == 0 ? Colors.white : Colors.grey[200],
-                        leading: Image.network(
-                          "https://logos.skyscnr.com/images/carhire/sippmaps/${car.group.img}",
-                          width: 80,
-                          height: 80,
-                        ),
-                        title: Text(
-                            "${car.sipp.fromSipp()} (${car.carName} or similar)"),
-                        trailing: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            IconButton(
-                              icon: const Icon(Icons.info),
-                              onPressed: () {
-                                showDialog(
-                                  context: context,
-                                  builder: (BuildContext context) {
-                                    return CarInfoDialog(car);
-                                  },
-                                );
-                              },
-                            ),
-                            ElevatedButton(
-                              child: Text(
-                                "Select${widget.currentGroup!.options.map((c) => c.guid).contains(car.guid) ? "ed" : ""}",
-                              ),
-                              onPressed: () async {
-                                if (widget.currentGroup!.options
-                                    .map((c) => c.guid)
-                                    .contains(car.guid)) {
-                                  await widget.currentGroup!
-                                      .removeOptionById(car.guid);
-                                } else {
-                                  await widget.currentGroup!.addOption(car);
-                                }
-                                setState(() {});
-                                widget.setState();
-                                if (isMobile && mounted) {
-                                  Navigator.pop(context);
-                                }
-                              },
-                            ),
-                          ],
-                        ),
-                        subtitle: Text("\$${car.price.toStringAsFixed(2)}"),
-                      ),
-                    ),
+        : cars.isEmpty
+            ? const Center(
+                child: SizedBox(
+                  width: 120,
+                  height: 120,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 20,
+                    semanticsLabel: 'Circular progress indicator',
                   ),
                 ),
-                // for (RentalCarOffer car in (_selectedSort ? cars : cars.reversed).where(filterCar))
-                // ListTile(
-                //     leading: Image.network("https://logos.skyscnr.com/images/carhire/sippmaps/${car.group.img}", width: 80, height: 80),
-                //     title: Text("${car.sipp.fromSipp()} (${car.carName} or similar)"),
-                //     trailing: Row(
-                //       mainAxisSize: MainAxisSize.min,
-                //       children: [
-                //         IconButton(
-                //           icon: Icon(Icons.info),
-                //           onPressed: () {
-                //             showDialog(
-                //               context: context,
-                //               builder: (BuildContext context) {
-                //                 return CarInfoDialog(car);
-                //               }
-                //             );
-                //           },
-                //         ),
-                //         ElevatedButton(
-                //           child: Text("Select${widget.currentGroup!.options.map((c) => c.guid).contains(car.guid) ? "ed" : ""}"),
-                //           onPressed: () async {
-                //             if(widget.currentGroup!.options.map((c) => c.guid).contains(car.guid)) {
-                //               await widget.currentGroup!.removeOptionById(car.guid);
-                //             } else {
-                //               await widget.currentGroup!.addOption(car);
-                //             }
-                //             setState(() {});
-                //             widget.setState();
-                //           },
-                //         )
-                //       ]
-                //     ),
-                //     subtitle: Text("\$${car.price.toStringAsFixed(2)}"),
-                //   )
-              ],
-            ),
-          );
+              )
+            : Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Column(
+                  children: [
+                    Text("Rental Cars for ${widget.currentGroup!.name}",
+                        style: const TextStyle(
+                            fontSize: 24, fontWeight: FontWeight.bold)),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Wrap(
+                            spacing: 10,
+                            children: <Widget>[
+                              FilterButton(
+                                  text: 'Company',
+                                  globalKey: _companyKey,
+                                  onPressed: () => _showCompanyPopup(),
+                                  icon: Icon(
+                                    _isCompanyOpen
+                                        ? Icons.arrow_drop_up
+                                        : Icons.arrow_drop_down,
+                                  )),
+                              FilterButton(
+                                  text: 'Size',
+                                  globalKey: _sizeKey,
+                                  onPressed: _showSizePopup,
+                                  icon: Icon(
+                                    _isSizeOpen
+                                        ? Icons.arrow_drop_up
+                                        : Icons.arrow_drop_down,
+                                  )),
+                              FilterButton(
+                                  text: 'Drive',
+                                  globalKey: _driveKey,
+                                  onPressed: _showDrivePopup,
+                                  icon: Icon(
+                                    _isDriveOpen
+                                        ? Icons.arrow_drop_up
+                                        : Icons.arrow_drop_down,
+                                  )),
+                              FilterButton(
+                                  text: 'Fuel',
+                                  globalKey: _fuelKey,
+                                  onPressed: _showFuelPopup,
+                                  icon: Icon(
+                                    _isFuelOpen
+                                        ? Icons.arrow_drop_up
+                                        : Icons.arrow_drop_down,
+                                  )),
+                            ],
+                          ),
+                        ),
+                        FilterButton(
+                            color: Colors.grey[50]!,
+                            text: 'Sort by Price',
+                            globalKey: _sortKey,
+                            onPressed: () {},
+                            icon: IconButton(
+                              onPressed: () {
+                                setState(() {
+                                  _selectedSort = !_selectedSort;
+                                });
+                              },
+                              icon: Icon(_selectedSort
+                                  ? Icons.arrow_upward
+                                  : Icons.arrow_downward),
+                            )),
+                      ],
+                    ),
+                    const SizedBox(height: 5),
+                    Expanded(
+                      child: ImplicitlyAnimatedList<RentalCarOffer>(
+                        insertDuration: const Duration(milliseconds: 350),
+                        removeDuration: const Duration(milliseconds: 350),
+                        updateDuration: const Duration(milliseconds: 350),
+                        areItemsTheSame: (a, b) => a.guid == b.guid,
+                        items: (_selectedSort ? cars : cars.reversed)
+                            .where(filterCar)
+                            .toList(),
+                        itemBuilder: (context, animation, car, i) =>
+                            SizeFadeTransition(
+                          sizeFraction: 0.8,
+                          curve: Curves.easeInOut,
+                          animation: animation,
+                          child: Container(
+                            color: i % 2 == 0 ? Colors.grey[200] : Colors.white,
+                            child: ListTile(
+                              leading: Image.network(
+                                "https://logos.skyscnr.com/images/carhire/sippmaps/${car.group.img}",
+                                width: 80,
+                                height: 80,
+                              ),
+                              title: Text(
+                                  "${car.sipp.fromSipp()} (${car.carName} or similar)"),
+                              trailing: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  IconButton(
+                                    icon: const Icon(Icons.info),
+                                    onPressed: () {
+                                      showDialog(
+                                        context: context,
+                                        builder: (BuildContext context) {
+                                          return CarInfoDialog(car);
+                                        },
+                                      );
+                                    },
+                                  ),
+                                  ElevatedButton(
+                                    child: Text(
+                                      "Select${widget.currentGroup!.options.map((c) => c.guid).contains(car.guid) ? "ed" : ""}",
+                                    ),
+                                    onPressed: () async {
+                                      if (widget.currentGroup!.options
+                                          .map((c) => c.guid)
+                                          .contains(car.guid)) {
+                                        await widget.currentGroup!
+                                            .removeOptionById(car.guid);
+                                      } else {
+                                        await widget.currentGroup!
+                                            .addOption(car);
+                                      }
+                                      setState(() {});
+                                      widget.setState();
+                                      if (isMobile && mounted) {
+                                        Navigator.pop(context);
+                                      }
+                                    },
+                                  ),
+                                ],
+                              ),
+                              subtitle:
+                                  Text("\$${car.price.toStringAsFixed(2)}"),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    // for (RentalCarOffer car in (_selectedSort ? cars : cars.reversed).where(filterCar))
+                    // ListTile(
+                    //     leading: Image.network("https://logos.skyscnr.com/images/carhire/sippmaps/${car.group.img}", width: 80, height: 80),
+                    //     title: Text("${car.sipp.fromSipp()} (${car.carName} or similar)"),
+                    //     trailing: Row(
+                    //       mainAxisSize: MainAxisSize.min,
+                    //       children: [
+                    //         IconButton(
+                    //           icon: Icon(Icons.info),
+                    //           onPressed: () {
+                    //             showDialog(
+                    //               context: context,
+                    //               builder: (BuildContext context) {
+                    //                 return CarInfoDialog(car);
+                    //               }
+                    //             );
+                    //           },
+                    //         ),
+                    //         ElevatedButton(
+                    //           child: Text("Select${widget.currentGroup!.options.map((c) => c.guid).contains(car.guid) ? "ed" : ""}"),
+                    //           onPressed: () async {
+                    //             if(widget.currentGroup!.options.map((c) => c.guid).contains(car.guid)) {
+                    //               await widget.currentGroup!.removeOptionById(car.guid);
+                    //             } else {
+                    //               await widget.currentGroup!.addOption(car);
+                    //             }
+                    //             setState(() {});
+                    //             widget.setState();
+                    //           },
+                    //         )
+                    //       ]
+                    //     ),
+                    //     subtitle: Text("\$${car.price.toStringAsFixed(2)}"),
+                    //   )
+                  ],
+                ),
+              );
   }
 }
