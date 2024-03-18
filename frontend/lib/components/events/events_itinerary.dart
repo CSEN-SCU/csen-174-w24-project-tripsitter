@@ -118,81 +118,90 @@ class _EventsItineraryState extends State<EventsItinerary> {
                 ),
               ],
             );
-            Widget participants = Expanded(
-              child: FilterButton(
-                text: 'Participants',
-                icon: Icon(
-                  widget.participantsPopupOpenState[
-                              activity.event.id] ??
-                          false
-                      ? Icons.arrow_drop_up
-                      : Icons.arrow_drop_down,
-                ),
-                globalKey: widget.participantsPopupKeys[activity
-                    .event.id]!, // Use the activity's specific key
-                onPressed: () {
-                  final activityId = activity.event.id;
-                  setState(() {
-                    widget.participantsPopupOpenState[activityId] =
-                        true;
-                  });
-                  final participantOptions =
-                      widget.profiles.map((p) => p.name).toList();
-                  final currentlySelected = widget.profiles
-                      .where((p) => widget
-                          .selectedParticipantsMap[activityId]!
-                          .contains(p.id))
-                      .map((p) => p.name)
-                      .toList();
-                  CheckboxPopup(
-                    options: participantOptions,
-                    selected: currentlySelected,
-                    onSelected: (List<String> selectedNames) {
-                      // Update the selected participants map based on names
-                      setState(() {
-                        widget.selectedParticipantsMap[activityId] =
-                            widget.profiles
-                                .where((profile) => selectedNames
-                                    .contains(profile.name))
-                                .map((profile) => profile.id)
-                                .toList();
-      
-                        // Update the actual activity participants to reflect changes
-                        activity.participants.clear();
-                        activity.participants.addAll(widget
-                            .selectedParticipantsMap[activityId]!);
-                        widget.trip.save();
-                      });
-                    },
-                    format: (s) => s.toString(),
-                  )
-                      .showPopup(context,
-                          widget.participantsPopupKeys[activityId]!)
-                      .then((_) {
-                    setState(() {
-                      widget.participantsPopupOpenState[
-                          activityId] = false;
-                    });
-                  });
-                },
+            Widget participants = FilterButton(
+              text: 'Participants',
+              icon: Icon(
+                widget.participantsPopupOpenState[
+                            activity.event.id] ??
+                        false
+                    ? Icons.arrow_drop_up
+                    : Icons.arrow_drop_down,
               ),
+              globalKey: widget.participantsPopupKeys[activity
+                  .event.id]!, // Use the activity's specific key
+              onPressed: () {
+                final activityId = activity.event.id;
+                setState(() {
+                  widget.participantsPopupOpenState[activityId] =
+                      true;
+                });
+                final participantOptions =
+                    widget.profiles.map((p) => p.name).toList();
+                final currentlySelected = widget.profiles
+                    .where((p) => widget
+                        .selectedParticipantsMap[activityId]!
+                        .contains(p.id))
+                    .map((p) => p.name)
+                    .toList();
+                CheckboxPopup(
+                  options: participantOptions,
+                  selected: currentlySelected,
+                  onSelected: (List<String> selectedNames) {
+                    // Update the selected participants map based on names
+                    setState(() {
+                      widget.selectedParticipantsMap[activityId] =
+                          widget.profiles
+                              .where((profile) => selectedNames
+                                  .contains(profile.name))
+                              .map((profile) => profile.id)
+                              .toList();
+                  
+                      // Update the actual activity participants to reflect changes
+                      activity.participants.clear();
+                      activity.participants.addAll(widget
+                          .selectedParticipantsMap[activityId]!);
+                      widget.trip.save();
+                    });
+                  },
+                  format: (s) => s.toString(),
+                )
+                    .showPopup(context,
+                        widget.participantsPopupKeys[activityId]!)
+                    .then((_) {
+                  setState(() {
+                    widget.participantsPopupOpenState[
+                        activityId] = false;
+                  });
+                });
+              },
             );
             return Card(
               child: Column(
                 children: [
-                  ListTile(
-                    title: Text(activity.event.name),
-                    isThreeLine: true,
-                    visualDensity:
-                        const VisualDensity(vertical: 4), // to expand
-                    subtitle: Text(
-                        '${activity.event.venues.firstOrNull?.name}\n${activity.event.startTime.getFormattedDate()}'),
-                    trailing: isMobile ? null : Column(
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Row(
                       children: [
-                        actionsRow,
-                        const SizedBox(height: 2),
-                        participants,
-                      ],
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(activity.event.name, style: TextStyle(fontSize: 15, color: Colors.black)),
+                              Text(
+                                '${activity.event.venues.firstOrNull?.name}\n${activity.event.startTime.getFormattedDate()}'),
+                              
+                            ],
+                          ),
+                        ),
+                        if(!isMobile)
+                          Column(
+                            children: [
+                              actionsRow,
+                              const SizedBox(height: 2),
+                              participants,
+                            ],
+                          )
+                      ]
                     ),
                   ),
                   if(isMobile)
