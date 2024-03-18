@@ -107,6 +107,7 @@ class _RestaurantsItineraryState extends State<RestaurantsItinerary> {
                         }
                       },
                     ),
+                    Container(width: 10),
                     ElevatedButton(
                       onPressed: () async {
                         await widget.trip.removeMeal(meal);

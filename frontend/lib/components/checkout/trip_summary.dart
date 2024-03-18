@@ -217,6 +217,9 @@ class _TripSummaryState extends State<TripSummary> {
                               ),
                               child: Stack(children: [
                                 TripsitterMap<int>(
+                                    createWidget: (dynamic h) {
+                                      return Container();
+                                    },
                                     items: [],
                                     trip: widget.trip,
                                     getLat: (r) => 0.0,

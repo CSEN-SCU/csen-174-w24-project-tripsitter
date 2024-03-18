@@ -5,8 +5,11 @@ import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:mapbox_gl/mapbox_gl.dart';
+import 'package:tripsitter/classes/airport.dart';
+import 'package:tripsitter/classes/hotels.dart';
 import 'package:tripsitter/classes/ticketmaster.dart';
 import 'package:tripsitter/classes/trip.dart';
+import 'package:tripsitter/classes/yelp.dart';
 import 'package:tripsitter/helpers/locators.dart';
 import 'package:tripsitter/helpers/data.dart';
 
@@ -20,7 +23,8 @@ class TripsitterMap<T> extends StatefulWidget {
   final bool Function(T item) isSelected;
   final bool Function(T item)? isOption;
   final bool Function(T item)? isOther;
-  const TripsitterMap({required this.items, required this.trip, required this.getLat, required this.getLon, required this.isSelected, required this.extras, this.isOption, this.isOther, super.key});
+  final Widget Function(T item) createWidget;
+  const TripsitterMap({required this.items, required this.createWidget, required this.trip, required this.getLat, required this.getLon, required this.isSelected, required this.extras, this.isOption, this.isOther, super.key});
 
   @override
   State createState() => TripsitterMapState();
@@ -62,11 +66,8 @@ class TripsitterMapState extends State<TripsitterMap> {
           params[i].latitude,
           params[i].longitude,
         );
-        var isNearby = eventDistance < 50.0;
-        if (isNearby) {
-          addMarker(point, params[i], isSelected: widget.isSelected(item), isOption: widget.isOption?.call(item) ?? false, isOther: widget.isOther?.call(item) ?? false);
-          markersCount++;
-        }
+        addMarker(point, params[i], isSelected: widget.isSelected(item), isOption: widget.isOption?.call(item) ?? false, isOther: widget.isOther?.call(item) ?? false, popupWidget: widget.createWidget(item));
+        markersCount++;
       });
     });
     if (widget.trip.hotels.isNotEmpty && widget.extras.contains(MarkerType.hotel)) {
@@ -81,7 +82,9 @@ class TripsitterMapState extends State<TripsitterMap> {
               Point<double>(value.x as double, value.y as double),
               LatLng(element.selectedInfo?.latitude ?? 0.0,
                   element.selectedInfo?.longitude ?? 0.0),
-              type: MarkerType.hotel);
+              type: MarkerType.hotel,
+              item: element.selectedInfo
+          );
         });
       }
     }
@@ -95,7 +98,7 @@ class TripsitterMapState extends State<TripsitterMap> {
                 .then((value) {
               addMarker(
                   Point<double>(value.x as double, value.y as double),
-                  LatLng(airport.lat, airport.lon), type: MarkerType.airport);
+                  LatLng(airport.lat, airport.lon), type: MarkerType.airport, item: airport);
             });
           }
         }
@@ -111,7 +114,7 @@ class TripsitterMapState extends State<TripsitterMap> {
           addMarker(
               Point<double>(value.x as double, value.y as double),
               latLng,
-              type: MarkerType.restaurant);
+              type: MarkerType.restaurant, item: meal.restaurant);
         });
       }
     }
@@ -127,7 +130,7 @@ class TripsitterMapState extends State<TripsitterMap> {
             addMarker(
                 Point<double>(value.x as double, value.y as double),
                 latLng,
-                type: MarkerType.activity);
+                type: MarkerType.activity, item: activity.event);
           });
         }
       }
@@ -150,6 +153,7 @@ class TripsitterMapState extends State<TripsitterMap> {
     mapController?.toScreenLocationBatch(coordinates).then((points) {
       if(_markerStates.isEmpty) return;
       _markerStates.asMap().forEach((i, value) {
+        if(_markerStates.length <= i || points.length <= i) return;
         _markerStates[i].updatePosition(points[i]);
       });
     });
@@ -160,6 +164,8 @@ class TripsitterMapState extends State<TripsitterMap> {
     LatLng coordinates,
     {
       MarkerType type = MarkerType.item,
+      Widget? popupWidget,
+      dynamic item,
       bool isSelected = false,
       bool isOption = false,
       bool isOther = false,
@@ -174,6 +180,8 @@ class TripsitterMapState extends State<TripsitterMap> {
           isSelected: isSelected,
           isOther: isOther,
           isOption: isOption,
+          popupWidget: popupWidget,
+          item: item,
           type: type
         ),
       );
@@ -230,6 +238,8 @@ class Marker extends StatefulWidget {
   final void Function(MarkerState) addMarkerState;
   final MarkerType type;
   final bool isSelected, isOther, isOption;
+  final Widget? popupWidget;
+  final dynamic? item;
 
   Marker({
     required this.coordinate,
@@ -239,6 +249,8 @@ class Marker extends StatefulWidget {
     required this.isOther,
     required this.isOption,
     this.type = MarkerType.item,
+    this.item,
+    this.popupWidget,
     super.key,
   });
 
@@ -256,6 +268,8 @@ class MarkerState extends State<Marker> with TickerProviderStateMixin {
 
   MarkerType get type => widget.type;
   late Point<num> _position;
+
+  bool showPopup = false;
 
   @override
   void initState() {
@@ -278,6 +292,47 @@ class MarkerState extends State<Marker> with TickerProviderStateMixin {
     }
   }
 
+  Widget summaryWidget() {
+    if(widget.item is HotelInfo) {
+      HotelInfo hotel = widget.item as HotelInfo;
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(hotel.name, style: TextStyle(fontWeight: FontWeight.bold)),
+        ],
+      );
+    } else if(widget.item is TicketmasterEvent) {
+      TicketmasterEvent event = widget.item as TicketmasterEvent;
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(event.name, style: TextStyle(fontWeight: FontWeight.bold)),
+          Text(event.venues.firstOrNull?.name ??""),
+          Text("(Starts ${event.startTime.localDate} ${event.startTime.localTime})")
+        ],
+      );
+    } else if(widget.item is YelpRestaurant) {
+      YelpRestaurant restaurant = widget.item as YelpRestaurant;
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(restaurant.name, style: TextStyle(fontWeight: FontWeight.bold)),
+          Text("${restaurant.price ?? ""}\n★ ${restaurant.rating.toString()}")
+        ],
+      );
+    } else if(widget.item is Airport) {
+      Airport airport = widget.item as Airport;
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(airport.name, style: TextStyle(fontWeight: FontWeight.bold)),
+          Text(airport.iataCode),
+        ],
+      );
+    }
+    return Container();
+  }
+
   @override
   Widget build(BuildContext context) {
     var ratio = 1.0;
@@ -291,7 +346,21 @@ class MarkerState extends State<Marker> with TickerProviderStateMixin {
     return Positioned(
       left: _position.x / ratio - (type == MarkerType.item ? _iconSize : _iconSize * 1.5) / 2,
       top: _position.y / ratio - (type == MarkerType.item ? _iconSize : _iconSize * 1.5) / 2,
-      child: icon,
+      child: PopupMenuButton(
+        tooltip: "View",
+        itemBuilder: (BuildContext context) { 
+          return <PopupMenuEntry>[
+            PopupMenuItem(
+              value: 'view',
+              child: (type == MarkerType.item && widget.popupWidget != null) ? widget.popupWidget : Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: summaryWidget(),
+              ),
+            ),
+          ];
+         },
+        child: MouseRegion(cursor: SystemMouseCursors.click, child: GestureDetector(child: icon))
+      ),
     );
   }
 
