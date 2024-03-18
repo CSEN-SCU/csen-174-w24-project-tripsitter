@@ -1,5 +1,7 @@
 import 'dart:math';
 
+import 'package:animated_list_plus/animated_list_plus.dart';
+import 'package:animated_list_plus/transitions.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -324,65 +326,81 @@ class _HotelOptionsState extends State<HotelOptions> {
                 ),
               if(!mapSelected)
                 Expanded(
-                  child: ListView(
-                    children: [
-                      for (int i = 0; i < (mapSelected ? 0 : hotelsFiltered.length); i++)
-                        ExpansionTile(
-                          title: ListTile(
-                            // leading: Image.network("https://logos.skyscnr.com/images/carhire/sippmaps/${car.group.img}", width: 80, height: 80),
-                            title: Text(hotelsFiltered[i].hotel.name),
-                            trailing: Row(mainAxisSize: MainAxisSize.min, children: [
-                              IconButton(
-                                icon: const Icon(Icons.info),
-                                onPressed: () {
-                                  showDialog(
-                                      context: context,
-                                      builder: (BuildContext context) {
-                                        return HotelInfoDialog(hotelsFiltered[i].hotel);
-                                      });
-                                },
+                  child: ImplicitlyAnimatedList<HotelOption>(
+                    insertDuration: const Duration(milliseconds: 350),
+                    removeDuration: const Duration(milliseconds: 350),
+                    updateDuration: const Duration(milliseconds: 350),
+                    areItemsTheSame: (a, b) => a == b,
+                    items: hotelsFiltered,
+                    itemBuilder: (context, animation, hotel, i) =>
+                        SizeFadeTransition(
+                            sizeFraction: 0.8,
+                            curve: Curves.easeInOut,
+                            animation: animation,
+                            child: Container(
+                              color: i % 2 == 0 ? Colors.grey[200] : Colors.white,
+                              child: ExpansionTile(
+                                title: ListTile(
+                                  title: Text(hotel.hotel.name),
+                                  trailing: Row(mainAxisSize: MainAxisSize.min, children: [
+                                    IconButton(
+                                      icon: const Icon(Icons.info),
+                                      onPressed: () {
+                                        showDialog(
+                                            context: context,
+                                            builder: (BuildContext context) {
+                                              return HotelInfoDialog(hotel.hotel);
+                                            });
+                                      },
+                                    ),
+                                  ]),
+                                  subtitle: Text(minPrice(hotel.offers) != null
+                                      ? "From \$${minPrice(hotel.offers)}"
+                                      : "No price available"),
+                                ),
+                                children: hotel.offers.map((HotelOffer o) {
+                                  return ListTile(
+                                    subtitle: Text(o.room?.description?.text ??
+                                        "No description available"),
+                                    title: o.price.total == null
+                                        ? null
+                                        : Text("\$${o.price.total}"),
+                                    trailing: ElevatedButton(
+                                      onPressed: () async {
+                                        if (widget.currentGroup!.infos.isNotEmpty &&
+                                            widget.currentGroup!.infos
+                                                .map((c) => c.hotelId)
+                                                .contains(hotel.hotel.hotelId)) {
+                                          await widget.currentGroup!.removeOption(widget
+                                              .currentGroup!.infos
+                                              .indexWhere((element) =>
+                                                  element.hotelId ==
+                                                  hotel.hotel.hotelId));
+                                        } else {
+                                          await widget.currentGroup!
+                                              .addOption(hotel.hotel, o);
+                                        }
+                                        setState(() {});
+                                        widget.setState();
+                                        if(isMobile && mounted) {
+                                          Navigator.pop(context);
+                                        }
+                                      },
+                                      child: Text(
+                                          "Select${(widget.currentGroup!.infos.isNotEmpty && widget.currentGroup!.infos.map((c) => c.hotelId).contains(hotel.hotel.hotelId)) ? "ed" : ""}"),
+                                    ),
+                                  );
+                                }).toList(),
                               ),
-                            ]),
-                            subtitle: Text(minPrice(hotelsFiltered[i].offers) != null
-                                ? "From \$${minPrice(hotelsFiltered[i].offers)}"
-                                : "No price available"),
-                          ),
-                          children: hotelsFiltered[i].offers.map((HotelOffer o) {
-                            return ListTile(
-                              subtitle: Text(o.room?.description?.text ??
-                                  "No description available"),
-                              title: o.price.total == null
-                                  ? null
-                                  : Text("\$${o.price.total}"),
-                              trailing: ElevatedButton(
-                                onPressed: () async {
-                                  if (widget.currentGroup!.infos.isNotEmpty &&
-                                      widget.currentGroup!.infos
-                                          .map((c) => c.hotelId)
-                                          .contains(hotelsFiltered[i].hotel.hotelId)) {
-                                    await widget.currentGroup!.removeOption(widget
-                                        .currentGroup!.infos
-                                        .indexWhere((element) =>
-                                            element.hotelId ==
-                                            hotelsFiltered[i].hotel.hotelId));
-                                  } else {
-                                    await widget.currentGroup!
-                                        .addOption(hotelsFiltered[i].hotel, o);
-                                  }
-                                  setState(() {});
-                                  widget.setState();
-                                  if(isMobile && mounted) {
-                                    Navigator.pop(context);
-                                  }
-                                },
-                                child: Text(
-                                    "Select${(widget.currentGroup!.infos.isNotEmpty && widget.currentGroup!.infos.map((c) => c.hotelId).contains(hotels[i].hotel.hotelId)) ? "ed" : ""}"),
-                              ),
-                            );
-                          }).toList(),
-                        ),
-                    ]
-                  ),
+                            )
+                          )
+                  )
+                  // child: ListView(
+                  //   children: [
+                  //     for (int i = 0; i < (mapSelected ? 0 : hotelsFiltered.length); i++)
+                        
+                  //   ]
+                  // ),
                 ),
               
             ],

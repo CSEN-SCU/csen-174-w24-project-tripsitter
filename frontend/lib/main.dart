@@ -66,7 +66,7 @@ class MyApp extends StatelessWidget {
     Airline.cacheAirlines(context);
     return LayoutBuilder(
         builder: (BuildContext context, BoxConstraints constraints) {
-      bool isMobile = constraints.maxWidth < 850 || constraints.maxHeight < 650;
+      bool isMobile = constraints.maxWidth < 950 || constraints.maxHeight < 650;
       return MultiProvider(
         providers: [
           StreamProvider<User?>.value(
