@@ -73,6 +73,7 @@ class _TripDashBoardState extends State<TripDashBoard> {
                     children: [
                       Container(
                         color: Colors.white,
+                        height: 62,
                         
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
