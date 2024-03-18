@@ -70,8 +70,8 @@ class _CheckoutPageState extends State<CheckoutPage> {
       children: [
         if((split ? trip.rentalCars.where((r) => r.members.contains(uid)) : trip.rentalCars).isNotEmpty || (split ? trip.activities.where((a) => a.participants.contains(uid)) : trip.activities).isNotEmpty)
           ...[
-            const Text("Note: Only flights and hotels can be paid directly through TripSitter. After purchasing, you will be directed to the rental car and activity websites to complete your purchase."),
-            Text("Amount owed to TripSitter: \$${(split ? trip.userStripePrice(uid) : trip.stripePrice).toStringAsFixed(2)}", style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+            const Text("Note: Only flights and hotels can be paid directly through Tripsitter. After purchasing, you will be directed to the rental car and activity websites to complete your purchase."),
+            Text("Amount owed to Tripsitter: \$${(split ? trip.userStripePrice(uid) : trip.stripePrice).toStringAsFixed(2)}", style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
           ],
         ConstrainedBox(
           constraints: const BoxConstraints(

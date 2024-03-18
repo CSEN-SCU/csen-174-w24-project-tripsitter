@@ -81,7 +81,7 @@ class MyApp extends StatelessWidget {
           if (user == null) {
             return MaterialApp(
               onGenerateRoute: router.generator,
-              title: 'TripSitter',
+              title: 'Tripsitter',
               theme: ThemeData(
                 colorScheme: ColorScheme.fromSeed(
                     seedColor: HexColor("#C6D6FF"), brightness: Brightness.light),
@@ -109,7 +109,7 @@ class MyApp extends StatelessWidget {
             ],
             child: MaterialApp(
               onGenerateRoute: router.generator,
-              title: 'TripSitter',
+              title: 'Tripsitter',
               theme: ThemeData(
                 colorScheme: ColorScheme.fromSeed(
                     seedColor: HexColor("#C6D6FF"), brightness: Brightness.light),
