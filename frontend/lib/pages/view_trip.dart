@@ -131,6 +131,9 @@ class ViewTrip extends StatelessWidget {
                                 title: const Text("Trip Map"),
                                 onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => MobileWrapper(title: "Trip Map", child: TripsitterMap<int>(
                                   items: [],
+                                  createWidget: (dynamic item) {
+                                    return Container();
+                                  },
                                   trip: trip,
                                   getLat: (r) => 0.0, 
                                   getLon: (r) => 0.0, 
