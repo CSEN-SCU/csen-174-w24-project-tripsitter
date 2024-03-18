@@ -63,7 +63,7 @@ class _SelectCarsState extends State<SelectCars> {
                             ),
               ),
             Expanded(
-              child: CarOptions(currentGroup: currentGroup, setState: () => setState((){}))
+              child: CarOptions(trip: widget.trip, currentGroup: currentGroup, setState: () => setState((){}))
             ),
           ]
         );

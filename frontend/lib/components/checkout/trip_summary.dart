@@ -194,13 +194,15 @@ class _TripSummaryState extends State<TripSummary> {
                 "${widget.trip.destination.name}, ${widget.trip.destination.country}",
                 style: sectionHeaderStyle.copyWith(fontSize: 15)),
             Container(height: 20),
-            Row(
+            Wrap(
+              alignment: WrapAlignment.center,
+              runSpacing: 10,
               children: [
                 if (widget.showBooking)
                   ElevatedButton(
                       onPressed: createCalendarEvents,
                       child: Text(calendarLoading ?? "Add to Calendar")),
-                if (widget.showBooking && !isMobile) SizedBox(width: 20),
+                if (widget.showBooking) const SizedBox(width: 20),
                 ElevatedButton(
                     onPressed: () {
                       showDialog(
@@ -217,6 +219,9 @@ class _TripSummaryState extends State<TripSummary> {
                               ),
                               child: Stack(children: [
                                 TripsitterMap<int>(
+                                    createWidget: (dynamic h) {
+                                      return Container();
+                                    },
                                     items: [],
                                     trip: widget.trip,
                                     getLat: (r) => 0.0,
@@ -240,7 +245,7 @@ class _TripSummaryState extends State<TripSummary> {
                       );
                     },
                     child: const Text("Show Trip Map")),
-                SizedBox(width: 20),
+                const SizedBox(width: 20),
                 if (widget.showBooking)
                   ElevatedButton(
                       onPressed: () async {
