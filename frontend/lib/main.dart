@@ -4,6 +4,7 @@ import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:tripsitter/classes/flights.dart';
 import 'package:tripsitter/classes/profile.dart';
+import 'package:tripsitter/helpers/styles.dart';
 import 'package:tripsitter/pages/create_trip.dart';
 import 'package:tripsitter/pages/profile_page.dart';
 import 'package:tripsitter/pages/update_Profile.dart';
@@ -65,7 +66,7 @@ class MyApp extends StatelessWidget {
     Airline.cacheAirlines(context);
     return LayoutBuilder(
         builder: (BuildContext context, BoxConstraints constraints) {
-      bool isMobile = constraints.maxWidth < 850 || constraints.maxHeight < 650;
+      bool isMobile = constraints.maxWidth < 950 || constraints.maxHeight < 650;
       return MultiProvider(
         providers: [
           StreamProvider<User?>.value(
@@ -85,6 +86,16 @@ class MyApp extends StatelessWidget {
                 colorScheme: ColorScheme.fromSeed(
                     seedColor: HexColor("#C6D6FF"), brightness: Brightness.light),
                 useMaterial3: true,
+                buttonTheme: ButtonThemeData(
+                  buttonColor: HexColor("#C6D6FF"),
+                  textTheme: ButtonTextTheme.primary,
+                ),
+                filledButtonTheme: FilledButtonThemeData(
+                  style: buttonStyle
+                ),
+                elevatedButtonTheme: ElevatedButtonThemeData(
+                  style: buttonStyle
+                ),
               ),
               home: const LoginPage(),
             );
@@ -103,6 +114,16 @@ class MyApp extends StatelessWidget {
                 colorScheme: ColorScheme.fromSeed(
                     seedColor: HexColor("#C6D6FF"), brightness: Brightness.light),
                 useMaterial3: true,
+                buttonTheme: ButtonThemeData(
+                  buttonColor: HexColor("#C6D6FF"),
+                  textTheme: ButtonTextTheme.primary,
+                ),
+                filledButtonTheme: FilledButtonThemeData(
+                  style: buttonStyle
+                ),
+                elevatedButtonTheme: ElevatedButtonThemeData(
+                  style: buttonStyle
+                ),
               ),
             ),
           );

@@ -38,26 +38,28 @@ class _SelectRestaurantsState extends State<SelectRestaurants> {
       return Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-              decoration: const BoxDecoration(
-                borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(25.0),
-                    bottomLeft: Radius.circular(25.0)),
-                color: Color.fromARGB(255, 200, 200, 200),
-              ),
-              width: constraints.maxWidth * 0.35,
-              child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: RestaurantsItinerary(
-                    trip: widget.trip,
-                    profiles: widget.profiles,
-                    participantsPopupKeys: participantsPopupKeys,
-                    selectedParticipantsMap: selectedParticipantsMap,
-                    participantsPopupOpenState: participantsPopupOpenState,
-                    setState: () => setState(() {}),
-                  ))),
-          SizedBox(
-              width: constraints.maxWidth * 0.65,
+          ConstrainedBox(
+            constraints: BoxConstraints(minWidth: 450),
+            child: Container(
+                decoration: const BoxDecoration(
+                  borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(25.0),
+                      bottomLeft: Radius.circular(25.0)),
+                  color: Color.fromARGB(255, 200, 200, 200),
+                ),
+                width: constraints.maxWidth * 0.35,
+                child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: RestaurantsItinerary(
+                      trip: widget.trip,
+                      profiles: widget.profiles,
+                      participantsPopupKeys: participantsPopupKeys,
+                      selectedParticipantsMap: selectedParticipantsMap,
+                      participantsPopupOpenState: participantsPopupOpenState,
+                      setState: () => setState(() {}),
+                    ))),
+          ),
+          Expanded(
               child: Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: RestaurantsOptions(

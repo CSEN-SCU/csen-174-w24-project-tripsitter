@@ -41,181 +41,204 @@ class _CarGroupsState extends State<CarGroups> {
       child: ListView(children: [
         // Text('Selections', style: Theme.of(context).textTheme.displayMedium?.copyWith(decoration: TextDecoration.underline, fontWeight: FontWeight.bold)),
         Center(
-        child: Text(
-          'Rental Car Groups',
-          style: GoogleFonts.kadwa(
-            textStyle: const TextStyle(
-              color: Colors.black,
-              fontWeight: FontWeight.bold,
-              fontSize: 30,
+          child: Text(
+            'Rental Car Groups',
+            style: GoogleFonts.kadwa(
+              textStyle: const TextStyle(
+                color: Colors.black,
+                fontWeight: FontWeight.bold,
+                fontSize: 30,
+              ),
             ),
           ),
         ),
-      ),
         for (RentalCarGroup group in widget.trip.rentalCars)
-          Container(
-              color: widget.currentGroup == group
-                  ? Colors.blue[200]
-                  : Colors.transparent,
-              child: Column(
-                children: [
-                  ListTile(
-                    title: TextFormField(
-                      initialValue: group.name,
-                      decoration: const InputDecoration(
-                        labelText: "Group Name",
-                      ),
-                      onChanged: (String value) {
-                        setState(() {
-                          group.setName(value);
-                        });
-                        widget.setState();
-                      },
-                    ),
-                    subtitle: Text(group.members
-                        .map((uid) =>
-                            widget.profiles.firstWhere((e) => e.id == uid).name)
-                        .join(", ")),
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        PopupMenuButton<UserProfile>(
-                          itemBuilder: (BuildContext context) {
-                            return widget.profiles
-                                .where((profile) {
-                                  for (RentalCarGroup g
-                                      in widget.trip.rentalCars) {
-                                    if (g.members.contains(profile.id) &&
-                                        group != g) {
-                                      return false;
-                                    }
-                                  }
-                                  return true;
-                                })
-                                .map((UserProfile profile) => PopupMenuItem(
-                                      value: profile,
-                                      child: Row(
-                                        children: [
-                                          group.members.contains(profile.id)
-                                              ? const Icon(Icons.check)
-                                              : const Icon(Icons.add),
-                                          Text(profile.name),
-                                        ],
-                                      ),
-                                    ))
-                                .toList();
-                          },
-                          child: const Icon(Icons.add),
-                          onSelected: (UserProfile profile) async {
-                            if (group.members.contains(profile.id)) {
-                              await group.removeMember(profile.id);
-                            } else {
-                              await group.addMember(profile.id);
-                            }
-                            setState(() {});
+          Column(
+            children: [
+              Container(
+                  decoration: BoxDecoration(
+                    color: group == widget.currentGroup
+                        ? Colors.blue[200]
+                        : Colors.white,
+                    borderRadius: BorderRadius.circular(10),
+                    border: group == widget.currentGroup
+                        ? Border.all(color: Colors.black, width: 2)
+                        : null,
+                  ),
+                  child: Column(
+                    children: [
+                      ListTile(
+                        title: TextFormField(
+                          initialValue: group.name,
+                          decoration: const InputDecoration(
+                            labelText: "Group Name",
+                          ),
+                          onChanged: (String value) {
+                            setState(() {
+                              group.setName(value);
+                            });
                             widget.setState();
                           },
                         ),
-                        IconButton(
-                            onPressed: () {
+                        subtitle: Text(group.members
+                            .map((uid) => widget.profiles
+                                .firstWhere((e) => e.id == uid)
+                                .name)
+                            .join(", ")),
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            PopupMenuButton<UserProfile>(
+                              itemBuilder: (BuildContext context) {
+                                return widget.profiles
+                                    .where((profile) {
+                                      for (RentalCarGroup g
+                                          in widget.trip.rentalCars) {
+                                        if (g.members.contains(profile.id) &&
+                                            group != g) {
+                                          return false;
+                                        }
+                                      }
+                                      return true;
+                                    })
+                                    .map((UserProfile profile) => PopupMenuItem(
+                                          value: profile,
+                                          child: Row(
+                                            children: [
+                                              group.members.contains(profile.id)
+                                                  ? const Icon(Icons.check)
+                                                  : const Icon(Icons.add),
+                                              Text(profile.name),
+                                            ],
+                                          ),
+                                        ))
+                                    .toList();
+                              },
+                              child: const Icon(Icons.people),
+                              onSelected: (UserProfile profile) async {
+                                if (group.members.contains(profile.id)) {
+                                  await group.removeMember(profile.id);
+                                } else {
+                                  await group.addMember(profile.id);
+                                }
+                                setState(() {});
+                                widget.setState();
+                              },
+                            ),
+                            // IconButton(
+                            //     onPressed: () {
+                            //       setState(() {
+                            //         widget.setCurrentGroup(group);
+                            //       });
+                            //       widget.setState();
+                            //     },
+                            //     icon: const Icon(Icons.car_rental)),
+                            IconButton(
+                                onPressed: () async {
+                                  await widget.trip.removeRentalCarGroup(group);
+                                  if (widget.currentGroup == group) {
+                                    widget.setCurrentGroup(null);
+                                  }
+                                  setState(() {});
+                                  widget.setState();
+                                },
+                                icon: const Icon(Icons.delete)),
+                          ],
+                        ),
+                        onTap: () {
+                          setState(() {
+                            widget.setCurrentGroup(group);
+                          });
+                          widget.setState();
+                        },
+                      ),
+                      ...group.options.map((RentalCarOffer car) => ListTile(
+                            leading: Radio<RentalCarOffer>(
+                              value: car,
+                              groupValue: group.selected,
+                              onChanged: (RentalCarOffer? value) async {
+                                if (value == null) return;
+                                await group.selectOption(value);
+                                setState(() {});
+                                widget.setState();
+                              },
+                            ),
+                            title: Text(
+                                "${car.sipp.fromSipp()} (${car.carName} or similar)"),
+                            subtitle: Text(
+                                "${car.provider.providerName}, \$${car.price.toStringAsFixed(2)}"),
+                            trailing: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                IconButton(
+                                  icon: const Icon(Icons.info),
+                                  onPressed: () {
+                                    showDialog(
+                                        context: context,
+                                        builder: (BuildContext context) {
+                                          return CarInfoDialog(car);
+                                        });
+                                  },
+                                ),
+                                CommentsPopup(
+                                  comments: car.comments,
+                                  profiles: widget.profiles,
+                                  myUid: user!.uid,
+                                  removeComment: (TripComment comment) async {
+                                    car.removeComment(comment);
+                                    await trip.save();
+                                    if (mounted) {
+                                      setState(() {});
+                                    }
+                                  },
+                                  addComment: (String comment) async {
+                                    car.addComment(TripComment(
+                                        comment: comment,
+                                        uid: user.uid,
+                                        date: DateTime.now()));
+                                    await trip.save();
+                                    if (mounted) {
+                                      setState(() {});
+                                    }
+                                  },
+                                ),
+                                IconButton(
+                                  icon: const Icon(Icons.delete),
+                                  onPressed: () async {
+                                    await group.removeOption(car);
+                                    setState(() {});
+                                    widget.setState();
+                                  },
+                                ),
+                              ],
+                            ),
+                            onTap: () {
                               setState(() {
                                 widget.setCurrentGroup(group);
                               });
                               widget.setState();
                             },
-                            icon: const Icon(Icons.car_rental)),
-                        IconButton(
-                            onPressed: () async {
-                              await widget.trip.removeRentalCarGroup(group);
-                              if (widget.currentGroup == group) {
-                                widget.setCurrentGroup(null);
-                              }
-                              setState(() {});
-                              widget.setState();
+                          )),
+                      if (isMobile)
+                        ElevatedButton.icon(
+                            icon: const Icon(Icons.add),
+                            onPressed: () {
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => MobileWrapper(
+                                          title: "Add Car Options",
+                                          child: CarOptions(
+                                            currentGroup: group,
+                                            setState: () => setState(() {}),
+                                          ))));
                             },
-                            icon: const Icon(Icons.delete)),
-                      ],
-                    ),
-                  ),
-                  ...group.options.map((RentalCarOffer car) => ListTile(
-                        leading: Radio<RentalCarOffer>(
-                          value: car,
-                          groupValue: group.selected,
-                          onChanged: (RentalCarOffer? value) async {
-                            if (value == null) return;
-                            await group.selectOption(value);
-                            setState(() {});
-                            widget.setState();
-                          },
-                        ),
-                        title: Text(
-                            "${car.sipp.fromSipp()} (${car.carName} or similar)"),
-                        subtitle: Text(
-                            "${car.provider.providerName}, \$${car.price.toStringAsFixed(2)}"),
-                        trailing: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            CommentsPopup(
-                              comments: car.comments,
-                              profiles: widget.profiles,
-                              myUid: user!.uid,
-                              removeComment: (TripComment comment) async {
-                                car.removeComment(comment);
-                                await trip.save();
-                                if (mounted) {
-                                  setState(() {});
-                                }
-                              },
-                              addComment: (String comment) async {
-                                car.addComment(TripComment(
-                                    comment: comment,
-                                    uid: user.uid,
-                                    date: DateTime.now()));
-                                await trip.save();
-                                if (mounted) {
-                                  setState(() {});
-                                }
-                              },
-                            ),
-                            IconButton(
-                              icon: const Icon(Icons.info),
-                              onPressed: () {
-                                showDialog(
-                                    context: context,
-                                    builder: (BuildContext context) {
-                                      return CarInfoDialog(car);
-                                    });
-                              },
-                            ),
-                            IconButton(
-                              icon: const Icon(Icons.delete),
-                              onPressed: () async {
-                                await group.removeOption(car);
-                                setState(() {});
-                                widget.setState();
-                              },
-                            ),
-                          ],
-                        ),
-                      )),
-                  if (isMobile)
-                    ElevatedButton.icon(
-                        icon: const Icon(Icons.add),
-                        onPressed: () {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => MobileWrapper(
-                                      title: "Add Car Options",
-                                      child: CarOptions(
-                                        currentGroup: group,
-                                        setState: () => setState(() {}),
-                                      ))));
-                        },
-                        label: const Text("Add Options")),
-                  const Divider(),
-                ],
-              )),
+                            label: const Text("Add Options")),
+                    ],
+                  )),
+              const SizedBox(height: 10),
+            ],
+          ),
         // check if all profiles are in a group
         if (!(widget.profiles.isNotEmpty &&
             widget.trip.rentalCars.isNotEmpty &&

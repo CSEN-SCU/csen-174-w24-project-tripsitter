@@ -54,173 +54,197 @@ class _HotelGroupsState extends State<HotelGroups> {
           ),
         ),
         for (HotelGroup group in widget.trip.hotels)
-          Container(
-              color: widget.currentGroup == group
-                  ? Colors.blue[200]
-                  : Colors.transparent,
-              child: Column(
-                children: [
-                  ListTile(
-                    title: TextFormField(
-                      initialValue: group.name,
-                      decoration: const InputDecoration(
-                        labelText: "Group Name",
-                      ),
-                      onChanged: (String value) {
-                        setState(() {
-                          group.setName(value);
-                        });
-                        widget.setState();
-                      },
-                    ),
-                    subtitle: Text(group.members
-                        .map((uid) =>
-                            widget.profiles.firstWhereOrNull((e) => e.id == uid)?.name ?? "")
-                        .join(", ")),
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        PopupMenuButton<UserProfile>(
-                          itemBuilder: (BuildContext context) {
-                            return widget.profiles
-                                .where((profile) {
-                                  for (HotelGroup g in widget.trip.hotels) {
-                                    if (g.members.contains(profile.id) &&
-                                        group != g) {
-                                      return false;
-                                    }
-                                  }
-                                  return true;
-                                })
-                                .map((UserProfile profile) => PopupMenuItem(
-                                      value: profile,
-                                      child: Row(
-                                        children: [
-                                          group.members.contains(profile.id)
-                                              ? const Icon(Icons.check)
-                                              : const Icon(Icons.add),
-                                          Text(profile.name),
-                                        ],
-                                      ),
-                                    ))
-                                .toList();
-                          },
-                          child: const Icon(Icons.add),
-                          onSelected: (UserProfile profile) async {
-                            debugPrint("Toggling ${profile.name}");
-                            if (group.members.contains(profile.id)) {
-                              await group.removeMember(profile.id);
-                            } else {
-                              await group.addMember(profile.id);
-                            }
-                            setState(() {});
+          Column(
+            children: [
+              Container(
+                  decoration: BoxDecoration(
+                    color: group == widget.currentGroup
+                        ? Colors.blue[200]
+                        : Colors.white,
+                    borderRadius: BorderRadius.circular(10),
+                    border: group == widget.currentGroup
+                        ? Border.all(color: Colors.black, width: 2)
+                        : null,
+                  ),
+                  child: Column(
+                    children: [
+                      ListTile(
+                        title: TextFormField(
+                          initialValue: group.name,
+                          decoration: const InputDecoration(
+                            labelText: "Group Name",
+                          ),
+                          onChanged: (String value) {
+                            setState(() {
+                              group.setName(value);
+                            });
                             widget.setState();
                           },
                         ),
-                        IconButton(
-                            onPressed: () {
+                        subtitle: Text(group.members
+                            .map((uid) =>
+                                widget.profiles
+                                    .firstWhereOrNull((e) => e.id == uid)
+                                    ?.name ??
+                                "")
+                            .join(", ")),
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            PopupMenuButton<UserProfile>(
+                              itemBuilder: (BuildContext context) {
+                                return widget.profiles
+                                    .where((profile) {
+                                      for (HotelGroup g in widget.trip.hotels) {
+                                        if (g.members.contains(profile.id) &&
+                                            group != g) {
+                                          return false;
+                                        }
+                                      }
+                                      return true;
+                                    })
+                                    .map((UserProfile profile) => PopupMenuItem(
+                                          value: profile,
+                                          child: Row(
+                                            children: [
+                                              group.members.contains(profile.id)
+                                                  ? const Icon(Icons.check)
+                                                  : const Icon(Icons.add),
+                                              Text(profile.name),
+                                            ],
+                                          ),
+                                        ))
+                                    .toList();
+                              },
+                              child: const Icon(Icons.people),
+                              onSelected: (UserProfile profile) async {
+                                debugPrint("Toggling ${profile.name}");
+                                if (group.members.contains(profile.id)) {
+                                  await group.removeMember(profile.id);
+                                } else {
+                                  await group.addMember(profile.id);
+                                }
+                                setState(() {});
+                                widget.setState();
+                              },
+                            ),
+                            // IconButton(
+                            //     onPressed: () {
+                            //       setState(() {
+                            //         widget.setCurrentGroup(group);
+                            //       });
+                            //       widget.setState();
+                            //     },
+                            //     icon: const Icon(Icons.hotel)),
+                            IconButton(
+                                onPressed: () async {
+                                  await widget.trip.removeHotelGroup(group);
+                                  if (widget.currentGroup == group) {
+                                    widget.setCurrentGroup(null);
+                                  }
+                                  setState(() {});
+                                  widget.setState();
+                                },
+                                icon: const Icon(Icons.delete)),
+                          ],
+                        ),
+                        onTap: () {
+                          widget.setCurrentGroup(group);
+                          widget.setState();
+                        },
+                      ),
+                      for (int i = 0; i < group.infos.length; i++)
+                        ListTile(
+                          leading: Radio<HotelOffer>(
+                            value: group.offers[i],
+                            groupValue: group.selectedOffer,
+                            onChanged: (HotelOffer? value) async {
+                              if (value == null) return;
+                              await group.selectOption(
+                                  group.infos[i], group.offers[i]);
                               setState(() {
-                                widget.setCurrentGroup(group);
+                                widget.setState();
                               });
-                              widget.setState();
                             },
-                            icon: const Icon(Icons.hotel)),
-                        IconButton(
-                            onPressed: () async {
-                              await widget.trip.removeHotelGroup(group);
-                              if (widget.currentGroup == group) {
-                                widget.setCurrentGroup(null);
-                              }
-                              setState(() {});
-                              widget.setState();
-                            },
-                            icon: const Icon(Icons.delete)),
-                      ],
-                    ),
-                  ),
-                  for (int i = 0; i < group.infos.length; i++)
-                    ListTile(
-                      leading: Radio<HotelOffer>(
-                        value: group.offers[i],
-                        groupValue: group.selectedOffer,
-                        onChanged: (HotelOffer? value) async {
-                          if (value == null) return;
-                          await group.selectOption(
-                              group.infos[i], group.offers[i]);
-                          setState(() {
+                          ),
+                          title: Text(group.infos[i].name),
+                          subtitle: Text("\$${group.offers[i].price.total}"),
+                          // subtitle: Text(
+                          //     group.offers[i].room?.description?.text ??
+                          //         'No description available'),
+                          trailing: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              IconButton(
+                                icon: const Icon(Icons.info),
+                                onPressed: () {
+                                  showDialog(
+                                      context: context,
+                                      builder: (BuildContext context) {
+                                        return HotelInfoDialog(
+                                            hotel: group.infos[i],
+                                            offer: group.offers[i]);
+                                      });
+                                },
+                              ),
+                              CommentsPopup(
+                                comments: group.infos[i].comments,
+                                profiles: widget.profiles,
+                                myUid: user!.uid,
+                                removeComment: (TripComment comment) async {
+                                  group.infos[i].removeComment(comment);
+                                  await trip.save();
+                                  if (mounted) {
+                                    setState(() {});
+                                  }
+                                },
+                                addComment: (String comment) async {
+                                  group.infos[i].addComment(TripComment(
+                                      comment: comment,
+                                      uid: user.uid,
+                                      date: DateTime.now()));
+                                  await trip.save();
+                                  if (mounted) {
+                                    setState(() {});
+                                  }
+                                },
+                              ),
+                              IconButton(
+                                icon: const Icon(Icons.delete),
+                                onPressed: () async {
+                                  await group.removeOption(i);
+                                  setState(() {});
+                                  widget.setState();
+                                },
+                              ),
+                            ],
+                          ),
+                          onTap: () {
+                            widget.setCurrentGroup(group);
                             widget.setState();
-                          });
-                        },
-                      ),
-                      title: Text(
-                          "${group.infos[i].name} (\$${group.offers[i].price.total})"),
-                      subtitle: Text(
-                          group.offers[i].room?.description?.text ?? 'No description available'),
-                      trailing: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          CommentsPopup(
-                            comments: group.infos[i].comments,
-                            profiles: widget.profiles,
-                            myUid: user!.uid,
-                            removeComment: (TripComment comment) async {
-                              group.infos[i].removeComment(comment);
-                              await trip.save();
-                              if (mounted) {
-                                setState(() {});
-                              }
-                            },
-                            addComment: (String comment) async {
-                              group.infos[i].addComment(TripComment(
-                                  comment: comment,
-                                  uid: user.uid,
-                                  date: DateTime.now()));
-                              await trip.save();
-                              if (mounted) {
-                                setState(() {});
-                              }
-                            },
-                          ),
-                          IconButton(
-                            icon: const Icon(Icons.info),
+                          },
+                        ),
+                      if (isMobile)
+                        ElevatedButton.icon(
+                            icon: const Icon(Icons.add),
                             onPressed: () {
-                              showDialog(
-                                  context: context,
-                                  builder: (BuildContext context) {
-                                    return HotelInfoDialog(group.infos[i]);
-                                  });
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => MobileWrapper(
+                                          title: "Add Hotel Options",
+                                          child: HotelOptions(
+                                            currentGroup: group,
+                                            trip: widget.trip,
+                                            setState: () => setState(() {}),
+                                          ))));
                             },
-                          ),
-                          IconButton(
-                            icon: const Icon(Icons.delete),
-                            onPressed: () async {
-                              await group.removeOption(i);
-                              setState(() {});
-                              widget.setState();
-                            },
-                          ),
-                        ],
-                      ),
-                    ),
-                  if (isMobile)
-                    ElevatedButton.icon(
-                        icon: const Icon(Icons.add),
-                        onPressed: () {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => MobileWrapper(
-                                      title: "Add Hotel Options",
-                                      child: HotelOptions(
-                                        currentGroup: group,
-                                        trip: widget.trip,
-                                        setState: () => setState(() {}),
-                                      ))));
-                        },
-                        label: const Text("Add Options")),
-                  const Divider(),
-                ],
-              )),
+                            label: const Text("Add Options")),
+                    ],
+                  )),
+              const SizedBox(height: 10),
+            ],
+          ),
         // check if all profiles are in a group
         if (!(widget.profiles.isNotEmpty &&
             widget.trip.hotels.isNotEmpty &&
