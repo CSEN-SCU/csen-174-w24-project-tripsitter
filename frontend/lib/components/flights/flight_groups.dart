@@ -326,6 +326,10 @@ class _FlightGroupsState extends State<FlightGroups> {
                             //     widget.setState();
                             //   },
                             // )
+                            onTap: () {
+                              widget.setCurrentGroup(group);
+                              widget.setState();
+                            },
                           ),
                         if (isMobile)
                           ElevatedButton(
