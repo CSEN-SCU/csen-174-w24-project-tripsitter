@@ -439,7 +439,10 @@ class _MyStatefulWidgetState extends State<TripCenterConsole>
                             ),
                             child: Stack(children: [
                               TripsitterMap<int>(
-                                items: [],
+                                items: List<int>.empty(),
+                                createWidget: (r) {
+                                  return Container();
+                                },
                                 trip: widget.trip, 
                                 getLat: (r) => 0.0, 
                                 getLon: (r) => 0.0, 

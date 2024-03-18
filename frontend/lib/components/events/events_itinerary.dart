@@ -106,6 +106,7 @@ class _EventsItineraryState extends State<EventsItinerary> {
                     }
                   },
                 ),
+                Container(width: 10),
                 ElevatedButton(
                   onPressed: () async {
                     await widget.trip.removeActivity(activity);

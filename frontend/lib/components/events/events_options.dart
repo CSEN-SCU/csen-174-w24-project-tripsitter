@@ -365,6 +365,112 @@ class _EventsOptionsState extends State<EventsOptions>
                       MarkerType.hotel,
                       MarkerType.restaurant
                     ],
+                    createWidget: (dynamic e) {
+                      TicketmasterEvent event = e as TicketmasterEvent;
+                      return ListTile(
+                                title: Wrap(
+                                        spacing: 5.0,
+                                        children: [
+                                          Text(event.name),
+                                          Text(event.prices.isEmpty
+                                              ? ""
+                                              : "(From \$${event.prices.map((p) => p.min).reduce(min)}/person)")
+                                        ],
+                                      ),
+                                subtitle: Wrap(
+                                        spacing: 5.0,
+                                        children: [
+                                          Text(event.venues.firstOrNull?.name ??
+                                              ""),
+                                          Text(
+                                              "(Starts ${event.startTime.localDate} ${event.startTime.localTime})")
+                                        ],
+                                      ),
+                                trailing: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    IconButton(
+                                        padding: EdgeInsets.zero,
+                                        icon: const Icon(Icons.info),
+                                        onPressed: () {
+                                          showDialog(
+                                            context: context,
+                                            builder: (BuildContext context) {
+                                              return EventPopup(event);
+                                            },
+                                          );
+                                        }),
+                                    Builder(builder: (context) {
+                                      bool selected = trip.activities
+                                          .map((e) => e.event.id)
+                                          .contains(event.id);
+                                      return GestureDetector(
+                                        onTap: selected
+                                            ? () async {
+                                                print("Removing activity");
+                                                await trip.removeActivity(trip
+                                                    .activities
+                                                    .firstWhere((a) =>
+                                                        a.event.id ==
+                                                        event.id));
+                                                setState(() {});
+                                                if (widget.setState != null) {
+                                                  widget.participantsPopupOpenState[
+                                                      event.id] = true;
+                                                  widget.selectedParticipantsMap
+                                                      .remove(event.id);
+                                                  widget.participantsPopupKeys
+                                                      .remove(event.id);
+                                                  widget.setState!();
+                                                }
+                                              }
+                                            : () async {
+                                                print("Adding activity");
+                                                await trip.addActivity(
+                                                    event,
+                                                    widget.profiles
+                                                        .map((e) => e.id)
+                                                        .toList());
+                                                setState(() {});
+                                                if (widget.setState != null) {
+                                                  widget.participantsPopupOpenState[
+                                                      event.id] = false;
+                                                  widget.selectedParticipantsMap[
+                                                          event.id] =
+                                                      widget.profiles
+                                                          .map((e) => e.id)
+                                                          .toList();
+                                                  widget.participantsPopupKeys[
+                                                      event.id] = GlobalKey();
+                                                  widget.setState!();
+                                                }
+                                              },
+                                        child: Checkbox(
+                                          value: selected,
+                                          onChanged: null,
+                                          fillColor:
+                                              MaterialStateProperty.all<Color>(
+                                                  selected
+                                                      ? const Color.fromARGB(
+                                                          255, 127, 166, 198)
+                                                      : Colors.grey[300]!),
+                                          // style: ButtonStyle(
+                                          //     backgroundColor:
+                                          //         MaterialStateProperty.all<Color>(
+                                          //             selected
+                                          //                 ? const Color.fromARGB(
+                                          //                     255, 127, 166, 198)
+                                          //                 : Colors.grey[300]!)),
+                                          // child: Text('Select${selected ? 'ed' : ''}',
+                                          //     style: const TextStyle(
+                                          //         color: Colors.black)),
+                                        ),
+                                      );
+                                    })
+                                  ],
+                                ),
+                              );
+                    },
                     isSelected: (dynamic event) => trip.activities
                         .map((e) => e.event.id)
                         .contains((event as TicketmasterEvent).id),
