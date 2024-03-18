@@ -350,11 +350,6 @@ class _UpdateProfileState extends State<UpdateProfile> {
                       Navigator.pushReplacementNamed(context, "/");
                     }
                   },
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor:
-                                    const Color.fromARGB(255, 125, 175, 220),
-                                foregroundColor: Colors.black,
-                              ),
                   child: const Text("Save Profile"),
               )
                   
