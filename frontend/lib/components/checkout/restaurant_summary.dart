@@ -44,13 +44,14 @@ class RestaurantSummary extends StatelessWidget {
           Expanded(
               flex: 1,
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: meal.participants
                     .map((e) =>
                         profiles
                             .firstWhereOrNull((profile) => profile.id == e)
                             ?.name ??
                         "")
-                    .map((e) => Text(e))
+                    .map((e) => Text(e, textAlign: TextAlign.center))
                     .toList(),
               )),
         SizedBox(

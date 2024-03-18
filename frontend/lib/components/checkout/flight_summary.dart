@@ -16,6 +16,7 @@ class FlightSummary extends StatelessWidget {
   Widget build(BuildContext context) {
     List<UserProfile> profiles = Provider.of<List<UserProfile>>(context);
     bool split = Provider.of<bool>(context);
+    bool isMobile = Provider.of<bool>(context, listen: false);
     if (flight.selected == null) {
       return Container();
     }
@@ -43,13 +44,14 @@ class FlightSummary extends StatelessWidget {
           Expanded(
               flex: 1,
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: flight.members
                     .map((e) =>
                         profiles
                             .firstWhereOrNull((profile) => profile.id == e)
                             ?.name ??
                         "")
-                    .map((e) => Text(e))
+                    .map((e) => Text(e, textAlign: TextAlign.center))
                     .toList(),
               )),
         SizedBox(
@@ -67,34 +69,42 @@ class FlightSummary extends StatelessWidget {
 class FlightItinerarySummary extends StatelessWidget {
   final DateFormat dateFormatter = DateFormat("E, MMM d, y");
   final DateFormat timeFormatter = DateFormat("h:mm a");
+  final DateFormat dateFormatterMobile = DateFormat("MMM d");
+  final DateFormat timeFormatterMobile = DateFormat("h:mm a");
   final FlightItinerary it;
   final bool displayPlanes;
   FlightItinerarySummary(this.it, this.displayPlanes, {super.key});
 
   @override
   Widget build(BuildContext context) {
+    bool isMobile = Provider.of<bool>(context, listen: false);
     return Padding(
-      padding: const EdgeInsets.only(right: 8.0),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(dateFormatter.format(it.segments.first.departure.at)),
-          Text(
-              "${timeFormatter.format(it.segments.first.departure.at)} - ${timeFormatter.format(it.segments.last.arrival.at)}${(it.segments.first.departure.at.day != it.segments.last.arrival.at.day || it.segments.first.departure.at.year != it.segments.last.arrival.at.year || it.segments.first.departure.at.month != it.segments.last.arrival.at.month) ? " (+1)" : ""}"),
-          if (displayPlanes)
-            Text(it.segments
-                .map((e) =>
-                    "${Airline.fromCode(e.carrierCode)?.name ?? e.carrierCode} ${e.number}")
-                .join(", "))
-          else
-            Text(it.segments
-                .map((e) =>
-                    Airline.fromCode(e.carrierCode)?.name ?? e.carrierCode)
-                .toSet()
-                .join(", "))
-        ],
-      ),
-    );
+        padding: const EdgeInsets.only(right: 8.0),
+        child: !isMobile || displayPlanes
+            ? Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(dateFormatter.format(it.segments.first.departure.at)),
+                  Text(
+                      "${timeFormatter.format(it.segments.first.departure.at)} - ${timeFormatter.format(it.segments.last.arrival.at)}${(it.segments.first.departure.at.day != it.segments.last.arrival.at.day || it.segments.first.departure.at.year != it.segments.last.arrival.at.year || it.segments.first.departure.at.month != it.segments.last.arrival.at.month) ? " (+1)" : ""}"),
+                  if (displayPlanes)
+                    Text(it.segments
+                        .map((e) =>
+                            "${Airline.fromCode(e.carrierCode)?.name ?? e.carrierCode} ${e.number}")
+                        .join(", "))
+                  else
+                    Text(it.segments
+                        .map((e) =>
+                            Airline.fromCode(e.carrierCode)?.name ??
+                            e.carrierCode)
+                        .toSet()
+                        .join(", "))
+                ],
+              )
+            : Text(
+                "${dateFormatterMobile.format(it.segments.first.departure.at)} ${timeFormatterMobile.format(it.segments.first.departure.at)} - ${timeFormatterMobile.format(it.segments.last.arrival.at)}${(it.segments.first.departure.at.day != it.segments.last.arrival.at.day || it.segments.first.departure.at.year != it.segments.last.arrival.at.year || it.segments.first.departure.at.month != it.segments.last.arrival.at.month) ? " (+1)" : ""}",
+                textAlign: TextAlign.left,
+              ));
   }
 }
