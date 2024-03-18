@@ -81,19 +81,18 @@ class _TripSideColumnState extends State<TripSideColumn> {
         if ((trip!.usingSplitPayments
             ? trip!.paymentsComplete[user.uid] != true
             : !trip!.isConfirmed))
-          ElevatedButton.icon(
-            icon: const Icon(Icons.credit_card),
-            onPressed: () {
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) =>
-                          CheckoutPage(trip: trip!, profiles: profiles)));
-            },
-            label: const Text("Checkout"),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color.fromARGB(255, 125, 175, 220),
-              foregroundColor: Colors.black,
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: ElevatedButton.icon(
+              icon: const Icon(Icons.credit_card),
+              onPressed: () {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) =>
+                            CheckoutPage(trip: trip!, profiles: profiles)));
+              },
+              label: const Text("Checkout"),
             ),
           ),
         if ((!trip!.isConfirmed &&
