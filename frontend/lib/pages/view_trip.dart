@@ -2,6 +2,7 @@
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:tripsitter/classes/profile.dart';
 import 'package:tripsitter/classes/trip.dart';
 import 'package:tripsitter/components/cars/select_cars.dart';
@@ -18,6 +19,8 @@ import 'package:tripsitter/components/restaurants/select_restaurants.dart';
 import 'package:tripsitter/components/trip_dash.dart';
 import 'package:tripsitter/components/trip_side_column.dart';
 import 'package:tripsitter/components/checkout/checkout.dart';
+import 'package:tripsitter/helpers/styles.dart';
+import 'package:tripsitter/pages/edit_trip_info.dart';
 import 'package:tripsitter/pages/login.dart';
 
 class ViewTrip extends StatelessWidget {
@@ -77,6 +80,14 @@ class ViewTrip extends StatelessWidget {
                                 decorationThickness: 1.2,
                               )
                             ),
+                            Text("${DateFormat('MMM d, yyyy').format(trip.startDate)} → ${DateFormat('MMM d, yyyy').format(trip.endDate)}", style: sectionHeaderStyle.copyWith(fontSize: 15)),
+                            Text("${trip.destination.name}, ${trip.destination.country}", style: sectionHeaderStyle.copyWith(fontSize: 15)),
+                            if(!trip.frozen)
+                              ListTile(
+                                leading: const Icon(Icons.edit),
+                                title: const Text("Edit Trip Info"),
+                                onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => MobileWrapper(trip: trip, profiles: profiles, title: "Edit Trip Info", child: EditTripInfo(trip)))),
+                              ),
                             ListTile(
                               leading: const Icon(Icons.people),
                               title: const Text("Manage Participants"),

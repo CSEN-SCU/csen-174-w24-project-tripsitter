@@ -38,29 +38,31 @@ class _SelectHotelsState extends State<SelectHotels> {
         return Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-              Container(
-                decoration: const BoxDecoration(
-                  borderRadius: BorderRadius.only(topLeft: Radius.circular(25.0), bottomLeft: Radius.circular(25.0)),
-                  color: Color.fromARGB(255, 200, 200, 200),
-                ),
-              width: constraints.maxWidth * 0.35,
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: HotelGroups(
-                  profiles: widget.profiles,
-                  trip: widget.trip, 
-                  currentGroup: currentGroup, 
-                  setCurrentGroup: (HotelGroup? group) {
-                    setState(() {
-                      currentGroup = group;
-                    });
-                  },
-                  setState: () => setState((){}),
+              ConstrainedBox(
+                constraints: BoxConstraints(minWidth: 450),
+                child: Container(
+                  decoration: const BoxDecoration(
+                    borderRadius: BorderRadius.only(topLeft: Radius.circular(25.0), bottomLeft: Radius.circular(25.0)),
+                    color: Color.fromARGB(255, 200, 200, 200),
+                  ),
+                width: constraints.maxWidth * 0.35,
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: HotelGroups(
+                    profiles: widget.profiles,
+                    trip: widget.trip, 
+                    currentGroup: currentGroup, 
+                    setCurrentGroup: (HotelGroup? group) {
+                      setState(() {
+                        currentGroup = group;
+                      });
+                    },
+                    setState: () => setState((){}),
+                  )
                 )
-              )
-            ),
-            SizedBox(
-              width: constraints.maxWidth * 0.65,
+                            ),
+              ),
+            Expanded(
               child: HotelOptions(
                 currentGroup: currentGroup, 
                 trip: widget.trip, 
