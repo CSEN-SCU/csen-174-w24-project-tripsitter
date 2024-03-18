@@ -218,7 +218,7 @@ class _FlightOptionsState extends State<FlightOptions> {
       return Center(child: Text("Select a group to view flights"));
     }
     if (flights == null) {
-      return Center(child: CircularProgressIndicator(strokeWidth: 20,));
+      return Center(child: CircularProgressIndicator());
     }
     int rowIndex = 0;
     return Padding(
