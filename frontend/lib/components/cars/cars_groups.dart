@@ -240,6 +240,7 @@ class _CarGroupsState extends State<CarGroups> {
                                           builder: (context) => MobileWrapper(
                                               title: "Add Car Options",
                                               child: CarOptions(
+                                                trip: trip,
                                                 currentGroup: group,
                                                 setState: () => setState(() {}),
                                               ))));

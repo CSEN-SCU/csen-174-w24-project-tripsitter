@@ -55,7 +55,6 @@ class TripsitterMapState extends State<TripsitterMap> {
       double lng = widget.getLon(item);
       params.add(LatLng(lat, lng));
     }
-
     controller.toScreenLocationBatch(params).then((value) {
       if(widget.items.isEmpty) return;
       widget.items.forEachIndexed((i, item) {
@@ -199,26 +198,24 @@ class TripsitterMapState extends State<TripsitterMap> {
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(
-      child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Stack(
-          children: [
-            MapboxMap(
-              styleString: isLight ? MapboxStyles.LIGHT : MapboxStyles.DARK,
-              trackCameraPosition: true,
-              accessToken: mapboxApiKey,
-              onMapCreated: _onMapCreated,
-              onCameraIdle: _onCameraIdleCallback,
-              initialCameraPosition: CameraPosition(
-                target: LatLng(
-                    widget.trip.destination.lat, widget.trip.destination.lon),
-                zoom: 10.0,
-              ),
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Stack(
+        children: [
+          MapboxMap(
+            styleString: isLight ? MapboxStyles.LIGHT : MapboxStyles.DARK,
+            trackCameraPosition: true,
+            accessToken: mapboxApiKey,
+            onMapCreated: _onMapCreated,
+            onCameraIdle: _onCameraIdleCallback,
+            initialCameraPosition: CameraPosition(
+              target: LatLng(
+                  widget.trip.destination.lat, widget.trip.destination.lon),
+              zoom: 10.0,
             ),
-            ..._markers,
-          ],
-        ),
+          ),
+          ..._markers,
+        ],
       ),
     );
   }

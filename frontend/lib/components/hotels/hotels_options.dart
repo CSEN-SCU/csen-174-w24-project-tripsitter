@@ -348,96 +348,98 @@ class _HotelOptionsState extends State<HotelOptions> {
                   ],
                 ),
                 if (mapSelected)
-                  TripsitterMap<HotelOption>(
-                      items: hotelsFiltered,
-                      isSelected: (dynamic h) =>
-                          (widget.currentGroup!.selectedInfo?.hotelId ==
-                              (h as HotelOption).hotel.hotelId),
-                      isOption: (dynamic h) =>
-                          (widget.currentGroup!.infos.isNotEmpty &&
-                              widget.currentGroup!.infos
-                                  .map((c) => c.hotelId)
-                                  .contains((h as HotelOption).hotel.hotelId)),
-                      isOther: (dynamic h) => (widget.trip.hotels
-                          .map((g) => g.selectedInfo?.hotelId)
-                          .contains((h as HotelOption).hotel.hotelId)),
-                      createWidget: (dynamic h) {
-                        HotelOption hotel = h as HotelOption;
-                        return ExpansionTile(
-                          title: ListTile(
-                            title: Text(hotel.hotel.name),
-                            trailing: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  IconButton(
-                                    icon: const Icon(Icons.info),
-                                    onPressed: () {
-                                      showDialog(
-                                          context: context,
-                                          builder: (BuildContext
-                                              context) {
-                                            return HotelInfoDialog(
-                                                hotel: hotel.hotel);
-                                          });
-                                    },
-                                  ),
-                                ]),
-                            subtitle: Text(minPrice(hotel.offers) !=
-                                    null
-                                ? "From \$${minPrice(hotel.offers)}"
-                                : "No price available"),
-                          ),
-                          children:
-                              hotel.offers.map((HotelOffer o) {
-                            return ListTile(
-                              subtitle: Text(
-                                  o.room?.description?.text ??
-                                      "No description available"),
-                              title: o.price.total == null
-                                  ? null
-                                  : Text("\$${o.price.total}"),
-                              trailing: ElevatedButton(
-                                onPressed: () async {
-                                  if (widget.currentGroup!.infos
-                                          .isNotEmpty &&
-                                      widget.currentGroup!.infos
-                                          .map((c) => c.hotelId)
-                                          .contains(hotel
-                                              .hotel.hotelId)) {
-                                    await widget.currentGroup!
-                                        .removeOption(widget
-                                            .currentGroup!.infos
-                                            .indexWhere((element) =>
-                                                element.hotelId ==
-                                                hotel.hotel
-                                                    .hotelId));
-                                  } else {
-                                    await widget.currentGroup!
-                                        .addOption(hotel.hotel, o);
-                                  }
-                                  setState(() {});
-                                  widget.setState();
-                                  if (isMobile && mounted) {
-                                    Navigator.pop(context);
-                                  }
-                                },
-                                child: Text(
-                                    "Select${(widget.currentGroup!.infos.isNotEmpty && widget.currentGroup!.infos.map((c) => c.hotelId).contains(hotel.hotel.hotelId)) ? "ed" : ""}"),
-                              ),
-                            );
-                          }).toList(),
-                        );
-                      },
-                      extras: const [
-                        MarkerType.airport,
-                        MarkerType.restaurant,
-                        MarkerType.activity
-                      ],
-                      trip: widget.trip,
-                      getLat: (dynamic h) =>
-                          (h as HotelOption).hotel.latitude ?? 0.0,
-                      getLon: (dynamic h) =>
-                          (h as HotelOption).hotel.longitude ?? 0.0),
+                  Expanded(
+                    child: TripsitterMap<HotelOption>(
+                        items: hotelsFiltered,
+                        isSelected: (dynamic h) =>
+                            (widget.currentGroup!.selectedInfo?.hotelId ==
+                                (h as HotelOption).hotel.hotelId),
+                        isOption: (dynamic h) =>
+                            (widget.currentGroup!.infos.isNotEmpty &&
+                                widget.currentGroup!.infos
+                                    .map((c) => c.hotelId)
+                                    .contains((h as HotelOption).hotel.hotelId)),
+                        isOther: (dynamic h) => (widget.trip.hotels
+                            .map((g) => g.selectedInfo?.hotelId)
+                            .contains((h as HotelOption).hotel.hotelId)),
+                        createWidget: (dynamic h) {
+                          HotelOption hotel = h as HotelOption;
+                          return ExpansionTile(
+                            title: ListTile(
+                              title: Text(hotel.hotel.name),
+                              trailing: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    IconButton(
+                                      icon: const Icon(Icons.info),
+                                      onPressed: () {
+                                        showDialog(
+                                            context: context,
+                                            builder: (BuildContext
+                                                context) {
+                                              return HotelInfoDialog(
+                                                  hotel: hotel.hotel);
+                                            });
+                                      },
+                                    ),
+                                  ]),
+                              subtitle: Text(minPrice(hotel.offers) !=
+                                      null
+                                  ? "From \$${minPrice(hotel.offers)}"
+                                  : "No price available"),
+                            ),
+                            children:
+                                hotel.offers.map((HotelOffer o) {
+                              return ListTile(
+                                subtitle: Text(
+                                    o.room?.description?.text ??
+                                        "No description available"),
+                                title: o.price.total == null
+                                    ? null
+                                    : Text("\$${o.price.total}"),
+                                trailing: ElevatedButton(
+                                  onPressed: () async {
+                                    if (widget.currentGroup!.infos
+                                            .isNotEmpty &&
+                                        widget.currentGroup!.infos
+                                            .map((c) => c.hotelId)
+                                            .contains(hotel
+                                                .hotel.hotelId)) {
+                                      await widget.currentGroup!
+                                          .removeOption(widget
+                                              .currentGroup!.infos
+                                              .indexWhere((element) =>
+                                                  element.hotelId ==
+                                                  hotel.hotel
+                                                      .hotelId));
+                                    } else {
+                                      await widget.currentGroup!
+                                          .addOption(hotel.hotel, o);
+                                    }
+                                    setState(() {});
+                                    widget.setState();
+                                    if (isMobile && mounted) {
+                                      Navigator.pop(context);
+                                    }
+                                  },
+                                  child: Text(
+                                      "Select${(widget.currentGroup!.infos.isNotEmpty && widget.currentGroup!.infos.map((c) => c.hotelId).contains(hotel.hotel.hotelId)) ? "ed" : ""}"),
+                                ),
+                              );
+                            }).toList(),
+                          );
+                        },
+                        extras: const [
+                          MarkerType.airport,
+                          MarkerType.restaurant,
+                          MarkerType.activity
+                        ],
+                        trip: widget.trip,
+                        getLat: (dynamic h) =>
+                            (h as HotelOption).hotel.latitude ?? 0.0,
+                        getLon: (dynamic h) =>
+                            (h as HotelOption).hotel.longitude ?? 0.0),
+                  ),
                 const SizedBox(height: 5),
                 if (!mapSelected)
                   Expanded(

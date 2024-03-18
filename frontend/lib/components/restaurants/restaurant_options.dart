@@ -332,133 +332,135 @@ class _RestaurantsOptionsState extends State<RestaurantsOptions>
                 ),
               )
             : mapSelected
-                ? TripsitterMap<YelpRestaurant>(
-                    createWidget: (dynamic r) {
-                      YelpRestaurant restaurant = r as YelpRestaurant;
-                      return ListTile(
-                        leading: CircleAvatar(
-                            backgroundImage:
-                                NetworkImage(restaurant.imageUrl)),
-                        title: Text(restaurant.name),
-                        subtitle: Text(
-                            "${restaurant.price ?? ""}\n★ ${restaurant.rating.toString()}"),
-                        trailing: Column(
-                          children: [
-                            Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                IconButton(
-                                    icon: const Icon(Icons.info),
-                                    onPressed: () {
-                                      showDialog(
-                                        context: context,
-                                        builder:
-                                            (BuildContext context) {
-                                          return RestaurantPopup(
-                                              restaurant);
-                                        },
-                                      );
-                                    }),
-                                Builder(builder: (context) {
-                                  bool selected = trip.meals
-                                      .map((e) => e.restaurant.id)
-                                      .contains(restaurant.id);
-                                  return GestureDetector(
-                                    onTap: selected
-                                        ? () async {
-                                            print(
-                                                "Removing restaurant");
-                                            await trip.removeMeal(trip
-                                                .meals
-                                                .firstWhere((e) =>
-                                                    e.restaurant.id ==
-                                                    restaurant.id));
-                                            setState(() {});
-                                            if (widget.setState !=
-                                                null) {
-                                              widget.participantsPopupOpenState[
-                                                      restaurant.id] =
-                                                  true;
-                                              widget
-                                                  .selectedParticipantsMap
-                                                  .remove(
-                                                      restaurant.id);
-                                              widget
-                                                  .participantsPopupKeys
-                                                  .remove(
-                                                      restaurant.id);
-                                              widget.setState!();
-                                            }
-                                          }
-                                        : () async {
-                                            print(
-                                                "Adding restaurant");
-                                            await trip.addMeal(
-                                                restaurant,
-                                                widget.profiles
-                                                    .map((e) => e.id)
-                                                    .toList());
-                                            setState(() {});
-                                            if (widget.setState !=
-                                                null) {
-                                              widget.participantsPopupOpenState[
-                                                      restaurant.id] =
-                                                  false;
-                                              widget.selectedParticipantsMap[
-                                                  restaurant
-                                                      .id] = widget
-                                                  .profiles
-                                                  .map((e) => e.id)
-                                                  .toList();
-                                              widget.participantsPopupKeys[
-                                                      restaurant.id] =
-                                                  GlobalKey();
-                                              widget.setState!();
-                                            }
+                ? Expanded(
+                  child: TripsitterMap<YelpRestaurant>(
+                      createWidget: (dynamic r) {
+                        YelpRestaurant restaurant = r as YelpRestaurant;
+                        return ListTile(
+                          leading: CircleAvatar(
+                              backgroundImage:
+                                  NetworkImage(restaurant.imageUrl)),
+                          title: Text(restaurant.name),
+                          subtitle: Text(
+                              "${restaurant.price ?? ""}\n★ ${restaurant.rating.toString()}"),
+                          trailing: Column(
+                            children: [
+                              Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  IconButton(
+                                      icon: const Icon(Icons.info),
+                                      onPressed: () {
+                                        showDialog(
+                                          context: context,
+                                          builder:
+                                              (BuildContext context) {
+                                            return RestaurantPopup(
+                                                restaurant);
                                           },
-                                    child: Checkbox(
-                                      value: selected,
-                                      onChanged: null,
-                                      fillColor: MaterialStateProperty
-                                          .all<Color>(selected
-                                              ? const Color.fromARGB(
-                                                  255, 127, 166, 198)
-                                              : Colors.grey[300]!),
-                                      // style: ButtonStyle(
-                                      //     backgroundColor:
-                                      //         MaterialStateProperty.all<Color>(
-                                      //             selected
-                                      //                 ? const Color.fromARGB(
-                                      //                     255, 127, 166, 198)
-                                      //                 : Colors.grey[300]!)),
-                                      // child: Text('Select${selected ? 'ed' : ''}',
-                                      //     style: const TextStyle(
-                                      //         color: Colors.black)),
-                                    ),
-                                  );
-                                }),
-                              ],
-                            ),
-                          ],
-                        ),
-                      );
-                    },
-                    items: (_sortDirection ? restaurants : restaurants.reversed)
-                        .where(filterRestaurants)
-                        .toList(),
-                    isSelected: (dynamic r) => trip.meals
-                        .map((e) => e.restaurant.id)
-                        .contains((r as YelpRestaurant).id),
-                    extras: const [
-                      MarkerType.airport,
-                      MarkerType.hotel,
-                      MarkerType.activity
-                    ],
-                    trip: trip,
-                    getLat: (dynamic r) =>
-                        (r as YelpRestaurant).coordinates.latitude,
-                    getLon: (dynamic r) =>
-                        (r as YelpRestaurant).coordinates.longitude)
+                                        );
+                                      }),
+                                  Builder(builder: (context) {
+                                    bool selected = trip.meals
+                                        .map((e) => e.restaurant.id)
+                                        .contains(restaurant.id);
+                                    return GestureDetector(
+                                      onTap: selected
+                                          ? () async {
+                                              print(
+                                                  "Removing restaurant");
+                                              await trip.removeMeal(trip
+                                                  .meals
+                                                  .firstWhere((e) =>
+                                                      e.restaurant.id ==
+                                                      restaurant.id));
+                                              setState(() {});
+                                              if (widget.setState !=
+                                                  null) {
+                                                widget.participantsPopupOpenState[
+                                                        restaurant.id] =
+                                                    true;
+                                                widget
+                                                    .selectedParticipantsMap
+                                                    .remove(
+                                                        restaurant.id);
+                                                widget
+                                                    .participantsPopupKeys
+                                                    .remove(
+                                                        restaurant.id);
+                                                widget.setState!();
+                                              }
+                                            }
+                                          : () async {
+                                              print(
+                                                  "Adding restaurant");
+                                              await trip.addMeal(
+                                                  restaurant,
+                                                  widget.profiles
+                                                      .map((e) => e.id)
+                                                      .toList());
+                                              setState(() {});
+                                              if (widget.setState !=
+                                                  null) {
+                                                widget.participantsPopupOpenState[
+                                                        restaurant.id] =
+                                                    false;
+                                                widget.selectedParticipantsMap[
+                                                    restaurant
+                                                        .id] = widget
+                                                    .profiles
+                                                    .map((e) => e.id)
+                                                    .toList();
+                                                widget.participantsPopupKeys[
+                                                        restaurant.id] =
+                                                    GlobalKey();
+                                                widget.setState!();
+                                              }
+                                            },
+                                      child: Checkbox(
+                                        value: selected,
+                                        onChanged: null,
+                                        fillColor: MaterialStateProperty
+                                            .all<Color>(selected
+                                                ? const Color.fromARGB(
+                                                    255, 127, 166, 198)
+                                                : Colors.grey[300]!),
+                                        // style: ButtonStyle(
+                                        //     backgroundColor:
+                                        //         MaterialStateProperty.all<Color>(
+                                        //             selected
+                                        //                 ? const Color.fromARGB(
+                                        //                     255, 127, 166, 198)
+                                        //                 : Colors.grey[300]!)),
+                                        // child: Text('Select${selected ? 'ed' : ''}',
+                                        //     style: const TextStyle(
+                                        //         color: Colors.black)),
+                                      ),
+                                    );
+                                  }),
+                                ],
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                      items: (_sortDirection ? restaurants : restaurants.reversed)
+                          .where(filterRestaurants)
+                          .toList(),
+                      isSelected: (dynamic r) => trip.meals
+                          .map((e) => e.restaurant.id)
+                          .contains((r as YelpRestaurant).id),
+                      extras: const [
+                        MarkerType.airport,
+                        MarkerType.hotel,
+                        MarkerType.activity
+                      ],
+                      trip: trip,
+                      getLat: (dynamic r) =>
+                          (r as YelpRestaurant).coordinates.latitude,
+                      getLon: (dynamic r) =>
+                          (r as YelpRestaurant).coordinates.longitude),
+                )
                 : Expanded(
                     child: ImplicitlyAnimatedList<YelpRestaurant>(
                         insertDuration: const Duration(milliseconds: 350),
