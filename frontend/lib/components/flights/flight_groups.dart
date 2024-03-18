@@ -110,7 +110,7 @@ class _FlightGroupsState extends State<FlightGroups> {
                           : Colors.white,
                       borderRadius: BorderRadius.circular(10),
                       border: group == currentGroup
-                          ? Border.all(color: Colors.black, width: 1)
+                          ? Border.all(color: Colors.black, width: 2)
                           : null,
                     ),
                     child: Column(
@@ -326,6 +326,10 @@ class _FlightGroupsState extends State<FlightGroups> {
                             //     widget.setState();
                             //   },
                             // )
+                            onTap: () {
+                              widget.setCurrentGroup(group);
+                              widget.setState();
+                            },
                           ),
                         if (isMobile)
                           ElevatedButton(

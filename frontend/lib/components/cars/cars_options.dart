@@ -359,64 +359,70 @@ class _CarOptionsState extends State<CarOptions> {
                         )),
                   ],
                 ),
+                const SizedBox(height: 5),
                 Expanded(
                   child: ImplicitlyAnimatedList<RentalCarOffer>(
-                      insertDuration: const Duration(milliseconds: 350),
-                      removeDuration: const Duration(milliseconds: 350),
-                      updateDuration: const Duration(milliseconds: 350),
-                      areItemsTheSame: (a, b) => a.guid == b.guid,
-                      items: (_selectedSort ? cars : cars.reversed)
-                          .where(filterCar)
-                          .toList(),
-                      itemBuilder: (context, animation, car, i) =>
-                          SizeFadeTransition(
-                              sizeFraction: 0.8,
-                              curve: Curves.easeInOut,
-                              animation: animation,
-                              child: ListTile(
-                                leading: Image.network(
-                                    "https://logos.skyscnr.com/images/carhire/sippmaps/${car.group.img}",
-                                    width: 80,
-                                    height: 80),
-                                title: Text(
-                                    "${car.sipp.fromSipp()} (${car.carName} or similar)"),
-                                trailing: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      IconButton(
-                                        icon: const Icon(Icons.info),
-                                        onPressed: () {
-                                          showDialog(
-                                              context: context,
-                                              builder: (BuildContext context) {
-                                                return CarInfoDialog(car);
-                                              });
-                                        },
-                                      ),
-                                      ElevatedButton(
-                                        child: Text(
-                                            "Select${widget.currentGroup!.options.map((c) => c.guid).contains(car.guid) ? "ed" : ""}"),
-                                        onPressed: () async {
-                                          if (widget.currentGroup!.options
-                                              .map((c) => c.guid)
-                                              .contains(car.guid)) {
-                                            await widget.currentGroup!
-                                                .removeOptionById(car.guid);
-                                          } else {
-                                            await widget.currentGroup!
-                                                .addOption(car);
-                                          }
-                                          setState(() {});
-                                          widget.setState();
-                                          if (isMobile && mounted) {
-                                            Navigator.pop(context);
-                                          }
-                                        },
-                                      )
-                                    ]),
-                                subtitle:
-                                    Text("\$${car.price.toStringAsFixed(2)}"),
-                              ))),
+                    insertDuration: const Duration(milliseconds: 350),
+                    removeDuration: const Duration(milliseconds: 350),
+                    updateDuration: const Duration(milliseconds: 350),
+                    areItemsTheSame: (a, b) => a.guid == b.guid,
+                    items: (_selectedSort ? cars : cars.reversed)
+                        .where(filterCar)
+                        .toList(),
+                    itemBuilder: (context, animation, car, i) =>
+                        SizeFadeTransition(
+                      sizeFraction: 0.8,
+                      curve: Curves.easeInOut,
+                      animation: animation,
+                      child: ListTile(
+                        tileColor: i % 2 == 0 ? Colors.white : Colors.grey[200],
+                        leading: Image.network(
+                          "https://logos.skyscnr.com/images/carhire/sippmaps/${car.group.img}",
+                          width: 80,
+                          height: 80,
+                        ),
+                        title: Text(
+                            "${car.sipp.fromSipp()} (${car.carName} or similar)"),
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            IconButton(
+                              icon: const Icon(Icons.info),
+                              onPressed: () {
+                                showDialog(
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return CarInfoDialog(car);
+                                  },
+                                );
+                              },
+                            ),
+                            ElevatedButton(
+                              child: Text(
+                                "Select${widget.currentGroup!.options.map((c) => c.guid).contains(car.guid) ? "ed" : ""}",
+                              ),
+                              onPressed: () async {
+                                if (widget.currentGroup!.options
+                                    .map((c) => c.guid)
+                                    .contains(car.guid)) {
+                                  await widget.currentGroup!
+                                      .removeOptionById(car.guid);
+                                } else {
+                                  await widget.currentGroup!.addOption(car);
+                                }
+                                setState(() {});
+                                widget.setState();
+                                if (isMobile && mounted) {
+                                  Navigator.pop(context);
+                                }
+                              },
+                            ),
+                          ],
+                        ),
+                        subtitle: Text("\$${car.price.toStringAsFixed(2)}"),
+                      ),
+                    ),
+                  ),
                 ),
                 // for (RentalCarOffer car in (_selectedSort ? cars : cars.reversed).where(filterCar))
                 // ListTile(

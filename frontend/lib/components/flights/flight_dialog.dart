@@ -52,7 +52,9 @@ class FlightDialog extends StatelessWidget {
                           SizedBox(height: 10),
                           if (j < flight.segments.length - 1) ...[
                             Text(
-                                "Layover in ${flight.segments[j + 1].departure.iataCode}"),
+                                "Layover in ${flight.segments[j + 1].departure.iataCode}",
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.bold)),
                             Text(
                                 "Duration: ${flight.segments[j + 1].departure.at.difference(flight.segments[j].arrival.at).format()}"),
                             SizedBox(height: 10),

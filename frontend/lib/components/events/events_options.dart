@@ -287,23 +287,25 @@ class _EventsOptionsState extends State<EventsOptions>
             Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(0, 10, 0, 0),
-                child: Text("Toggle Map Mode",
-                    style: Theme.of(context).textTheme.displayMedium?.copyWith(
-                          decoration: TextDecoration.none,
-                          fontSize: 12,
-                        )),
-              ),
-              Switch(
-                value: mapSelected,
-                onChanged: (bool value) {
-                  setState(() {
-                    mapSelected = value;
-                  });
-                },
-              ),
-            ],)
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(0, 10, 0, 0),
+                  child: Text("Toggle Map Mode",
+                      style:
+                          Theme.of(context).textTheme.displayMedium?.copyWith(
+                                decoration: TextDecoration.none,
+                                fontSize: 12,
+                              )),
+                ),
+                Switch(
+                  value: mapSelected,
+                  onChanged: (bool value) {
+                    setState(() {
+                      mapSelected = value;
+                    });
+                  },
+                ),
+              ],
+            )
           ],
         ),
         Row(
@@ -324,24 +326,25 @@ class _EventsOptionsState extends State<EventsOptions>
                 ],
               ),
             ),
-            if(!mapSelected)
-            FilterButton(
-                color: Colors.grey[100]!,
-                text: _selectedSort.toString(),
-                globalKey: _sortKey,
-                onPressed: _showSortPopup,
-                icon: IconButton(
-                  onPressed: () {
-                    setState(() {
-                      _sortDirection = !_sortDirection;
-                    });
-                  },
-                  icon: Icon(_sortDirection
-                      ? Icons.arrow_upward
-                      : Icons.arrow_downward),
-                )),
+            if (!mapSelected)
+              FilterButton(
+                  color: Colors.grey[100]!,
+                  text: _selectedSort.toString(),
+                  globalKey: _sortKey,
+                  onPressed: _showSortPopup,
+                  icon: IconButton(
+                    onPressed: () {
+                      setState(() {
+                        _sortDirection = !_sortDirection;
+                      });
+                    },
+                    icon: Icon(_sortDirection
+                        ? Icons.arrow_upward
+                        : Icons.arrow_downward),
+                  )),
           ],
         ),
+        const SizedBox(height: 5),
         !isLoaded
             ? Center(
                 child: SizedBox(
@@ -363,27 +366,29 @@ class _EventsOptionsState extends State<EventsOptions>
                       MarkerType.restaurant
                     ],
                     isSelected: (dynamic event) => trip.activities
-                                .map((e) => e.event.id)
-                                .contains((event as TicketmasterEvent).id),
-                    getLat: (dynamic e) => (e as TicketmasterEvent).venues.first.latitude ?? 0,
-                    getLon: (dynamic e) => (e as TicketmasterEvent).venues.first.longitude ?? 0,
+                        .map((e) => e.event.id)
+                        .contains((event as TicketmasterEvent).id),
+                    getLat: (dynamic e) =>
+                        (e as TicketmasterEvent).venues.first.latitude ?? 0,
+                    getLon: (dynamic e) =>
+                        (e as TicketmasterEvent).venues.first.longitude ?? 0,
                     items: (_sortDirection ? events : events.reversed)
                         .where(filterEvents)
-                        .toList()
-                )
+                        .toList())
                 : Expanded(
-                  child: ImplicitlyAnimatedList<TicketmasterEvent>(
-                    insertDuration: const Duration(milliseconds: 350),
-                    removeDuration: const Duration(milliseconds: 350),
-                    updateDuration: const Duration(milliseconds: 350),
-                    areItemsTheSame: (a, b) => a.id == b.id,
-                    items: (_sortDirection ? events : events.reversed)
-                            .where(filterEvents).toList(),
-                    itemBuilder: (context, animation, event, i){
+                    child: ImplicitlyAnimatedList<TicketmasterEvent>(
+                        insertDuration: const Duration(milliseconds: 350),
+                        removeDuration: const Duration(milliseconds: 350),
+                        updateDuration: const Duration(milliseconds: 350),
+                        areItemsTheSame: (a, b) => a.id == b.id,
+                        items: (_sortDirection ? events : events.reversed)
+                            .where(filterEvents)
+                            .toList(),
+                        itemBuilder: (context, animation, event, i) {
                           Color bgColor = rowIndex % 2 == 0
                               ? Colors.grey[200]! // Light gray color
                               : Colors.white; // White color
-                    
+
                           // Increment the row index for the next iteration
                           rowIndex++;
                           return SizeFadeTransition(
@@ -393,49 +398,64 @@ class _EventsOptionsState extends State<EventsOptions>
                             child: Container(
                               color: bgColor,
                               child: ListTile(
-                                  leading: isMobile ? null : event.images.isEmpty
-                                          ? const Icon(Icons.star)
-                                          : Padding(
+                                leading: isMobile
+                                    ? null
+                                    : event.images.isEmpty
+                                        ? const Icon(Icons.star)
+                                        : Padding(
                                             padding: const EdgeInsets.all(2.0),
-                                            child: AspectRatio(aspectRatio: 1.0, child: Image.network(event.images.first.url)),
+                                            child: AspectRatio(
+                                                aspectRatio: 1.0,
+                                                child: Image.network(
+                                                    event.images.first.url)),
                                           ),
-                                  title: isMobile ? Wrap(
-                                    spacing: 5.0,
-                                    children: [
-                                      Text(event.name),
-                                      Text(event.prices.isEmpty ? "" : "(From \$${event.prices.map((p) => p.min).reduce(min)}/person)")
-                                    ],
-                                  ) : Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Expanded(
-                                        flex: 3,
-                                        child: Column(
-                                          children: [
-                                            Text(event.name),
-                                            Text(event.prices.isEmpty ? "" : "From \$${event.prices.map((p) => p.min).reduce(min)}/person"),
-                                          ],
-                                        ),
-                                      ),
-                                      Expanded(
-                                        flex: 2,
-                                        child: Text(
-                                          '${event.venues.firstOrNull?.name}\nStarts ${event.startTime.localDate} ${event.startTime.localTime}'
-                                        ),
+                                title: isMobile
+                                    ? Wrap(
+                                        spacing: 5.0,
+                                        children: [
+                                          Text(event.name),
+                                          Text(event.prices.isEmpty
+                                              ? ""
+                                              : "(From \$${event.prices.map((p) => p.min).reduce(min)}/person)")
+                                        ],
                                       )
-                                    ],
-                                  ),
-                                  subtitle: isMobile ? Wrap(
-                                    spacing: 5.0,
-                                    children: [
-                                      Text(event.venues.firstOrNull?.name ?? ""),
-                                      Text("(Starts ${event.startTime.localDate} ${event.startTime.localTime})")
-                                    ],
-                                  ) : null,
-                                  trailing: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      IconButton(
+                                    : Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Expanded(
+                                            flex: 3,
+                                            child: Column(
+                                              children: [
+                                                Text(event.name),
+                                                Text(event.prices.isEmpty
+                                                    ? ""
+                                                    : "From \$${event.prices.map((p) => p.min).reduce(min)}/person"),
+                                              ],
+                                            ),
+                                          ),
+                                          Expanded(
+                                            flex: 2,
+                                            child: Text(
+                                                '${event.venues.firstOrNull?.name}\nStarts ${event.startTime.localDate} ${event.startTime.localTime}'),
+                                          )
+                                        ],
+                                      ),
+                                subtitle: isMobile
+                                    ? Wrap(
+                                        spacing: 5.0,
+                                        children: [
+                                          Text(event.venues.firstOrNull?.name ??
+                                              ""),
+                                          Text(
+                                              "(Starts ${event.startTime.localDate} ${event.startTime.localTime})")
+                                        ],
+                                      )
+                                    : null,
+                                trailing: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    IconButton(
                                         padding: EdgeInsets.zero,
                                         icon: const Icon(Icons.info),
                                         onPressed: () {
@@ -445,81 +465,80 @@ class _EventsOptionsState extends State<EventsOptions>
                                               return EventPopup(event);
                                             },
                                           );
-                                        }
-                                      ),
-                                      Builder(builder: (context) {
-                                        bool selected = trip.activities
-                                            .map((e) => e.event.id)
-                                            .contains(event.id);
-                                        return GestureDetector(
-                                          onTap: selected
-                                              ? () async {
+                                        }),
+                                    Builder(builder: (context) {
+                                      bool selected = trip.activities
+                                          .map((e) => e.event.id)
+                                          .contains(event.id);
+                                      return GestureDetector(
+                                        onTap: selected
+                                            ? () async {
                                                 print("Removing activity");
-                                                  await trip.removeActivity(trip
-                                                      .activities
-                                                      .firstWhere((a) =>
-                                                          a.event.id == event.id));
-                                                  setState(() {});
-                                                  if (widget.setState != null) {
-                                                    widget.participantsPopupOpenState[
-                                                        event.id] = true;
-                                                    widget.selectedParticipantsMap
-                                                        .remove(event.id);
-                                                    widget.participantsPopupKeys
-                                                        .remove(event.id);
-                                                    widget.setState!();
-                                                  }
+                                                await trip.removeActivity(trip
+                                                    .activities
+                                                    .firstWhere((a) =>
+                                                        a.event.id ==
+                                                        event.id));
+                                                setState(() {});
+                                                if (widget.setState != null) {
+                                                  widget.participantsPopupOpenState[
+                                                      event.id] = true;
+                                                  widget.selectedParticipantsMap
+                                                      .remove(event.id);
+                                                  widget.participantsPopupKeys
+                                                      .remove(event.id);
+                                                  widget.setState!();
                                                 }
-                                              : () async {
-                                                  print("Adding activity");
-                                                  await trip.addActivity(
-                                                      event,
+                                              }
+                                            : () async {
+                                                print("Adding activity");
+                                                await trip.addActivity(
+                                                    event,
+                                                    widget.profiles
+                                                        .map((e) => e.id)
+                                                        .toList());
+                                                setState(() {});
+                                                if (widget.setState != null) {
+                                                  widget.participantsPopupOpenState[
+                                                      event.id] = false;
+                                                  widget.selectedParticipantsMap[
+                                                          event.id] =
                                                       widget.profiles
                                                           .map((e) => e.id)
-                                                          .toList());
-                                                  setState(() {});
-                                                  if (widget.setState != null) {
-                                                    widget.participantsPopupOpenState[
-                                                        event.id] = false;
-                                                    widget.selectedParticipantsMap[
-                                                            event.id] =
-                                                        widget.profiles
-                                                            .map((e) => e.id)
-                                                            .toList();
-                                                    widget.participantsPopupKeys[
-                                                        event.id] = GlobalKey();
-                                                    widget.setState!();
-                                                  }
-                                                },
-                                          child: Checkbox(
-                                            value: selected,
-                                            onChanged: null,
-                                            fillColor: MaterialStateProperty.all<Color>(
-                                                selected
-                                                    ? const Color.fromARGB(
-                                                        255, 127, 166, 198)
-                                                    : Colors.grey[300]!),
-                                            // style: ButtonStyle(
-                                            //     backgroundColor:
-                                            //         MaterialStateProperty.all<Color>(
-                                            //             selected
-                                            //                 ? const Color.fromARGB(
-                                            //                     255, 127, 166, 198)
-                                            //                 : Colors.grey[300]!)),
-                                            // child: Text('Select${selected ? 'ed' : ''}',
-                                            //     style: const TextStyle(
-                                            //         color: Colors.black)),
-                                          ),
-                                        );
-                                      })
-                                    ],
-                                  ),
+                                                          .toList();
+                                                  widget.participantsPopupKeys[
+                                                      event.id] = GlobalKey();
+                                                  widget.setState!();
+                                                }
+                                              },
+                                        child: Checkbox(
+                                          value: selected,
+                                          onChanged: null,
+                                          fillColor:
+                                              MaterialStateProperty.all<Color>(
+                                                  selected
+                                                      ? const Color.fromARGB(
+                                                          255, 127, 166, 198)
+                                                      : Colors.grey[300]!),
+                                          // style: ButtonStyle(
+                                          //     backgroundColor:
+                                          //         MaterialStateProperty.all<Color>(
+                                          //             selected
+                                          //                 ? const Color.fromARGB(
+                                          //                     255, 127, 166, 198)
+                                          //                 : Colors.grey[300]!)),
+                                          // child: Text('Select${selected ? 'ed' : ''}',
+                                          //     style: const TextStyle(
+                                          //         color: Colors.black)),
+                                        ),
+                                      );
+                                    })
+                                  ],
                                 ),
+                              ),
                             ),
                           );
-                        })
-                  ),
-
+                        })),
       ],
     );
   }
