@@ -3,11 +3,11 @@ import { Request, Response } from "express";
 
 const SKYSCRAPER_KEY = process.env.SKYSCRAPER_KEY;
 
-const rentalLocationData = require("./rentalLocationData.json");
-const rentalData = require("./rentalData.json");
+// const rentalLocationData = require("./rentalLocationData.json");
+// const rentalData = require("./rentalData.json");
 
 async function getEntityList(name: String) {
-    return rentalLocationData;
+    // return rentalLocationData;
     
     const options = {
         method: 'GET',
@@ -68,8 +68,8 @@ export async function getRentalCars(req: Request, res: Response) {
     const entityId = options[0].entity_id;
     console.log("Entity ID", entityId);
     
-    res.send(parseQuotes(rentalData.data));
-    return;
+    // res.send(parseQuotes(rentalData.data));
+    // return;
 
     const reqOptions = {
         method: 'GET',
