@@ -5,6 +5,7 @@ import 'package:googleapis/calendar/v3.dart' as gcal;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sign_in_button/sign_in_button.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:tripsitter/helpers/styles.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -38,10 +39,30 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Sign In to Tripsitter'),
+      body: Stack(
+        children: [
+          Positioned(
+          bottom: 0,
+          left: 0,
+          right: 0,
+          child: Image.asset(
+            "assets/skyline.png",
+          ),
+        ),
+          Center(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text("Tripsitter", style: sectionHeaderStyle.copyWith(fontSize: 50)),
+                Image.asset("assets/tripsitter_logo.png", width: 200, height: 200,),
+                Container( child: _user != null ? _userInfo() : _googleSignInButton()),
+                Container(height: 100)
+              ],
+            )
+          ),
+        ],
       ),
-      body: _user != null ? _userInfo() : _googleSignInButton(),
     );
   }
 
@@ -50,7 +71,7 @@ class _LoginPageState extends State<LoginPage> {
       height: 50,
       child: SignInButton(
         Buttons.google,
-        text: 'Login To Tripsitter',
+        text: 'Log In/Sign Up',
         onPressed: signInWithGoogle,
       ),
     ),);
