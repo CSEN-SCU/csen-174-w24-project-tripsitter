@@ -252,7 +252,16 @@ class _HotelOptionsState extends State<HotelOptions> {
     return widget.currentGroup == null
         ? const Center(
             child: Text("Select or create a group to choose a hotel"))
-        : Padding(
+        : hotels.isEmpty ? Center(
+                child: SizedBox(
+                  width: 120,
+                  height: 120,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 20,
+                    semanticsLabel: 'Circular progress indicator',
+                  ),
+                ),
+              ) :  Padding(
             padding: const EdgeInsets.all(8.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,

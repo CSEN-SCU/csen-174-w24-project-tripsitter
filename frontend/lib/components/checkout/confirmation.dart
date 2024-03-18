@@ -17,7 +17,7 @@ class ConfirmationPage extends StatelessWidget {
     User? user = FirebaseAuth.instance.currentUser;
     if(user == null) {
       return const Center(
-        child: CircularProgressIndicator()
+        child: CircularProgressIndicator(strokeWidth: 20)
       );
     }
     String uid = user.uid;
