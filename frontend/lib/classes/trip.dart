@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:collection/collection.dart';
+import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
 import 'package:tripsitter/classes/car.dart';
 import 'package:tripsitter/classes/city.dart';
@@ -216,9 +217,9 @@ class Trip {
       "endDate": _endDate,
       "destination": _destination.toJson(),
       "isConfirmed": _isConfirmed,
-      "flights": _flights.map((flight) => flight.toJson()).toList(),
-      "hotels": _hotels.map((hotel) => hotel.toJson()).toList(),
-      "rentalCars": _rentalCars.map((rentalCar) => rentalCar.toJson()).toList(),
+      "flights": _flights.map((flight) => flight.toJson(includeComments: true)).toList(),
+      "hotels": _hotels.map((hotel) => hotel.toJson(includeComments: true)).toList(),
+      "rentalCars": _rentalCars.map((rentalCar) => rentalCar.toJson(includeComments: true)).toList(),
       "activities": _activities.map((activity) => activity.toJson()).toList(),
       "meals": _meals.map((meal) => meal.toJson()).toList(),
       "frozen": _frozen,
@@ -227,7 +228,9 @@ class Trip {
   }
 
   Future<void> _save() async {
+    debugPrint("SAVING TRIP ${_id}");
     await FirebaseFirestore.instance.collection("trips").doc(_id).set(toJson());
+    debugPrint("Saved!");
   }
 
   static Stream<List<Trip>> getTripsByProfile(String uid) {
@@ -529,13 +532,13 @@ class FlightGroup {
     );
   }
 
-  Map<String, dynamic> toJson() {
+  Map<String, dynamic> toJson({bool includeComments = false}) {
     return {
       "members": _members,
       "departureAirport": _departureAirport,
       "arrivalAirport": _arrivalAirport,
-      "options": _options.map((option) => option.toJson()).toList(),
-      "selected": _selected?.toJson(),
+      "options": _options.map((option) => option.toJson(includeComments: includeComments)).toList(),
+      "selected": _selected?.toJson(includeComments: includeComments),
       "pnr": _pnr
     };
   }
@@ -668,11 +671,11 @@ class HotelGroup {
   HotelInfo? get selectedInfo => _selectedInfo;
   String? get pnr => _pnr;
 
-  Map<String, dynamic> toJson() {
+  Map<String, dynamic> toJson({bool includeComments = false}) {
     return {
       "members": _members,
       "name": _name,
-      "infos": _infos.map((option) => option.toJson()).toList(),
+      "infos": _infos.map((option) => option.toJson(includeComments: includeComments)).toList(),
       "offers": _offers.map((offer) => offer.toJson()).toList(),
       "selectedOffer": selectedOffer?.toJson(),
       "selectedInfo": selectedInfo?.toJson(),
@@ -769,12 +772,12 @@ class RentalCarGroup {
     );
   }
 
-  Map<String, dynamic> toJson() {
+  Map<String, dynamic> toJson({bool includeComments = false}) {
     return {
       "members": _members,
       "name": _name,
-      "options": _options.map((option) => option.toJson()).toList(),
-      "selected": _selected?.toJson(),
+      "options": _options.map((option) => option.toJson(includeComments: includeComments)).toList(),
+      "selected": _selected?.toJson(includeComments: includeComments),
     };
   }
 
