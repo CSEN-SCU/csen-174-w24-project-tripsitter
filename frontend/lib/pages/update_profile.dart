@@ -171,7 +171,7 @@ class _UpdateProfileState extends State<UpdateProfile> {
           child: ConstrainedBox(
         constraints: const BoxConstraints(maxHeight: 200, maxWidth: 200),
         child:
-            const AspectRatio(aspectRatio: 1.0, child: CircularProgressIndicator()),
+            const AspectRatio(aspectRatio: 1.0, child: CircularProgressIndicator(strokeWidth: 20)),
       ));
     }
     if (image == null && profile!.hasPhoto) {
@@ -325,7 +325,7 @@ class _UpdateProfileState extends State<UpdateProfile> {
               ),
               ListTile(
                 leading: loadingPic
-                    ? const CircularProgressIndicator()
+                    ? const CircularProgressIndicator(strokeWidth: 20)
                     : CircleAvatar(
                         backgroundImage: (profile!.hasPhoto && image != null)
                             ? NetworkImage(image!)

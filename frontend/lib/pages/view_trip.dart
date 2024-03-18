@@ -47,7 +47,7 @@ class ViewTrip extends StatelessWidget {
           if(trip == null) {
             return const Scaffold(
               body: Center(
-                child: CircularProgressIndicator(),
+                child: CircularProgressIndicator(strokeWidth: 20),
               ),
             );
           }

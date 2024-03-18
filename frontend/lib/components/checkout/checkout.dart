@@ -202,7 +202,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
     User? user = FirebaseAuth.instance.currentUser;
     if(user == null) {
       return const Center(
-        child: CircularProgressIndicator()
+        child: CircularProgressIndicator(strokeWidth: 20)
       );
     }
     bool split = trip.usingSplitPayments;

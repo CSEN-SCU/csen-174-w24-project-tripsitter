@@ -290,7 +290,16 @@ class _CarOptionsState extends State<CarOptions> {
     return widget.currentGroup == null
         ? const Center(
             child: Text("Select or create a group to choose a rental car"))
-        : Padding(
+        : cars.isEmpty ? const Center(
+                child: SizedBox(
+                  width: 120,
+                  height: 120,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 20,
+                    semanticsLabel: 'Circular progress indicator',
+                  ),
+                ),
+              ) :  Padding(
             padding: const EdgeInsets.all(8.0),
             child: Column(
               children: [
