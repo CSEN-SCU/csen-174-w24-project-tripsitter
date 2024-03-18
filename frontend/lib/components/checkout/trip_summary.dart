@@ -1,7 +1,7 @@
 // ignore_for_file: use_build_context_synchronously
 
 import 'dart:convert';
-import 'dart:html';
+import 'package:universal_html/html.dart' as html;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -249,7 +249,7 @@ class _TripSummaryState extends State<TripSummary> {
                         if (kIsWeb) {
                           var savedFile = await pdf.save();
                           List<int> fileInts = List.from(savedFile);
-                          AnchorElement(
+                          html.AnchorElement(
                               href:
                                   "data:application/octet-stream;charset=utf-16le;base64,${base64.encode(fileInts)}")
                             ..setAttribute(
