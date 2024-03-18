@@ -6,7 +6,7 @@ class TripSitterNavbar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
   final bool backButton;
   final bool homeButton;
-  const TripSitterNavbar({this.title = "TripSitter", this.backButton = false, this.homeButton = true, super.key});
+  const TripSitterNavbar({this.title = "Tripsitter", this.backButton = false, this.homeButton = true, super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -23,7 +23,7 @@ class TripSitterNavbar extends StatelessWidget implements PreferredSizeWidget {
             textStyle: TextStyle(
               color: Colors.black,
               fontWeight: FontWeight.bold,
-              fontSize: title == "TripSitter" ? 36 : 24,
+              fontSize: title == "Tripsitter" ? 36 : 24,
             ),
           ),
         ),

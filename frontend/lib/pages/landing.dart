@@ -14,7 +14,7 @@ class LandingPage extends StatelessWidget {
     }
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Sign In to TripSitter'),
+        title: const Text('Sign In to Tripsitter'),
         backgroundColor: const Color.fromRGBO(196, 53, 53, 1),
       ),
       body: Center(

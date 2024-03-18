@@ -39,7 +39,7 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Sign In to TripSitter'),
+        title: const Text('Sign In to Tripsitter'),
       ),
       body: _user != null ? _userInfo() : _googleSignInButton(),
     );
@@ -50,7 +50,7 @@ class _LoginPageState extends State<LoginPage> {
       height: 50,
       child: SignInButton(
         Buttons.google,
-        text: 'Login To TripSitter',
+        text: 'Login To Tripsitter',
         onPressed: signInWithGoogle,
       ),
     ),);
