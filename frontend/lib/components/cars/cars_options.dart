@@ -359,6 +359,7 @@ class _CarOptionsState extends State<CarOptions> {
                         )),
                   ],
                 ),
+                const SizedBox(height: 5),
                 Expanded(
                   child: ImplicitlyAnimatedList<RentalCarOffer>(
                     insertDuration: const Duration(milliseconds: 350),

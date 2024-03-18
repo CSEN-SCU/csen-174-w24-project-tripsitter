@@ -297,92 +297,93 @@ class _FlightOptionsState extends State<FlightOptions> {
                   )),
             ],
           ),
-          if(flights != null)
+          const SizedBox(height: 5),
+          if (flights != null)
             Expanded(
               child: ImplicitlyAnimatedList<FlightItineraryRecursive>(
-                insertDuration: const Duration(milliseconds: 350),
-                removeDuration: const Duration(milliseconds: 350),
-                updateDuration: const Duration(milliseconds: 350),
-                areItemsTheSame: (a, b) => a == b,
-                items: (_sortDirection ? flights! : flights!.reversed)
+                  insertDuration: const Duration(milliseconds: 350),
+                  removeDuration: const Duration(milliseconds: 350),
+                  updateDuration: const Duration(milliseconds: 350),
+                  areItemsTheSame: (a, b) => a == b,
+                  items: (_sortDirection ? flights! : flights!.reversed)
                       .where(filterFlight)
-                    .toList(),
-                itemBuilder: (context, animation, flight, i) =>
-                    SizeFadeTransition(
-                        sizeFraction: 0.8,
-                        curve: Curves.easeInOut,
-                        animation: animation,
-                        child: Container(
-                          color: i % 2 == 0 ? Colors.grey[200] : Colors.white,
-                          child: ListTile(
-                            leading: Stack(
-                              children: flight.offers.first
-                                  .itineraries[flight.depth].segments
-                                  .map((s) =>
-                                      s.operating?.carrierCode ??
-                                      s.carrierCode)
-                                  .toSet()
-                                  .map((iata) =>
-                                      TripsitterApi.getAirlineImage(iata))
-                                  .toList()),
-                            title: Row(
-                              children: [
-                                Expanded(
-                                  flex: 5,
-                                  child: Column(
-                                    mainAxisSize: MainAxisSize.min,
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                          "${flight.next.isNotEmpty ? "From " : ""}\$${flight.minPrice?.total ?? ''}"),
-                                      Text(
-                                          "Operated by ${flight.offers.first.itineraries[flight.depth].segments.map((s) => Airline.fromCode(s.operating?.carrierCode ?? s.carrierCode)?.name ?? s.operating?.carrierCode ?? s.carrierCode).toSet().join(", ")}"),
-                                    ],
+                      .toList(),
+                  itemBuilder: (context, animation, flight, i) =>
+                      SizeFadeTransition(
+                          sizeFraction: 0.8,
+                          curve: Curves.easeInOut,
+                          animation: animation,
+                          child: Container(
+                            color: i % 2 == 0 ? Colors.grey[200] : Colors.white,
+                            child: ListTile(
+                              leading: Stack(
+                                  children: flight.offers.first
+                                      .itineraries[flight.depth].segments
+                                      .map((s) =>
+                                          s.operating?.carrierCode ??
+                                          s.carrierCode)
+                                      .toSet()
+                                      .map((iata) =>
+                                          TripsitterApi.getAirlineImage(iata))
+                                      .toList()),
+                              title: Row(
+                                children: [
+                                  Expanded(
+                                    flex: 5,
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                            "${flight.next.isNotEmpty ? "From " : ""}\$${flight.minPrice?.total ?? ''}"),
+                                        Text(
+                                            "Operated by ${flight.offers.first.itineraries[flight.depth].segments.map((s) => Airline.fromCode(s.operating?.carrierCode ?? s.carrierCode)?.name ?? s.operating?.carrierCode ?? s.carrierCode).toSet().join(", ")}"),
+                                      ],
+                                    ),
                                   ),
-                                ),
-                                Expanded(
-                                  flex: 4,
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Text(flight.segments.length == 1
-                                          ? "Nonstop"
-                                          : "${(flight.segments.length - 1).toString()} stop${flight.segments.length > 2 ? "s" : ""}"),
-                                      flight.segments.length == 1
-                                          ? const Text("")
-                                          : Text(
-                                              "Stops in ${flight.segments.sublist(1).map((s) => s.departure.iataCode).join(", ")}"),
-                                    ],
-                                  ),
-                                )
-                              ],
-                            ),
-                            trailing: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                IconButton(
-                                                              icon: const Icon(Icons.info_outline),
-                                                              onPressed: () {
-                                showDialog(
-                                    context: context,
-                                    builder: (context) =>
-                                        FlightDialog(flight.itineraries.first));
-                                                              },
-                                                            ),
-                              IconButton(
-                                icon: Icon(currentDepth == 1
-                                    ? Icons.check
-                                    : Icons.navigate_next_outlined),
-                                onPressed: () {
-                                  selectFlight(flight);
-                                },
+                                  Expanded(
+                                    flex: 4,
+                                    child: Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Text(flight.segments.length == 1
+                                            ? "Nonstop"
+                                            : "${(flight.segments.length - 1).toString()} stop${flight.segments.length > 2 ? "s" : ""}"),
+                                        flight.segments.length == 1
+                                            ? const Text("")
+                                            : Text(
+                                                "Stops in ${flight.segments.sublist(1).map((s) => s.departure.iataCode).join(", ")}"),
+                                      ],
+                                    ),
+                                  )
+                                ],
                               ),
-                              ],
+                              trailing: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  IconButton(
+                                    icon: const Icon(Icons.info_outline),
+                                    onPressed: () {
+                                      showDialog(
+                                          context: context,
+                                          builder: (context) => FlightDialog(
+                                              flight.itineraries.first));
+                                    },
+                                  ),
+                                  IconButton(
+                                    icon: Icon(currentDepth == 1
+                                        ? Icons.check
+                                        : Icons.navigate_next_outlined),
+                                    onPressed: () {
+                                      selectFlight(flight);
+                                    },
+                                  ),
+                                ],
+                              ),
                             ),
-                          ),
-                        )
-                      )
-                    ),
+                          ))),
             ),
         ]));
   }

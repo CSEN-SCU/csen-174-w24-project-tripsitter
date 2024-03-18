@@ -24,7 +24,7 @@ class HotelInfoDialog extends StatelessWidget {
                 "More Info: ",
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
-            Text(offer!.room?.description?.text ?? "None"),
+            if (offer != null) Text(offer!.room?.description?.text ?? "None"),
           ]),
       actions: [
         ElevatedButton(
