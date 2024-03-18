@@ -380,7 +380,9 @@ class _FlightOptionsState extends State<FlightOptions> {
                               ],
                             ),
                           ),
-                        ))),
+                        )
+                      )
+                    ),
             ),
         ]));
   }
