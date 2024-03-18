@@ -17,40 +17,54 @@ class HotelSummary extends StatelessWidget {
   Widget build(BuildContext context) {
     List<UserProfile> profiles = Provider.of<List<UserProfile>>(context);
     bool split = Provider.of<bool>(context);
-    if(hotel.selectedInfo == null || hotel.selectedOffer == null) {
+    if (hotel.selectedInfo == null || hotel.selectedOffer == null) {
       return Container();
     }
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical:8.0),
-      child: Row(
-        children: [
-          Expanded(
-            flex: 2,
-            child: Column(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Row(children: [
+        Expanded(
+          flex: 2,
+          child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text("${hotel.name}${hotel.pnr != null ? " (Confirmation: ${hotel.pnr})" : ""}", style: summaryHeaderStyle),
-                Text(hotel.selectedOffer!.checkInDate != hotel.selectedOffer!.checkOutDate ? "${dateFormatter.format(DateTime.parse(hotel.selectedOffer!.checkInDate))} → ${dateFormatter.format(DateTime.parse(hotel.selectedOffer!.checkOutDate))}" : dateFormatter.format(DateTime.parse(hotel.selectedOffer!.checkInDate))),
+                Text(
+                    "${hotel.name}${hotel.pnr != null ? " (Confirmation: ${hotel.pnr})" : ""}",
+                    style: summaryHeaderStyle),
+                Text(hotel.selectedOffer!.checkInDate !=
+                        hotel.selectedOffer!.checkOutDate
+                    ? "${dateFormatter.format(DateTime.parse(hotel.selectedOffer!.checkInDate))} → ${dateFormatter.format(DateTime.parse(hotel.selectedOffer!.checkOutDate))}"
+                    : dateFormatter.format(
+                        DateTime.parse(hotel.selectedOffer!.checkInDate))),
                 Text(hotel.selectedInfo!.name),
-              ]
-            ),
-          ),
-          if(!split)
-            Expanded(
+              ]),
+        ),
+        if (!split)
+          Expanded(
               flex: 1,
               child: Column(
-                children: hotel.members.map((e) => profiles.firstWhereOrNull((profile) => profile.id == e)?.name ?? "").map((e) => Text(e)).toList() ,
-              )
-            ),
-          SizedBox(
-            width: 130,
-            child: Center(
-              child: Text(price == null ? "Unknown price" : "\$${price!.toStringAsFixed(2)}")
-            ),
-          )
-        ]
-      ),
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: hotel.members
+                    .map((e) =>
+                        profiles
+                            .firstWhereOrNull((profile) => profile.id == e)
+                            ?.name ??
+                        "")
+                    .map((e) => Text(
+                          e,
+                          textAlign: TextAlign.center,
+                        ))
+                    .toList(),
+              )),
+        SizedBox(
+          width: 130,
+          child: Center(
+              child: Text(price == null
+                  ? "Unknown price"
+                  : "\$${price!.toStringAsFixed(2)}")),
+        )
+      ]),
     );
   }
 }

@@ -127,18 +127,19 @@ class _FlightGroupsState extends State<FlightGroups> {
                                 debugPrint(nearbyDepartureAirports
                                     .map((e) => e.iataCode)
                                     .join(", "));
-      
+
                                 List<Airport> nearbyArrivalAirports =
                                     await getNearbyAirports(
                                         group.arrivalAirport, context);
                                 debugPrint(nearbyArrivalAirports
                                     .map((e) => e.iataCode)
                                     .join(", "));
-      
+
                                 showDialog(
                                     context: context,
                                     builder: (context) => AlertDialog(
-                                            title: const Text("Change Airports"),
+                                            title:
+                                                const Text("Change Airports"),
                                             content: Column(
                                               mainAxisSize: MainAxisSize.min,
                                               children: [
@@ -157,8 +158,10 @@ class _FlightGroupsState extends State<FlightGroups> {
                                                             a.iataCode ==
                                                             group
                                                                 .departureAirport),
-                                                    items: nearbyDepartureAirports
-                                                        .map((Airport value) {
+                                                    items:
+                                                        nearbyDepartureAirports
+                                                            .map((Airport
+                                                                value) {
                                                       return DropdownMenuItem<
                                                           Airport>(
                                                         value: value,
@@ -179,7 +182,8 @@ class _FlightGroupsState extends State<FlightGroups> {
                                                       }
                                                     },
                                                   ),
-                                                if (nearbyArrivalAirports.length >
+                                                if (nearbyArrivalAirports
+                                                        .length >
                                                     1)
                                                   DropdownButtonFormField<
                                                       Airport>(
@@ -191,7 +195,8 @@ class _FlightGroupsState extends State<FlightGroups> {
                                                     value: nearbyArrivalAirports
                                                         .firstWhere((a) =>
                                                             a.iataCode ==
-                                                            group.arrivalAirport),
+                                                            group
+                                                                .arrivalAirport),
                                                     items: nearbyArrivalAirports
                                                         .map((Airport value) {
                                                       return DropdownMenuItem<
@@ -235,10 +240,12 @@ class _FlightGroupsState extends State<FlightGroups> {
                                         ?.name ??
                                     "")
                                 .join(', ')),
-                            onTap: isMobile ? null : () {
-                              widget.setCurrentGroup(group);
-                              widget.setState();
-                            },
+                            onTap: isMobile
+                                ? null
+                                : () {
+                                    widget.setCurrentGroup(group);
+                                    widget.setState();
+                                  },
                             // trailing: IconButton(
                             //   icon: const Icon(Icons.delete),
                             //   onPressed: () async {
@@ -265,13 +272,24 @@ class _FlightGroupsState extends State<FlightGroups> {
                                 },
                               ),
                               subtitle: Text("\$${offer.price.total}"),
-                              title: Row(
-                                  children: offer.itineraries
-                                      .map((itinerary) => Expanded(
-                                          child: FlightItinerarySummary(
-                                              itinerary, false)))
-                                      .toList()),
-      
+                              title: !isMobile
+                                  ? Row(
+                                      children: offer.itineraries
+                                          .map((itinerary) => Expanded(
+                                              child: FlightItinerarySummary(
+                                                  itinerary, false)))
+                                          .toList())
+                                  : Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: offer.itineraries
+                                          .map((itinerary) =>
+                                              FlightItinerarySummary(
+                                                  itinerary, false))
+                                          .toList()),
+
                               // Text(offer.itineraries.map((i) {
                               //   return "${Airline.fromCode(i.segments.first.carrierCode)?.name ?? i.segments.last.carrierCode}: ${DateFormat('MMM d, yyyy').format(i.segments.first.departure.at)} ${DateFormat(DateFormat.HOUR_MINUTE).format(i.segments.first.departure.at)} - ${DateFormat(DateFormat.HOUR_MINUTE).format(i.segments.last.arrival.at)}";
                               // }).join(",\n")),
@@ -328,10 +346,12 @@ class _FlightGroupsState extends State<FlightGroups> {
                               //     widget.setState();
                               //   },
                               // )
-                              onTap: isMobile ? null : () {
-                                widget.setCurrentGroup(group);
-                                widget.setState();
-                              },
+                              onTap: isMobile
+                                  ? null
+                                  : () {
+                                      widget.setCurrentGroup(group);
+                                      widget.setState();
+                                    },
                             ),
                           if (isMobile)
                             Padding(

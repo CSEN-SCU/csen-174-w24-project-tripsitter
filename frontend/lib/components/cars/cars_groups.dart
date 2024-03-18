@@ -103,11 +103,13 @@ class _CarGroupsState extends State<CarGroups> {
                                         }
                                         return true;
                                       })
-                                      .map((UserProfile profile) => PopupMenuItem(
+                                      .map((UserProfile profile) =>
+                                          PopupMenuItem(
                                             value: profile,
                                             child: Row(
                                               children: [
-                                                group.members.contains(profile.id)
+                                                group.members
+                                                        .contains(profile.id)
                                                     ? const Icon(Icons.check)
                                                     : const Icon(Icons.add),
                                                 Text(profile.name),
@@ -137,7 +139,8 @@ class _CarGroupsState extends State<CarGroups> {
                               //     icon: const Icon(Icons.car_rental)),
                               IconButton(
                                   onPressed: () async {
-                                    await widget.trip.removeRentalCarGroup(group);
+                                    await widget.trip
+                                        .removeRentalCarGroup(group);
                                     if (widget.currentGroup == group) {
                                       widget.setCurrentGroup(null);
                                     }
@@ -147,12 +150,14 @@ class _CarGroupsState extends State<CarGroups> {
                                   icon: const Icon(Icons.delete)),
                             ],
                           ),
-                          onTap: isMobile ? null : () {
-                            setState(() {
-                              widget.setCurrentGroup(group);
-                            });
-                            widget.setState();
-                          },
+                          onTap: isMobile
+                              ? null
+                              : () {
+                                  setState(() {
+                                    widget.setCurrentGroup(group);
+                                  });
+                                  widget.setState();
+                                },
                         ),
                         ...group.options.map((RentalCarOffer car) => ListTile(
                               leading: Radio<RentalCarOffer>(
@@ -214,12 +219,14 @@ class _CarGroupsState extends State<CarGroups> {
                                   ),
                                 ],
                               ),
-                              onTap:  isMobile ? null : () {
-                                setState(() {
-                                  widget.setCurrentGroup(group);
-                                });
-                                widget.setState();
-                              },
+                              onTap: isMobile
+                                  ? null
+                                  : () {
+                                      setState(() {
+                                        widget.setCurrentGroup(group);
+                                      });
+                                      widget.setState();
+                                    },
                             )),
                         if (isMobile)
                           Padding(
@@ -249,12 +256,14 @@ class _CarGroupsState extends State<CarGroups> {
               widget.trip.rentalCars.isNotEmpty &&
               widget.profiles.every((profile) => widget.trip.rentalCars
                   .any((group) => group.members.contains(profile.id))) &&
-              widget.trip.rentalCars.every((group) => group.members.isNotEmpty)))
+              widget.trip.rentalCars
+                  .every((group) => group.members.isNotEmpty)))
             ElevatedButton(
               onPressed: () async {
-                RentalCarGroup newGroup = await widget.trip.createRentalCarGroup(
-                    "Group ${widget.trip.rentalCars.length + 1}",
-                    List<String>.empty(growable: true));
+                RentalCarGroup newGroup = await widget.trip
+                    .createRentalCarGroup(
+                        "Group ${widget.trip.rentalCars.length + 1}",
+                        List<String>.empty(growable: true));
                 if (!isMobile) {
                   widget.setCurrentGroup(newGroup);
                 }
